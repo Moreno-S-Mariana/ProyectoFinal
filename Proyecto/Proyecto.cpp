@@ -1,5 +1,5 @@
 /*PROYECTO COMPUTACIÓN GRÁFICA*/
-//FERIA PULQUE
+//*****************************************FERIA PULQUE**********************************************
 /*GARCÍA SOTO JEAN CARLO
   MINO GUZMÁN YARA AMAIRANI
   MORENO SANTOYO MARIANA*/
