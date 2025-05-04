@@ -24,7 +24,7 @@ Window::Window(GLint windowWidth, GLint windowHeight)
 	articulacion5 = 0.0f;
 	valor2 = 0.0f;
 	valor3 = 0.0f;
-
+	banderaAnimacion1_DP = false;	//Animación apagada por defecto 
 
 	for (size_t i = 0; i < 1024; i++)
 	{
@@ -217,6 +217,20 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
 			//printf("se solto la tecla %d'\n", key);
 		}
 	}
+	//Danny Phantom
+	if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
+		if (theWindow->banderaAnimacion1_DP) {
+			theWindow->banderaAnimacion1_DP = false;		//Apaga si está prendida
+		}
+		else if (theWindow->banderaAnimacion1_DP == false) {
+			theWindow->banderaAnimacion1_DP = true;			//Prende animación si está apagada
+		}
+		
+	}
+	
+
+
+
 }
 
 void Window::ManejaMouse(GLFWwindow* window, double xPos, double yPos)

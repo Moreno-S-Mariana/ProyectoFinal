@@ -30,12 +30,17 @@ public:
 	GLfloat getvalor3() { return valor3; }
 	GLfloat getarticulacion4() { return articulacion4; }
 	GLfloat getarticulacion5() { return articulacion5; }
+
+	//Animación Danny Phantom
+	GLfloat getAnimacion_Simp1_DP() { return banderaAnimacion1_DP; }
+
+
 	~Window();
 private:
 	GLFWwindow* mainWindow;
 	GLint width, height;
 	GLfloat rotax, rotay, rotaz, articulacion1, articulacion2, articulacion3,valor,articulacion4, articulacion5,valor2 , valor3;
-
+	bool banderaAnimacion1_DP;
 	bool keys[1024];
 	GLint bufferWidth, bufferHeight;
 	GLfloat lastX;
