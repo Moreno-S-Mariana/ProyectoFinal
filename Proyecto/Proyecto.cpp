@@ -2,7 +2,13 @@
 //*****************************************FERIA PULQUE**********************************************
 /*GARCÍA SOTO JEAN CARLO
   MINO GUZMÁN YARA AMAIRANI
-  MORENO SANTOYO MARIANA*/
+  MORENO SANTOYO MARIANA
+  
+  Materia: CGEIHC
+  Grupo:
+  Fecha:
+  
+  */
 #define STB_IMAGE_IMPLEMENTATION
 
 #include <stdio.h>
