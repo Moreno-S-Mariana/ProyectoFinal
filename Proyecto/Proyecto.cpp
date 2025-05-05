@@ -64,8 +64,9 @@ GLfloat vueloDP = 0.0f;
 GLfloat saltoFuria = 0.0f;
 GLfloat desplazamientoY_F = 0.0f;
 GLfloat anguloBrazoF = 0.0f;
-
-
+//***************************************** Variable animación de Panico*****************************************
+GLfloat anguloBrazoP = 0.0f;
+GLfloat mueveCuerpoPanico = 0.0f;
 
 
 Window mainWindow;
@@ -1465,8 +1466,18 @@ int main()
 		/********************************************Panico****************************************************/
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(93.0f, 10.0f, 100.0f));
-		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
+		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		if (mainWindow.getAnimacion_Simp1_P()) {	//Activa animación
+			mueveCuerpoPanico += 0.3f * deltaTime;
+			model = glm::translate(model, glm::vec3(0.0f + 2 * sin(glm::radians(3 * mueveCuerpoPanico)),
+													0.0f,
+													0.0f));
+		}
+		else if (mainWindow.getAnimacion_Simp1_DP() == false) {
+			mueveCuerpoPanico = 0.0f;		//Reinicia el recorrido de la animación
+		}
+
 		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Panico_Mar.RenderModel();
@@ -1483,6 +1494,15 @@ int main()
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-0.835f, 2.15f, 0.1f));
+		if (mainWindow.getAnimacion_Simp1_P()) {	//Activa animación
+			anguloBrazoP += 0.3f * deltaTime;
+			model = glm::rotate(model, glm::radians(-140.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(25 * sin(glm::radians(10 * anguloBrazoP))), glm::vec3(1.0f, 0.0f, 0.0f));
+		}
+		else if (mainWindow.getAnimacion_Simp1_DP() == false) {
+			anguloBrazoP = 0.0f;		//Reinicia el recorrido de la animación
+		}
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		PanicoBDer.RenderModel();
 
