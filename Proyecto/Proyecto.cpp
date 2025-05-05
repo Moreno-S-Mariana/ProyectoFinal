@@ -60,6 +60,13 @@ float angulovaria = 0.0f;
 //******************************************************************************************************************
 //***************************************** Variable animación de Danny Phantom*****************************************
 GLfloat vueloDP = 0.0f;
+//***************************************** Variable animación de Furia*****************************************
+GLfloat saltoFuria = 0.0f;
+GLfloat desplazamientoY_F = 0.0f;
+GLfloat anguloBrazoF = 0.0f;
+
+
+
 
 Window mainWindow;
 std::vector<Mesh*> meshList;
@@ -162,11 +169,12 @@ Model DannyP_PiernaDer;
 
 //***************************************** COMIDA *****************************************
 
-Model Elotes;
+Model PuestoElotes;
 Model PuestoComida;
 Model PuestoTacos;
-Model Algodon;
-Model Dulces;
+Model PuestoAlgodon;
+Model PuestoDulces;
+Model Taco;
 
 //materiales
 Material Material_brillante;
@@ -506,8 +514,8 @@ int main()
 
 	//***************************************** PUESTOS DE COMIDA ****************************************
 
-	Elotes = Model();
-	Elotes.LoadModel("Models/Puestos/PuestoElotes.obj");
+	PuestoElotes = Model();
+	PuestoElotes.LoadModel("Models/Puestos/PuestoElotes.obj");
 
 	PuestoTacos = Model();
 	PuestoTacos.LoadModel("Models/Puestos/puestotacos.obj");
@@ -515,12 +523,14 @@ int main()
 	PuestoComida = Model();
 	PuestoComida.LoadModel("Models/Puestos/PuestoComida.obj");
 
-	Algodon = Model();
-	Algodon.LoadModel("Models/Puestos/Algodones.obj");
+	PuestoAlgodon = Model();
+	PuestoAlgodon.LoadModel("Models/Puestos/Algodones.obj");
 
-	Dulces = Model();
-	Dulces.LoadModel("Models/Puestos/Dulces.obj");
+	PuestoDulces = Model();
+	PuestoDulces.LoadModel("Models/Puestos/Dulces.obj");
 
+	Taco = Model();
+	Taco.LoadModel("Models/Comida/Taco.obj");
 
 	// puestos
 
@@ -666,7 +676,7 @@ int main()
 		//0.3->Dia		0.03->Noche
 		/*float intensidad = 0.1f + 0.2f * (0.5f + 0.5f * sin(lastTime * velocidadDN));
 		mainLight.UpdateLightIntensity(intensidad, intensidad);*/
-		mainLight.UpdateLightIntensity(0.3, 0.3);
+		mainLight.UpdateLightIntensity(0.3, 0.3);	//Cambiar al final 
 
 		//Recibir eventos del usuario
 		glfwPollEvents();
@@ -757,6 +767,7 @@ int main()
 
 		glm::mat4 model(1.0);
 		glm::mat4 modelaux(1.0);
+		glm:: mat4 modelaux2(1.0);
 		glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
 
 
@@ -1472,6 +1483,18 @@ int main()
 		model = glm::translate(model, glm::vec3(-185.0f, 11.0f, 45.0f));
 		model = glm::scale(model, glm::vec3(20.0f, 20.0f, 20.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		
+		if (mainWindow.getAnimacion_Simp1_F()) {	//Activa animación
+			saltoFuria += 0.1f * deltaTime;
+			desplazamientoY_F = fabs(sin(saltoFuria)) * 0.7f;		//Valor abs para no desplazarse hacia abajo
+			model = glm::translate(model, glm::vec3(0.0f ,
+													0.0f + desplazamientoY_F,
+													0.0f));
+		}
+		else if (mainWindow.getAnimacion_Simp1_DP() == false) {
+			saltoFuria = 0.0f;		//Reinicia el recorrido de la animación
+		}
+
 		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Furia_cuerpo.RenderModel();
@@ -1488,11 +1511,32 @@ int main()
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.275f, 0.085f, 0.0f));
+		if (mainWindow.getAnimacion_Simp1_F()) {	//Activa animación
+			anguloBrazoF += 0.7f * deltaTime;
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, -0.05f));
+			model = glm::rotate(model, glm::radians(-130.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(50*sin(glm::radians(10*anguloBrazoF))), glm::vec3(1.0f, 0.0f, 0.0f));
+		}
+		else if (mainWindow.getAnimacion_Simp1_DP() == false) {
+			anguloBrazoF = 0.0f;
+		}
+		modelaux2 = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Furia_BrazoIzq.RenderModel();
 
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(0.06f, -0.2f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.1f, 0.1, 0.1f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Taco.RenderModel();
+
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-0.26f, 0.088f, 0.0f));
+		if (mainWindow.getAnimacion_Simp1_F()) {	//Activa animación
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, -0.05f));
+			model = glm::rotate(model, glm::radians(-130.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(50 * sin(glm::radians(10 * anguloBrazoF))), glm::vec3(1.0f, 0.0f, 0.0f));
+		}
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Furia_BrazoDer.RenderModel();
 		/********************************************Danny Phantom****************************************************/
@@ -1555,7 +1599,7 @@ int main()
 		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Elotes.RenderModel();
+		PuestoElotes.RenderModel();
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-185.0f, 22.0f, 70.0f));
@@ -1568,14 +1612,14 @@ int main()
 		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Algodon.RenderModel();
+		PuestoAlgodon.RenderModel();
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-35.0f, 11.0f, -35.0f));
 		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Dulces.RenderModel();
+		PuestoDulces.RenderModel();
 
 		glDisable(GL_BLEND);
 

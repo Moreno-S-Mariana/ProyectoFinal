@@ -33,14 +33,15 @@ public:
 
 	//Animación Danny Phantom
 	GLfloat getAnimacion_Simp1_DP() { return banderaAnimacion1_DP; }
-
+	//Animación Furia
+	GLfloat getAnimacion_Simp1_F() { return banderaAnimacion1_F; }
 
 	~Window();
 private:
 	GLFWwindow* mainWindow;
 	GLint width, height;
 	GLfloat rotax, rotay, rotaz, articulacion1, articulacion2, articulacion3,valor,articulacion4, articulacion5,valor2 , valor3;
-	bool banderaAnimacion1_DP;
+	bool banderaAnimacion1_DP, banderaAnimacion1_F;
 	bool keys[1024];
 	GLint bufferWidth, bufferHeight;
 	GLfloat lastX;

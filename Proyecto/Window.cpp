@@ -25,6 +25,7 @@ Window::Window(GLint windowWidth, GLint windowHeight)
 	valor2 = 0.0f;
 	valor3 = 0.0f;
 	banderaAnimacion1_DP = false;	//Animación apagada por defecto 
+	banderaAnimacion1_F = false;	//Animación apagada por defecto 
 
 	for (size_t i = 0; i < 1024; i++)
 	{
@@ -227,7 +228,16 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
 		}
 		
 	}
-	
+	//Furia
+	if (key == GLFW_KEY_C && action == GLFW_PRESS) {
+		if (theWindow->banderaAnimacion1_F) {
+			theWindow->banderaAnimacion1_F= false;		//Apaga si está prendida
+		}
+		else if (theWindow->banderaAnimacion1_F == false) {
+			theWindow->banderaAnimacion1_F = true;			//Prende animación si está apagada
+		}
+
+	}
 
 
 
