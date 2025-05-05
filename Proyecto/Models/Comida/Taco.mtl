@@ -1,0 +1,14 @@
+# Blender 4.3.2 MTL File: 'None'
+# www.blender.org
+
+newmtl tripo_mat_e84ec724-b43a-457c-b2aa-917c22c7d0b3.001
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd Diffuse_Bake_Taco.png
+map_Ns Roughness_Taco.png
+map_refl Metallic_Taco.png
+map_Bump -bm 1.000000 Normal_Bake_Taco.png
