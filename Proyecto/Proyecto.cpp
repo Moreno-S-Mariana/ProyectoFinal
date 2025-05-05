@@ -623,15 +623,27 @@ int main()
 		1.0f, 0.0f, 0.0f,
 		5.0f);
 	spotLightCount++;
-
-	spotLights[1] = SpotLight(0.8f, 0.8f, 0.0f, // color    // Color amarillo chillón (RGB)
-		0.5f, 0.1f,           // aIntensity y dIntensity
-		-3.0f, 0.0f, 0.0f,     // Posición del helicóptero en el centro y a 5 unidades de altura
-		-1.0f, 0.0f, 0.0f,    // La luz apunta hacia la izquierda (eje X negativo)
-		1.0f, 0.0f, 0.00f,
-		30.0f);
-	spotLightCount++;
 	
+	// Lámpara izquierda
+	spotLights[1] = SpotLight(1.0f, 0.843f, 0.6f,
+		10.0f, 80.0f,			// aIntensity y dIntensity
+		-28.0f, 9.0f, 93.0f,   // Posición
+		1.0f, 0.0f, 1.0f,      // Dirección
+		1.0f, 0.5f, 0.1f,
+		55.0f
+	);
+	spotLightCount++;
+
+	// Lámpara derecha
+	spotLights[2] = SpotLight(1.0f, 0.843f, 0.6f,
+		10.0f, 80.0f,
+		28.0f, 9.0f, 90.0f,
+		-1.0f, 0.0f, 1.0f,
+		1.0f, 0.5f, 0.1f,
+		55.0f
+	);
+	spotLightCount++;
+
 	//se crean mas luces puntuales y spotlight 
 
 	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformEyePosition = 0,
