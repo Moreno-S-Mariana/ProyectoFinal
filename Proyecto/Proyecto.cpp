@@ -3,11 +3,11 @@
 /*GARCÍA SOTO JEAN CARLO
   MINO GUZMÁN YARA AMAIRANI
   MORENO SANTOYO MARIANA
-  
+
   Materia: CGEIHC
   Grupo:
   Fecha:
-  Integrantes:
+
   */
 #define STB_IMAGE_IMPLEMENTATION
 
@@ -64,8 +64,9 @@ GLfloat vueloDP = 0.0f;
 GLfloat saltoFuria = 0.0f;
 GLfloat desplazamientoY_F = 0.0f;
 GLfloat anguloBrazoF = 0.0f;
-
-
+//***************************************** Variable animación de Panico*****************************************
+GLfloat anguloBrazoP = 0.0f;
+GLfloat mueveCuerpoPanico = 0.0f;
 
 
 Window mainWindow;
@@ -190,8 +191,8 @@ static double limitFPS = 1.0 / 60.0;
 DirectionalLight mainLight;
 //para declarar varias luces de tipo pointlight
 //PointLight pointLights[MAX_POINT_LIGHTS];
-PointLight pointLights1[MAX_POINT_LIGHTS];
-PointLight pointLights2[MAX_POINT_LIGHTS];
+PointLight pointLights1[MAX_POINT_LIGHTS];	//PointLight Lámparas
+PointLight pointLights2[MAX_POINT_LIGHTS];	//PointLigth Quiosko
 SpotLight spotLights[MAX_SPOT_LIGHTS];
 SpotLight spotLights2[MAX_SPOT_LIGHTS];
 
@@ -569,12 +570,9 @@ int main()
 		0.03f, 0.03f,
 		0.0f, 0.0f, -1.0f);
 
-
-	unsigned int pointLightCount_ARRAY1 = 0;
-
 	//*************************************************************************************************************************************************
-
-// Luz 1
+	unsigned int pointLightCount_ARRAY1 = 0;
+	// Luz 1
 	pointLights1[0] = PointLight(
 		1.0f, 1.0f, 1.0f,   // color blanco
 		4.0f, 30.0f,        // ambientIntensity = 1.5f, diffuseIntensity = 6.0f
@@ -610,22 +608,18 @@ int main()
 	);
 	pointLightCount_ARRAY1++;
 
-
-
+	unsigned int pointLightCount_ARRAY2 = 0;
+	pointLights2[0] = PointLight(1.0f, 0.0f, 0.0f,   // color blanco
+		4.0f, 30.0f,				// ambientIntensity = 1.5f, diffuseIntensity = 6.0f
+		0.0f, 20.0f, 0.0f,
+		0.0f, 0.05f, 0.3f			// atenuación más lenta para que llegue más lejos
+	);
+	pointLightCount_ARRAY2++;
 	//*************************************************************************************************************************************************
 
 	unsigned int spotLightCount = 0;
-	//linterna
-	spotLights[0] = SpotLight(1.0f, 1.0f, 1.0f,
-		0.0f, 2.0f,
-		0.0f, 0.0f, 0.0f,
-		0.0f, -1.0f, 0.0f,
-		1.0f, 0.0f, 0.0f,
-		5.0f);
-	spotLightCount++;
-	
 	// Lámpara izquierda
-	spotLights[1] = SpotLight(1.0f, 0.843f, 0.6f,
+	spotLights[0] = SpotLight(1.0f, 0.843f, 0.6f,
 		10.0f, 80.0f,			// aIntensity y dIntensity
 		-28.0f, 9.0f, 93.0f,   // Posición
 		1.0f, 0.0f, 1.0f,      // Dirección
@@ -635,7 +629,7 @@ int main()
 	spotLightCount++;
 
 	// Lámpara derecha
-	spotLights[2] = SpotLight(1.0f, 0.843f, 0.6f,
+	spotLights[1] = SpotLight(1.0f, 0.843f, 0.6f,
 		10.0f, 80.0f,
 		28.0f, 9.0f, 90.0f,
 		-1.0f, 0.0f, 1.0f,
@@ -644,6 +638,69 @@ int main()
 	);
 	spotLightCount++;
 
+	//Carrusel
+	spotLights[2] = SpotLight(1.0f, 0.843f, 0.6f,
+		10.0f, 80.0f,             // Intensidades: ambiente y difusa
+		0.0f, 40.0f, 60.0f,
+		0.0f, -1.0f, 0.0f,       // Dirección (apunta hacia abajo)
+		1.0f, 0.09f, 0.032f,     // Atenuación
+		75.0f                    // Ángulo de corte (grado de apertura)
+	);
+	spotLightCount++;
+
+	//Dardo y globos
+	spotLights[3] = SpotLight(0.529f, 0.808f, 0.922f, //azul
+		10.0f, 80.0f,             // Intensidades: ambiente y difusa
+		-80.0f, 40.0f, 108.0f,
+		0.0f, -1.0f, 0.0f,       // Dirección (apunta hacia abajo)
+		1.0f, 0.09f, 0.032f,     // Atenuación
+		90.0f                    // Ángulo de corte (grado de apertura)
+	);
+	spotLightCount++;
+
+	unsigned int spotLightCount2 = 0;
+	//Martillo
+	spotLights2[0] = SpotLight(1.0f, 0.843f, 0.6f,  //amarillo cálido
+		10.0f, 80.0f,             // Intensidades: ambiente y difusa
+		0.0f, 60.0f, -50.0f,
+		0.0f, -1.0f, 0.0f,       // Dirección (apunta hacia abajo)
+		1.0f, 0.09f, 0.032f,     // Atenuación
+		80.0f                    // Ángulo de corte (grado de apertura)
+	);
+	spotLightCount2++;
+	
+	//Hachas
+	spotLights2[1] = SpotLight(0.133f, 0.545f, 0.133f,  //verde
+		10.0f, 80.0f,             // Intensidades: ambiente y difusa
+		70.0f, 45.0f, -90.0f,
+		0.0f, -1.0f, 0.0f,       // Dirección (apunta hacia abajo)
+		1.0f, 0.09f, 0.032f,     // Atenuación
+		80.0f                    // Ángulo de corte (grado de apertura)
+	);
+	spotLightCount2++;
+
+	//Topo
+	spotLights2[2] = SpotLight(0.502f, 0.0f, 0.502f,  //morado
+		10.0f, 80.0f,             // Intensidades: ambiente y difusa
+		-55.0f, 50.0f, -90.0f,
+		0.0f, -1.0f, 0.0f,       // Dirección (apunta hacia abajo)
+		1.0f, 0.09f, 0.032f,     // Atenuación
+		80.0f                    // Ángulo de corte (grado de apertura)
+	);
+	spotLightCount2++;
+
+	//Puesto
+	spotLights2[3] = SpotLight(1.0f, 0.843f, 0.6f,  
+		10.0f, 80.0f,             // Intensidades: ambiente y difusa
+		-55.0f, 50.0f, -65.0f,
+		0.0f, -1.0f, 0.0f,       // Dirección (apunta hacia abajo)
+		1.0f, 0.09f, 0.032f,     // Atenuación
+		60.0f                    // Ángulo de corte (grado de apertura)
+	);
+	spotLightCount2++;
+
+	
+	float intensidad = 0.0f;
 	//se crean mas luces puntuales y spotlight 
 
 	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformEyePosition = 0,
@@ -685,10 +742,11 @@ int main()
 		float t = fmod(glfwGetTime(), cycleTime);
 		float blendFactor = 0.0f;
 
-		//0.3->Dia		0.03->Noche
-		/*float intensidad = 0.1f + 0.2f * (0.5f + 0.5f * sin(lastTime * velocidadDN));
-		mainLight.UpdateLightIntensity(intensidad, intensidad);*/
-		mainLight.UpdateLightIntensity(0.3, 0.3);	//Cambiar al final 
+		//0.3->Dia		0.1->Noche
+		/**/
+		intensidad = 0.1f + 0.2f * (0.5f + 0.5f * sin(lastTime * velocidadDN));
+		mainLight.UpdateLightIntensity(intensidad, intensidad);
+		//mainLight.UpdateLightIntensity(0.3, 0.3);	//Cambiar al final 
 
 		//Recibir eventos del usuario
 		glfwPollEvents();
@@ -697,7 +755,7 @@ int main()
 
 		// Clear the window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		
+
 		//información en el shader de intensidad especular y brillo
 		uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
 		uniformShininess = shaderList[0].GetShininessLocation();
@@ -765,21 +823,27 @@ int main()
 
 		// luz ligada a a cámara de tipo flash
 		//sirve para que en tiempo de ejecución (dentro del while) se cambien propiedades de la luz
-		glm::vec3 lowerLight = camera.getCameraPosition();
-		lowerLight.y -= 0.3f;
-		spotLights[0].SetFlash(lowerLight, camera.getCameraDirection());
+		//glm::vec3 lowerLight = camera.getCameraPosition();
+		//lowerLight.y -= 0.3f;
+		//spotLights[0].SetFlash(lowerLight, camera.getCameraDirection());
 
 		//glm::vec3 lightPosition = glm::vec3(0.0f, 0.0f, 0.0f) + glm::vec3(0.0f, 0.0f, 0.1f) * (a1 + a2);
 
 		shaderList[0].SetDirectionalLight(&mainLight);							//Habilita luz principal
-		shaderList[0].SetSpotLights(spotLights, spotLightCount);				//Habilita las luces del spotlight
-		shaderList[0].SetPointLights(pointLights1, pointLightCount_ARRAY1);		//Habilita luces del pointlight
-
-
+		//shaderList[0].SetSpotLights(spotLights, spotLightCount);				//Habilita las luces del spotlight
+		shaderList[0].SetSpotLights(spotLights2, spotLightCount2);
+		//0.3 dia
+		//0.1 noche
+		if (intensidad < 0.175f) {
+			shaderList[0].SetPointLights(pointLights1, pointLightCount_ARRAY1);		//Habilita luces del pointlight
+		}
+		else if (intensidad > 0.175f) {
+			shaderList[0].SetPointLights(pointLights2, pointLightCount_ARRAY2);		//Habilita luces del pointlight
+		}
 
 		glm::mat4 model(1.0);
 		glm::mat4 modelaux(1.0);
-		glm:: mat4 modelaux2(1.0);
+		glm::mat4 modelaux2(1.0);
 		glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
 
 
@@ -793,7 +857,7 @@ int main()
 		meshList[2]->RenderMesh();
 
 		//****************************************** EDIFICIOS *****************************************
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, -245.0f));
 		model = glm::scale(model, glm::vec3(14.0f, 14.0f, 14.0f));
@@ -814,7 +878,7 @@ int main()
 		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Portales.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(0.0f, -6.0f, 235.0f));
 		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
@@ -1060,7 +1124,7 @@ int main()
 		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Quiosco_modelo.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(0.0f, 11.0f, 115.0f));
 		modelaux = model;
@@ -1163,7 +1227,7 @@ int main()
 		arbusto.RenderModel();
 
 		//***************************************** JUEGOS MECANICOS *****************************************
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(0.0f, 3.0f, 60.0f));
 		model = glm::rotate(model, glm::radians(angulovaria), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -1218,7 +1282,7 @@ int main()
 
 		//***************************************** JUEGOS DE LA FERIA *****************************************
 		//***************************************** DADOS  *****************************************
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(80.0f, 3.0f, 100.0f));
 		modelaux = model;
@@ -1245,7 +1309,7 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Dados.RenderModel();
 
-//***************************************** GLOBOS *****************************************
+		//***************************************** GLOBOS *****************************************
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-80.0f, 3.0f, 105.0f));
@@ -1388,7 +1452,7 @@ int main()
 		Mazo.RenderModel();
 
 		//***************************************** HACHAS *****************************************
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(70.0f, 11.0f, -90.0f));
 		modelaux = model;
@@ -1465,8 +1529,18 @@ int main()
 		/********************************************Panico****************************************************/
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(93.0f, 10.0f, 100.0f));
-		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
+		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		if (mainWindow.getAnimacion_Simp1_P()) {	//Activa animación
+			mueveCuerpoPanico += 0.3f * deltaTime;
+			model = glm::translate(model, glm::vec3(0.0f + 2 * sin(glm::radians(3 * mueveCuerpoPanico)),
+				0.0f,
+				0.0f));
+		}
+		else if (mainWindow.getAnimacion_Simp1_DP() == false) {
+			mueveCuerpoPanico = 0.0f;		//Reinicia el recorrido de la animación
+		}
+
 		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Panico_Mar.RenderModel();
@@ -1483,6 +1557,15 @@ int main()
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-0.835f, 2.15f, 0.1f));
+		if (mainWindow.getAnimacion_Simp1_P()) {	//Activa animación
+			anguloBrazoP += 0.3f * deltaTime;
+			model = glm::rotate(model, glm::radians(-140.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(25 * sin(glm::radians(10 * anguloBrazoP))), glm::vec3(1.0f, 0.0f, 0.0f));
+		}
+		else if (mainWindow.getAnimacion_Simp1_DP() == false) {
+			anguloBrazoP = 0.0f;		//Reinicia el recorrido de la animación
+		}
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		PanicoBDer.RenderModel();
 
@@ -1495,13 +1578,13 @@ int main()
 		model = glm::translate(model, glm::vec3(-185.0f, 11.0f, 45.0f));
 		model = glm::scale(model, glm::vec3(20.0f, 20.0f, 20.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		
+
 		if (mainWindow.getAnimacion_Simp1_F()) {	//Activa animación
 			saltoFuria += 0.1f * deltaTime;
 			desplazamientoY_F = fabs(sin(saltoFuria)) * 0.7f;		//Valor abs para no desplazarse hacia abajo
-			model = glm::translate(model, glm::vec3(0.0f ,
-													0.0f + desplazamientoY_F,
-													0.0f));
+			model = glm::translate(model, glm::vec3(0.0f,
+				0.0f + desplazamientoY_F,
+				0.0f));
 		}
 		else if (mainWindow.getAnimacion_Simp1_DP() == false) {
 			saltoFuria = 0.0f;		//Reinicia el recorrido de la animación
@@ -1527,7 +1610,7 @@ int main()
 			anguloBrazoF += 0.7f * deltaTime;
 			model = glm::translate(model, glm::vec3(0.0f, 0.0f, -0.05f));
 			model = glm::rotate(model, glm::radians(-130.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(50*sin(glm::radians(10*anguloBrazoF))), glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(50 * sin(glm::radians(10 * anguloBrazoF))), glm::vec3(1.0f, 0.0f, 0.0f));
 		}
 		else if (mainWindow.getAnimacion_Simp1_DP() == false) {
 			anguloBrazoF = 0.0f;
@@ -1556,13 +1639,13 @@ int main()
 		model = glm::translate(model, glm::vec3(81.0f, 16.0f, -67.0f));
 		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		
+
 		if (mainWindow.getAnimacion_Simp1_DP()) {	//Activa animación
 			vueloDP += 0.3f * deltaTime;
 			model = glm::rotate(model, glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-			model = glm::translate(model, glm::vec3(0.0f +2*sin(glm::radians(3*vueloDP+90.0f)), 
-													5.0f+3*sin(glm::radians(3* vueloDP)),
-													0.0f));
+			model = glm::translate(model, glm::vec3(0.0f + 2 * sin(glm::radians(3 * vueloDP + 90.0f)),
+				5.0f + 3 * sin(glm::radians(3 * vueloDP)),
+				0.0f));
 		}
 		else if (mainWindow.getAnimacion_Simp1_DP() == false) {
 			vueloDP = 0.0f;		//Reinicia el recorrido de la animación
@@ -1642,4 +1725,3 @@ int main()
 
 	return 0;
 }
-//holiiiii

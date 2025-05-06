@@ -26,6 +26,7 @@ Window::Window(GLint windowWidth, GLint windowHeight)
 	valor3 = 0.0f;
 	banderaAnimacion1_DP = false;	//Animación apagada por defecto 
 	banderaAnimacion1_F = false;	//Animación apagada por defecto 
+	banderaAnimacion1_P = false;	//Animación apagada por defecto 
 
 	for (size_t i = 0; i < 1024; i++)
 	{
@@ -149,7 +150,7 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
 	if (key == GLFW_KEY_M)
 	{
 		theWindow->articulacion5 -= 0.1;
-		}
+	}
 	if (key == GLFW_KEY_K)
 	{
 		if (theWindow->articulacion3 > -10)
@@ -226,19 +227,28 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
 		else if (theWindow->banderaAnimacion1_DP == false) {
 			theWindow->banderaAnimacion1_DP = true;			//Prende animación si está apagada
 		}
-		
+
 	}
 	//Furia
 	if (key == GLFW_KEY_C && action == GLFW_PRESS) {
 		if (theWindow->banderaAnimacion1_F) {
-			theWindow->banderaAnimacion1_F= false;		//Apaga si está prendida
+			theWindow->banderaAnimacion1_F = false;		//Apaga si está prendida
 		}
 		else if (theWindow->banderaAnimacion1_F == false) {
 			theWindow->banderaAnimacion1_F = true;			//Prende animación si está apagada
 		}
 
 	}
+	//Panico
+	if (key == GLFW_KEY_B && action == GLFW_PRESS) {
+		if (theWindow->banderaAnimacion1_P) {
+			theWindow->banderaAnimacion1_P = false;		//Apaga si está prendida
+		}
+		else if (theWindow->banderaAnimacion1_P == false) {
+			theWindow->banderaAnimacion1_P = true;			//Prende animación si está apagada
+		}
 
+	}
 
 
 }
