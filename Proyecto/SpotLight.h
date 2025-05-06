@@ -1,7 +1,8 @@
 #pragma once
 #include "PointLight.h"
-class SpotLight :
-	public PointLight
+#include <glm.hpp>
+
+class SpotLight : public PointLight
 {
 public:
 	SpotLight();
@@ -20,11 +21,12 @@ public:
 
 	void SetFlash(glm::vec3 pos, glm::vec3 dir);
 	void SetPos(glm::vec3 pos);
+
+	glm::vec3 GetPosition() const;
+
 	~SpotLight();
 
 private:
 	glm::vec3 direction;
-
 	GLfloat edge, procEdge;
 };
-

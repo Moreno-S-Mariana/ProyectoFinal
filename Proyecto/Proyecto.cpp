@@ -200,6 +200,7 @@ PointLight pointLights1[MAX_POINT_LIGHTS];	//PointLight Lámparas
 PointLight pointLights2[MAX_POINT_LIGHTS];	//PointLigth Quiosko
 SpotLight spotLights[MAX_SPOT_LIGHTS];
 SpotLight spotLights2[MAX_SPOT_LIGHTS];
+SpotLight spotLights3[MAX_SPOT_LIGHTS];
 
 // Vertex Shader
 static const char* vShader = "shaders/shader_light.vert";
@@ -313,6 +314,10 @@ void CreateShaders()
 	Shader* shader1 = new Shader();
 	shader1->CreateFromFiles(vShader, fShader);
 	shaderList.push_back(*shader1);
+}
+
+bool estaCerca(const glm::vec3& posCamara, const glm::vec3& posLuz, float distanciaMaxima) {
+	return glm::distance(posCamara, posLuz) <= distanciaMaxima;
 }
 
 int main()
@@ -661,24 +666,25 @@ int main()
 	);
 	spotLightCount++;
 
-	//Dardo y globos
-	spotLights[3] = SpotLight(0.529f, 0.808f, 0.922f, //azul
-		10.0f, 80.0f,             // Intensidades: ambiente y difusa
-		-80.0f, 40.0f, 108.0f,
-		0.0f, -1.0f, 0.0f,       // Dirección (apunta hacia abajo)
-		1.0f, 0.09f, 0.032f,     // Atenuación
-		90.0f                    // Ángulo de corte (grado de apertura)
-	);
-	spotLightCount++;
-
-	unsigned int spotLightCount2 = 0;
 	//Martillo
-	spotLights2[0] = SpotLight(1.0f, 0.843f, 0.6f,  //amarillo cálido
+	spotLights[3] = SpotLight(1.0f, 0.843f, 0.6f,  //amarillo cálido
 		10.0f, 80.0f,             // Intensidades: ambiente y difusa
 		0.0f, 60.0f, -50.0f,
 		0.0f, -1.0f, 0.0f,       // Dirección (apunta hacia abajo)
 		1.0f, 0.09f, 0.032f,     // Atenuación
 		80.0f                    // Ángulo de corte (grado de apertura)
+	);
+	spotLightCount++;
+
+	unsigned int spotLightCount2 = 0;
+	
+	//Dardo y globos
+	spotLights2[0] = SpotLight(0.529f, 0.808f, 0.922f, //azul
+		10.0f, 80.0f,             // Intensidades: ambiente y difusa
+		-80.0f, 40.0f, 108.0f,
+		0.0f, -1.0f, 0.0f,       // Dirección (apunta hacia abajo)
+		1.0f, 0.09f, 0.032f,     // Atenuación
+		90.0f                    // Ángulo de corte (grado de apertura)
 	);
 	spotLightCount2++;
 	
@@ -702,17 +708,57 @@ int main()
 	);
 	spotLightCount2++;
 
-	//Puesto
-	spotLights2[3] = SpotLight(1.0f, 0.843f, 0.6f,  
+	//Dados
+	spotLights2[3] = SpotLight(1.0f, 1.0f, 0.0f,  
 		10.0f, 80.0f,             // Intensidades: ambiente y difusa
-		-55.0f, 50.0f, -65.0f,
+		85.0f, 30.0f, 100.0f,
 		0.0f, -1.0f, 0.0f,       // Dirección (apunta hacia abajo)
 		1.0f, 0.09f, 0.032f,     // Atenuación
-		60.0f                    // Ángulo de corte (grado de apertura)
+		55.0f                    // Ángulo de corte (grado de apertura)
 	);
 	spotLightCount2++;
 
+	unsigned int spotLightCount3 = 0;
 	
+	//Luz boliche 
+	spotLights3[0] = SpotLight(0.6f, 0.0f, 0.8f,
+		10.0f, 80.0f,			
+		-80.0f, 9.0f, 250.0f,   
+		1.0f, 0.0f, 0.0f,      
+		1.0f, 0.09f, 0.032f,
+		70.0f
+	);
+	spotLightCount3++;
+
+	//Luz boliche 2
+	spotLights3[1] = SpotLight(0.0f, 0.4f, 1.0f,
+		10.0f, 80.0f,
+		-80.0f, 9.0f, 260.0f,
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.09f, 0.032f,
+		70.0f
+	);
+	spotLightCount3++;
+
+	//Luz boliche 3
+	spotLights3[2] = SpotLight(0.5f, 1.0f, 0.0f,
+		10.0f, 80.0f,
+		-80.0f, 9.0f, 240.0f,
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.09f, 0.032f,
+		70.0f
+	);
+	spotLightCount3++;
+	
+	//Luz boliche 4
+	spotLights3[3] = SpotLight(1.0f, 0.0f, 0.5f,
+		10.0f, 80.0f,
+		-80.0f, 9.0f, 270.0f,
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.09f, 0.032f,
+		70.0f
+	);
+	spotLightCount3++;
 	float intensidad = 0.0f;
 	//se crean mas luces puntuales y spotlight 
 
@@ -843,8 +889,53 @@ int main()
 		//glm::vec3 lightPosition = glm::vec3(0.0f, 0.0f, 0.0f) + glm::vec3(0.0f, 0.0f, 0.1f) * (a1 + a2);
 
 		shaderList[0].SetDirectionalLight(&mainLight);							//Habilita luz principal
+		
+		//Arreglo para los arreglos de luces
+		// Obtenemos posición de la cámara
+		glm::vec3 camPos(camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
+
+		// Arreglo temporal para luces activas
+		SpotLight lucesActivas[MAX_SPOT_LIGHTS];
+		int totalLucesActivas = 0;
+
+		// ---------- Arreglo 1: spotLights[] (enciende solo si están cerca)
+		for (int i = 0; i < spotLightCount; ++i) {
+			if (estaCerca(camPos, spotLights[i].GetPosition(), 100.0f)) {
+				lucesActivas[totalLucesActivas++] = spotLights[i];
+			}
+		}
+
+		// ---------- Arreglo 2: spotLights2[] (una por atracción, solo si cerca)
+		for (int i = 0; i < spotLightCount2; ++i) {
+			if (estaCerca(camPos, spotLights2[i].GetPosition(), 80.0f)) {
+				lucesActivas[totalLucesActivas++] = spotLights2[i];
+			}
+		}
+
+		// ---------- Arreglo 3: spotLights3[] (una luz encendida a la vez cíclicamente)
+		bool camaraCercaDeLuces3 = false;
+		for (int i = 0; i < spotLightCount3; ++i) {
+			if (estaCerca(camPos, spotLights3[i].GetPosition(), 100.0f)) {
+				camaraCercaDeLuces3 = true;
+				break;
+			}
+		}
+
+		static float tiempoAcumulado = 0.0f;
+		tiempoAcumulado += deltaTime;
+
+		if (camaraCercaDeLuces3) {
+			int indiceActivo = static_cast<int>(tiempoAcumulado / 10.0f) % spotLightCount3;
+			lucesActivas[totalLucesActivas++] = spotLights3[indiceActivo];
+		}
+
+		// ---------- Activar luces finales
+		shaderList[0].SetSpotLights(lucesActivas, totalLucesActivas);
+		
 		//shaderList[0].SetSpotLights(spotLights, spotLightCount);				//Habilita las luces del spotlight
-		shaderList[0].SetSpotLights(spotLights2, spotLightCount2);
+		//shaderList[0].SetSpotLights(spotLights2, spotLightCount2);
+		//shaderList[0].SetSpotLights(spotLights3, spotLightCount3);
+
 		//0.3 dia
 		//0.1 noche
 		if (intensidad < 0.175f) {
