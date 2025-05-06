@@ -191,8 +191,8 @@ static double limitFPS = 1.0 / 60.0;
 DirectionalLight mainLight;
 //para declarar varias luces de tipo pointlight
 //PointLight pointLights[MAX_POINT_LIGHTS];
-PointLight pointLights1[MAX_POINT_LIGHTS];
-PointLight pointLights2[MAX_POINT_LIGHTS];
+PointLight pointLights1[MAX_POINT_LIGHTS];	//PointLight Lámparas
+PointLight pointLights2[MAX_POINT_LIGHTS];	//PointLigth Quiosko
 SpotLight spotLights[MAX_SPOT_LIGHTS];
 SpotLight spotLights2[MAX_SPOT_LIGHTS];
 
@@ -570,12 +570,9 @@ int main()
 		0.03f, 0.03f,
 		0.0f, 0.0f, -1.0f);
 
-
-	unsigned int pointLightCount_ARRAY1 = 0;
-
 	//*************************************************************************************************************************************************
-
-// Luz 1
+	unsigned int pointLightCount_ARRAY1 = 0;
+	// Luz 1
 	pointLights1[0] = PointLight(
 		1.0f, 1.0f, 1.0f,   // color blanco
 		4.0f, 30.0f,        // ambientIntensity = 1.5f, diffuseIntensity = 6.0f
@@ -611,8 +608,13 @@ int main()
 	);
 	pointLightCount_ARRAY1++;
 
-
-
+	unsigned int pointLightCount_ARRAY2 = 0;
+	pointLights2[0] = PointLight( 1.0f, 0.0f, 0.0f,   // color blanco
+		4.0f, 30.0f,				// ambientIntensity = 1.5f, diffuseIntensity = 6.0f
+		0.0f, 20.0f, 0.0f,
+		0.0f, 0.05f, 0.3f			// atenuación más lenta para que llegue más lejos
+	);
+	pointLightCount_ARRAY2++;
 	//*************************************************************************************************************************************************
 
 	unsigned int spotLightCount = 0;
@@ -644,7 +646,7 @@ int main()
 		55.0f
 	);
 	spotLightCount++;
-
+	float intensidad = 0.0f;
 	//se crean mas luces puntuales y spotlight 
 
 	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformEyePosition = 0,
@@ -686,10 +688,11 @@ int main()
 		float t = fmod(glfwGetTime(), cycleTime);
 		float blendFactor = 0.0f;
 
-		//0.3->Dia		0.03->Noche
-		/*float intensidad = 0.1f + 0.2f * (0.5f + 0.5f * sin(lastTime * velocidadDN));
-		mainLight.UpdateLightIntensity(intensidad, intensidad);*/
-		mainLight.UpdateLightIntensity(0.3, 0.3);	//Cambiar al final 
+		//0.3->Dia		0.1->Noche
+		/**/
+		intensidad = 0.1f + 0.2f * (0.5f + 0.5f * sin(lastTime * velocidadDN));
+		mainLight.UpdateLightIntensity(intensidad, intensidad);
+		//mainLight.UpdateLightIntensity(0.3, 0.3);	//Cambiar al final 
 
 		//Recibir eventos del usuario
 		glfwPollEvents();
@@ -774,9 +777,15 @@ int main()
 
 		shaderList[0].SetDirectionalLight(&mainLight);							//Habilita luz principal
 		shaderList[0].SetSpotLights(spotLights, spotLightCount);				//Habilita las luces del spotlight
-		shaderList[0].SetPointLights(pointLights1, pointLightCount_ARRAY1);		//Habilita luces del pointlight
-
-
+		
+		//0.3 dia
+		//0.1 noche
+		if (intensidad < 0.175f) {
+			shaderList[0].SetPointLights(pointLights1, pointLightCount_ARRAY1);		//Habilita luces del pointlight
+		}
+		else if(intensidad > 0.175f) {
+			shaderList[0].SetPointLights(pointLights2, pointLightCount_ARRAY2);		//Habilita luces del pointlight
+		}
 
 		glm::mat4 model(1.0);
 		glm::mat4 modelaux(1.0);
