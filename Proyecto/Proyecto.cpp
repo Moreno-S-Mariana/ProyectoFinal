@@ -150,8 +150,12 @@ Model Jaula;
 Model Bola;
 Model Bat;
 
-//***************************************** PERSONAJES *****************************************
+//***************************************** Cobro Moneda *****************************************
+Model Coin;
+Model Mesa;
+Model Cuenco;
 
+//***************************************** PERSONAJES *****************************************
 Model Panico_Mar;
 Model PanicoBDer;
 Model PanicoBizq;
@@ -318,7 +322,7 @@ int main()
 	CreateObjects();
 	CreateShaders();
 
-	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 0.3f, 0.5f);
+	camera = Camera(glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 0.3f, 0.5f);
 
 	brickTexture = Texture("Textures/brick.png");
 	brickTexture.LoadTextureA();
@@ -477,6 +481,14 @@ int main()
 
 	Bola = Model();
 	Bola.LoadModel("Models/Juegos_Feria/Bateo/BolaBaseball.obj");
+
+	//***************************************** Moneda *****************************************
+	Coin = Model();
+	Coin.LoadModel("Models/Moneda/Coin.obj");
+	Mesa = Model();
+	Mesa.LoadModel("Models/Moneda/Mesa.obj");
+	Cuenco = Model();
+	Cuenco.LoadModel("Models/Moneda/Cuenco.obj");
 
 	//***************************************** PERSONAJES *****************************************
 
@@ -689,10 +701,10 @@ int main()
 		float blendFactor = 0.0f;
 
 		//0.3->Dia		0.1->Noche
-		/**/
+		/*
 		intensidad = 0.1f + 0.2f * (0.5f + 0.5f * sin(lastTime * velocidadDN));
-		mainLight.UpdateLightIntensity(intensidad, intensidad);
-		//mainLight.UpdateLightIntensity(0.3, 0.3);	//Cambiar al final 
+		mainLight.UpdateLightIntensity(intensidad, intensidad);*/
+		mainLight.UpdateLightIntensity(0.3, 0.3);	//Cambiar al final 
 
 		//Recibir eventos del usuario
 		glfwPollEvents();
@@ -835,7 +847,7 @@ int main()
 
 		//************************Boliche**********************************************************
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, -0.1f, 0.0f));
 		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Boliche.RenderModel();
@@ -901,6 +913,29 @@ int main()
 		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Bolaboliche.RenderModel();
+
+		//************************Mesa cobro moneda boliche************************************************ 
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-0.7f, 1.2f, -1.5f));
+		modelaux = model;
+		model = glm::scale(model, glm::vec3(0.005f, 0.01f, 0.01f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Mesa.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(0.0f, 0.72f, 0.0f));
+		modelaux = model;
+		model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Cuenco.RenderModel();
+		
+		//Moneda - Utilizar en los casos necesarios 
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(0.0f, 0.1f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.03f, 0.03f, 0.03f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Coin.RenderModel();
+
 
 		//*****************************************************************************************
 
@@ -1232,6 +1267,7 @@ int main()
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(80.0f, 3.0f, 100.0f));
 		modelaux = model;
+		modelaux2 = model;
 		model = glm::scale(model, glm::vec3(0.15f, 0.15f, 0.15f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		mesa_dado.RenderModel();
@@ -1254,12 +1290,26 @@ int main()
 		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Dados.RenderModel();
+		//************************cobro moneda dados************************************************ 
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(-10.0f, 10.9f, 0.0f));
+		modelaux2 = model;
+		//model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Cuenco.RenderModel();
 
+		//Moneda - Utilizar en los casos necesarios 
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Coin.RenderModel();
 //***************************************** GLOBOS *****************************************
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-80.0f, 3.0f, 105.0f));
 		modelaux = model;
+		modelaux2 = model;
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -1363,12 +1413,37 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Dardos.RenderModel();
 
+		//************************ Mesa cobro moneda Dardos ********************************************** 
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(25.0f, -1.0f, 0.0f));
+		modelaux2 = model;
+		model = glm::scale(model, glm::vec3(0.05f, 0.15f, 0.10f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Mesa.RenderModel();
+		
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(0.0f, 11.f, 0.0f));
+		modelaux2 = model;
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Cuenco.RenderModel();
+
+		//Moneda - Utilizar en los casos necesarios 
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(0.0f, 0.8f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Coin.RenderModel();
+/**/
+
+
 		//***************************************** TOPOS *****************************************
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-70.0f, 3.0f, -90.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		modelaux = model;
+		modelaux2 = model;
 		model = glm::scale(model, glm::vec3(40.0f, 40.0f, 40.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Topo.RenderModel();
@@ -1397,11 +1472,35 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Mazo.RenderModel();
 
+		//************************ Mesa cobro moneda topos ********************************************** 
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 20.0f));
+		modelaux2 = model;
+		model = glm::scale(model, glm::vec3(0.05f, 0.15f, 0.10f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Mesa.RenderModel();
+		
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(0.0f, 11.f, 0.0f));
+		modelaux2 = model;
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Cuenco.RenderModel();
+
+		//Moneda - Utilizar en los casos necesarios 
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(0.0f, 0.8f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Coin.RenderModel();
+		/**/
+
 		//***************************************** HACHAS *****************************************
 		
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(70.0f, 11.0f, -90.0f));
 		modelaux = model;
+		modelaux2 = model;
 		model = glm::scale(model, glm::vec3(8.0f, 5.0f, 8.0f));
 		model = glm::rotate(model, glm::radians(135.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -1438,9 +1537,33 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Hacha.RenderModel();
 
+		//************************ Mesa cobro moneda hachas ********************************************** 
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(-20.0f, -9.0f, -5.0f));
+		modelaux2 = model;
+		model = glm::scale(model, glm::vec3(0.05f, 0.15f, 0.10f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Mesa.RenderModel();
+
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(0.0f, 11.f, 0.0f));
+		modelaux2 = model;
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Cuenco.RenderModel();
+
+		//Moneda - Utilizar en los casos necesarios 
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(0.0f, 0.8f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Coin.RenderModel();
+		/**/
+
 		//***************************************** JAULA BATEO *****************************************
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(0.0f, 3.0f, -110.0f));
+		modelaux2 = model;
 		model = glm::scale(model, glm::vec3(5.0f, 5.0f, 5.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Jaula.RenderModel();
@@ -1470,6 +1593,29 @@ int main()
 		model = glm::scale(model, glm::vec3(5.0f, 6.0f, 5.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Bat.RenderModel();
+
+		//************************ Mesa cobro moneda Baseball ********************************************** 
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(-35.0f, 0.0f, 25.0f));
+		modelaux2 = model;
+		model = glm::scale(model, glm::vec3(0.05f, 0.10f, 0.10f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Mesa.RenderModel();
+
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(0.0f, 7.3f, 0.0f));
+		modelaux2 = model;
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Cuenco.RenderModel();
+
+		//Moneda - Utilizar en los casos necesarios 
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(0.0f, 0.8f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Coin.RenderModel();
+		/**/
 
 		//***************************************** PERSONAJES *****************************************
 		/********************************************Panico****************************************************/
