@@ -26,6 +26,10 @@ public:
 	glm::vec3 getCameraDirection();
 	glm::mat4 calculateViewMatrix();
 
+	// ? Getters añadidos
+	float getYaw() const { return yaw; }
+	float getPitch() const { return pitch; }
+
 	void setPosition(const glm::vec3& pos) { position = pos; }
 	void setYaw(float y) { yaw = y; update(); }
 	void setPitch(float p) { pitch = p; update(); }

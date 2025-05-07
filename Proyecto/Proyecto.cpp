@@ -3,10 +3,6 @@
 /*GARCÍA SOTO JEAN CARLO
   MINO GUZMÁN YARA AMAIRANI
   MORENO SANTOYO MARIANA
-
-  Materia: CGEIHC
-  Grupo:
-  Fecha:
   */
 #define STB_IMAGE_IMPLEMENTATION
 
@@ -75,6 +71,13 @@ const float velocidadGiroFuria = glm::radians(2.0f);
 //***************************************** Variable animación de Panico*****************************************
 GLfloat anguloBrazoP = 0.0f;
 GLfloat mueveCuerpoPanico = 0.0f;
+//***************************************** Variable animación de Topo*****************************************
+float topoPosY[3] = { 0.0f, 0.0f, 0.0f };
+float topoAngulo[3] = { 0.0f, 0.0f, 0.0f };
+bool topoSubiendo[3] = { true, true, true };
+float topoTiempoMaximo[3] = { 0.0f, 0.0f, 0.0f };
+float topoTiempoActual[3] = { 0.0f, 0.0f, 0.0f };
+bool topoVisible[3] = { true, true, true };
 //*****************************************Parámetros generales*****************************************
 Window mainWindow;
 std::vector<Mesh*> meshList;
@@ -214,7 +217,7 @@ static const char* vShader = "shaders/shader_light.vert";
 // Fragment Shader
 static const char* fShader = "shaders/shader_light.frag";
 
-CameraMode currentCameraMode = FIRST_PERSON;
+CameraMode currentCameraMode = THIRD_PERSON;
 int attractionIndex = 0;
 bool attractionInitialized = false;
 
@@ -725,7 +728,7 @@ int main()
 		10.0f, 80.0f,             
 		85.0f, 30.0f, 100.0f,
 		0.0f, -1.0f, 0.0f,       
-		1.0f, 0.09f, 0.032f,     
+		0.5f, 0.6f, 0.15f,     
 		55.0f                    
 	);
 	spotLightCount2++;
@@ -787,6 +790,51 @@ int main()
 		lastTime = now;
 
 		angulovaria += 0.3f * deltaTime;
+
+		//Animacion topos
+		for (int i = 0; i < 3; i++) {
+			// Rotación continua más lenta aún
+			topoAngulo[i] += 2.0f * deltaTime;
+			if (topoAngulo[i] > 360.0f) topoAngulo[i] -= 360.0f;
+
+			// Temporizador de visibilidad
+			topoTiempoActual[i] += deltaTime;
+
+			if (topoVisible[i]) {
+				if (topoTiempoActual[i] >= 10.0f) {
+					topoVisible[i] = false;
+					topoTiempoActual[i] = 0.0f;
+				}
+			}
+			else {
+				if (topoTiempoActual[i] >= 5.0f) {
+					topoVisible[i] = true;
+					topoTiempoActual[i] = 0.0f;
+				}
+			}
+
+			// Movimiento vertical muy suave
+			if (topoVisible[i]) {
+				if (topoSubiendo[i]) {
+					topoPosY[i] += 10.0f * deltaTime;  // subida más lenta
+					if (topoPosY[i] >= 3.0f) {
+						topoPosY[i] = 3.0f;
+						topoSubiendo[i] = false;
+					}
+				}
+				else {
+					topoPosY[i] = 3.0f;  // se queda arriba mientras es visible
+				}
+			}
+			else {
+				topoSubiendo[i] = true;
+				topoPosY[i] -= 10.0f * deltaTime;  // bajada más lenta
+				if (topoPosY[i] <= 0.0f) {
+					topoPosY[i] = 0.0f;
+				}
+			}
+		}
+
 
 		// Movimiento alternante del martillo
 		if (direccionDerecha) {
@@ -989,14 +1037,14 @@ int main()
 
 		// ---------- Arreglo 1: spotLights[] (enciende solo si están cerca)
 		for (int i = 0; i < spotLightCount; ++i) {
-			if (estaCerca(camPos, spotLights[i].GetPosition(), 100.0f)) {
+			if (estaCerca(camPos, spotLights[i].GetPosition(), 90.0f)) {
 				lucesActivas[totalLucesActivas++] = spotLights[i];
 			}
 		}
 
 		// ---------- Arreglo 2: spotLights2[] (una por atracción, solo si cerca)
 		for (int i = 0; i < spotLightCount2; ++i) {
-			if (estaCerca(camPos, spotLights2[i].GetPosition(), 80.0f)) {
+			if (estaCerca(camPos, spotLights2[i].GetPosition(), 60.0f)) {
 				lucesActivas[totalLucesActivas++] = spotLights2[i];
 			}
 		}
@@ -1004,7 +1052,7 @@ int main()
 		// ---------- Arreglo 3: spotLights3[] (una luz encendida a la vez cíclicamente)
 		bool camaraCercaDeLuces3 = false;
 		for (int i = 0; i < spotLightCount3; ++i) {
-			if (estaCerca(camPos, spotLights3[i].GetPosition(), 100.0f)) {
+			if (estaCerca(camPos, spotLights3[i].GetPosition(), 90.0f)) {
 				camaraCercaDeLuces3 = true;
 				break;
 			}
@@ -1667,34 +1715,34 @@ int main()
 		Coin.RenderModel();
 
 		//***************************************** TOPOS *****************************************
-
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-70.0f, 3.0f, -90.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		modelaux = model;
-		modelaux2 = model;
 		model = glm::scale(model, glm::vec3(40.0f, 40.0f, 40.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Topo.RenderModel();
 
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.5f, 11.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Monito_TOPO.RenderModel();		//Primer topo
+		// Posiciones relativas de cada topo
+		glm::vec3 posicionesTopos[3] = {
+			glm::vec3(0.5f, 8.0f, 0.0f),
+			glm::vec3(4.5f, 8.0f, 2.5f),
+			glm::vec3(4.5f, 8.0f, -2.5f)
+		};
 
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(4.5f, 11.0f, 2.5f));
-		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Monito_TOPO.RenderModel();		//Segundo topo
+		// Renderizado de cada Monito_TOPO
+		for (int i = 0; i < 3; i++) {
+			if (topoVisible[i]) {
+				model = modelaux;
+				model = glm::translate(model, posicionesTopos[i] + glm::vec3(0.0f, topoPosY[i], 0.0f));
+				model = glm::rotate(model, glm::radians(topoAngulo[i]), glm::vec3(0.0f, 1.0f, 0.0f));
+				model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+				Monito_TOPO.RenderModel();
+			}
+		}
 
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(4.5f, 11.0f, -2.5f));
-		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Monito_TOPO.RenderModel();		//Tercer topo
-
+		// MAZO
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(25.0f, 0.0f, -10.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
@@ -1899,7 +1947,6 @@ int main()
 			bool right = keys[GLFW_KEY_RIGHT];
 
 			glm::vec3 forward = glm::vec3(sin(furiaYaw), 0.0f, cos(furiaYaw));
-
 			int stepDir = 0;
 
 			if (up) {
@@ -1953,24 +2000,22 @@ int main()
 				model = glm::rotate(model, glm::radians(-armAngle), glm::vec3(1, 0, 0));
 				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 				Furia_BrazoIzq.RenderModel();
-			}
 
-			// Brazo derecho visible siempre
-			if (currentCameraMode == FIRST_PERSON) {
-				model = glm::mat4(1.0f);
-				model = glm::translate(model, camera.getCameraPosition() + glm::vec3(0.3f, -0.2f, -0.5f));
-				model = glm::rotate(model, glm::radians(armAngle), glm::vec3(1, 0, 0));
-				model = glm::rotate(model, glm::radians(glm::degrees(furiaYaw)), glm::vec3(0, 1, 0));
-				model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-			}
-			else {
+				// Brazo derecho también visible en 3ra persona
 				model = modelaux;
 				model = glm::translate(model, glm::vec3(-0.26f, 0.088f, 0.0f));
 				model = glm::rotate(model, glm::radians(armAngle), glm::vec3(1, 0, 0));
+				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+				Furia_BrazoDer.RenderModel();
 			}
-
-			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-			Furia_BrazoDer.RenderModel();
+			else {
+				// SOLO se muestra el brazo derecho en 1ra persona
+				model = modelaux;
+				model = glm::translate(model, glm::vec3(-0.26f, 0.2f, 0.5f)); // misma posición que en 3ra
+				model = glm::rotate(model, glm::radians(armAngle), glm::vec3(1, 0, 0));
+				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+				Furia_BrazoDer.RenderModel();
+			}
 		}
 
 		/********************************************Danny Phantom****************************************************/
