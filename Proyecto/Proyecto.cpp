@@ -792,45 +792,47 @@ int main()
 		angulovaria += 0.3f * deltaTime;
 
 		//Animacion topos
-		for (int i = 0; i < 3; i++) {
-			// Rotación continua más lenta aún
-			topoAngulo[i] += 2.0f * deltaTime;
-			if (topoAngulo[i] > 360.0f) topoAngulo[i] -= 360.0f;
+		if (mainWindow.getAnimacionTopos()) {
+			for (int i = 0; i < 3; i++) {
+				// Rotación continua más lenta aún
+				topoAngulo[i] += 2.0f * deltaTime;
+				if (topoAngulo[i] > 360.0f) topoAngulo[i] -= 360.0f;
 
-			// Temporizador de visibilidad
-			topoTiempoActual[i] += deltaTime;
+				// Temporizador de visibilidad
+				topoTiempoActual[i] += deltaTime;
 
-			if (topoVisible[i]) {
-				if (topoTiempoActual[i] >= 10.0f) {
-					topoVisible[i] = false;
-					topoTiempoActual[i] = 0.0f;
-				}
-			}
-			else {
-				if (topoTiempoActual[i] >= 5.0f) {
-					topoVisible[i] = true;
-					topoTiempoActual[i] = 0.0f;
-				}
-			}
-
-			// Movimiento vertical muy suave
-			if (topoVisible[i]) {
-				if (topoSubiendo[i]) {
-					topoPosY[i] += 10.0f * deltaTime;  // subida más lenta
-					if (topoPosY[i] >= 3.0f) {
-						topoPosY[i] = 3.0f;
-						topoSubiendo[i] = false;
+				if (topoVisible[i]) {
+					if (topoTiempoActual[i] >= 10.0f) {
+						topoVisible[i] = false;
+						topoTiempoActual[i] = 0.0f;
 					}
 				}
 				else {
-					topoPosY[i] = 3.0f;  // se queda arriba mientras es visible
+					if (topoTiempoActual[i] >= 5.0f) {
+						topoVisible[i] = true;
+						topoTiempoActual[i] = 0.0f;
+					}
 				}
-			}
-			else {
-				topoSubiendo[i] = true;
-				topoPosY[i] -= 10.0f * deltaTime;  // bajada más lenta
-				if (topoPosY[i] <= 0.0f) {
-					topoPosY[i] = 0.0f;
+
+				// Movimiento vertical muy suave
+				if (topoVisible[i]) {
+					if (topoSubiendo[i]) {
+						topoPosY[i] += 10.0f * deltaTime;
+						if (topoPosY[i] >= 3.0f) {
+							topoPosY[i] = 3.0f;
+							topoSubiendo[i] = false;
+						}
+					}
+					else {
+						topoPosY[i] = 3.0f;
+					}
+				}
+				else {
+					topoSubiendo[i] = true;
+					topoPosY[i] -= 10.0f * deltaTime;
+					if (topoPosY[i] <= 0.0f) {
+						topoPosY[i] = 0.0f;
+					}
 				}
 			}
 		}
@@ -1731,14 +1733,16 @@ int main()
 		};
 
 		// Renderizado de cada Monito_TOPO
-		for (int i = 0; i < 3; i++) {
-			if (topoVisible[i]) {
-				model = modelaux;
-				model = glm::translate(model, posicionesTopos[i] + glm::vec3(0.0f, topoPosY[i], 0.0f));
-				model = glm::rotate(model, glm::radians(topoAngulo[i]), glm::vec3(0.0f, 1.0f, 0.0f));
-				model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-				Monito_TOPO.RenderModel();
+		if (mainWindow.getAnimacionTopos()) {
+			for (int i = 0; i < 3; i++) {
+				if (topoVisible[i]) {
+					model = modelaux;
+					model = glm::translate(model, posicionesTopos[i] + glm::vec3(0.0f, topoPosY[i], 0.0f));
+					model = glm::rotate(model, glm::radians(topoAngulo[i]), glm::vec3(0.0f, 1.0f, 0.0f));
+					model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+					glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+					Monito_TOPO.RenderModel();
+				}
 			}
 		}
 
