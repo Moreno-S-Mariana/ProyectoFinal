@@ -16,28 +16,32 @@ Camera::Camera(glm::vec3 startPosition, glm::vec3 startUp, GLfloat startYaw, GLf
 	update();
 }
 
-void Camera::keyControl(bool* keys, GLfloat deltaTime)
+// Ahora admite el modo de cámara como parámetro
+void Camera::keyControl(bool* keys, GLfloat deltaTime, CameraMode camMode)
 {
 	GLfloat velocity = moveSpeed * deltaTime;
 
-	if (keys[GLFW_KEY_W])
-	{
-		position += front * velocity;
+	if (camMode == TOP_VIEW) {
+		// En modo vista superior solo se mueve en el plano XZ (como un dron)
+		if (keys[GLFW_KEY_W])
+			position += glm::vec3(0.0f, 0.0f, -velocity);  // adelante (norte)
+		if (keys[GLFW_KEY_S])
+			position += glm::vec3(0.0f, 0.0f, velocity);   // atrás (sur)
+		if (keys[GLFW_KEY_A])
+			position += glm::vec3(-velocity, 0.0f, 0.0f);  // izquierda (oeste)
+		if (keys[GLFW_KEY_D])
+			position += glm::vec3(velocity, 0.0f, 0.0f);   // derecha (este)
 	}
-
-	if (keys[GLFW_KEY_S])
-	{
-		position -= front * velocity;
-	}
-
-	if (keys[GLFW_KEY_A])
-	{
-		position -= right * velocity;
-	}
-
-	if (keys[GLFW_KEY_D])
-	{
-		position += right * velocity;
+	else {
+		// Movimiento normal en 1ra o 3ra persona
+		if (keys[GLFW_KEY_W])
+			position += front * velocity;
+		if (keys[GLFW_KEY_S])
+			position -= front * velocity;
+		if (keys[GLFW_KEY_A])
+			position -= right * velocity;
+		if (keys[GLFW_KEY_D])
+			position += right * velocity;
 	}
 }
 
@@ -50,14 +54,9 @@ void Camera::mouseControl(GLfloat xChange, GLfloat yChange)
 	pitch += yChange;
 
 	if (pitch > 89.0f)
-	{
 		pitch = 89.0f;
-	}
-
 	if (pitch < -89.0f)
-	{
 		pitch = -89.0f;
-	}
 
 	update();
 }
@@ -71,7 +70,6 @@ glm::vec3 Camera::getCameraPosition()
 {
 	return position;
 }
-
 
 glm::vec3 Camera::getCameraDirection()
 {
@@ -90,6 +88,4 @@ void Camera::update()
 }
 
 
-Camera::~Camera()
-{
-}
+Camera::~Camera() {}

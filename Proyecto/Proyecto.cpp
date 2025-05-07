@@ -1,4 +1,3 @@
-
 /*PROYECTO COMPUTACIÓN GRÁFICA*/
 //*****************************************FERIA PULQUE**********************************************
 /*GARCÍA SOTO JEAN CARLO
@@ -213,6 +212,10 @@ static const char* vShader = "shaders/shader_light.vert";
 
 // Fragment Shader
 static const char* fShader = "shaders/shader_light.frag";
+
+CameraMode currentCameraMode = FIRST_PERSON;
+int attractionIndex = 0;
+bool attractionInitialized = false;
 
 //función de calculo de normales por promedio de vértices 
 void calcAverageNormals(unsigned int* indices, unsigned int indiceCount, GLfloat* vertices, unsigned int verticeCount,
@@ -816,10 +819,44 @@ int main()
 
 		//Recibir eventos del usuario
 		glfwPollEvents();
-		camera.keyControl(mainWindow.getsKeys(), deltaTime);
+		if (currentCameraMode != ATTRACTIONS) {
+			camera.keyControl(mainWindow.getsKeys(), deltaTime, currentCameraMode);
+		}
 		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
 
 		bool* keys = mainWindow.getsKeys();
+
+		if (keys[GLFW_KEY_1]) currentCameraMode = FIRST_PERSON;
+		if (keys[GLFW_KEY_2]) currentCameraMode = THIRD_PERSON;
+		if (keys[GLFW_KEY_3]) currentCameraMode = TOP_VIEW;
+		if (keys[GLFW_KEY_4]) {
+			currentCameraMode = ATTRACTIONS;
+			attractionInitialized = false;  // Reinicia bandera de inicialización
+		}
+
+		static double lastSwitchTime = 0.0;
+		double currentTime = glfwGetTime();
+		if (currentCameraMode == ATTRACTIONS) {
+			if (keys[GLFW_KEY_E] && currentTime - lastSwitchTime > 0.3) {
+				attractionIndex = (attractionIndex + 1) % 4;
+				glm::vec3 attractionPos = spotLights2[attractionIndex].GetPosition();
+				glm::vec3 offset = glm::vec3(0.0f, 10.0f, 30.0f); // puedes ajustar esto
+				camera.setPosition(attractionPos + offset);
+				camera.setDirection(glm::normalize(attractionPos - (attractionPos + offset)));
+				lastSwitchTime = currentTime;
+			}
+
+			if (keys[GLFW_KEY_Q] && currentTime - lastSwitchTime > 0.3) {
+				attractionIndex = (attractionIndex + 3) % 4;
+				glm::vec3 attractionPos = spotLights2[attractionIndex].GetPosition();
+				glm::vec3 offset = glm::vec3(0.0f, 10.0f, 30.0f);
+				camera.setPosition(attractionPos + offset);
+				camera.setDirection(glm::normalize(attractionPos - (attractionPos + offset)));
+				lastSwitchTime = currentTime;
+			}
+
+		}
+
 		// Clear the window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -828,7 +865,52 @@ int main()
 		uniformShininess = shaderList[0].GetShininessLocation();
 
 		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
-		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
+		//glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
+		glm::mat4 view;
+		switch (currentCameraMode) {
+		case FIRST_PERSON:
+			camera.setPosition(furiaPos + glm::vec3(0.0f, 8.0f, 0.0f));
+			view = camera.calculateViewMatrix();  // ¡NO ajustes el yaw manualmente!
+			break;
+		case THIRD_PERSON:
+		{
+			glm::vec3 offset = glm::vec3(0.0f, 10.0f, 20.0f); // distancia detrás de Furia
+			glm::vec3 thirdPersonPos = furiaPos - glm::normalize(camera.getCameraDirection()) * 20.0f + glm::vec3(0.0f, 10.0f, 0.0f);
+			camera.setPosition(thirdPersonPos);
+			view = camera.calculateViewMatrix();
+			break;
+		}
+		case TOP_VIEW:
+		{
+			static bool primeraVez = true;
+			if (primeraVez) {
+				camera.setPosition(glm::vec3(0.0f, 150.0f, 0.0f));
+				primeraVez = false;
+			}
+
+			// Fijar la dirección de la cámara hacia abajo
+			glm::vec3 pos = camera.getCameraPosition();
+			glm::vec3 target = pos + glm::vec3(0.0f, -1.0f, 0.0f); // mira hacia abajo
+			glm::vec3 up = glm::vec3(0.0f, 0.0f, -1.0f); // mantener eje horizontal como 'arriba'
+
+			view = glm::lookAt(pos, target, up);
+		}
+		break;
+
+		case ATTRACTIONS:
+			if (!attractionInitialized) {
+				glm::vec3 attractionPos = spotLights2[attractionIndex].GetPosition();
+				camera.setPosition(attractionPos + glm::vec3(0.0f, 5.0f, 30.0f));  // Vista desde enfrente
+				camera.setDirection(glm::normalize(attractionPos - camera.getCameraPosition()));
+				camera.setYaw(glm::radians(180.0f));  // Opcional: ajusta orientación
+				attractionInitialized = true;
+			}
+			view = camera.calculateViewMatrix();
+		break;
+		}
+
+		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
+
 		glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
 
 		// día completo
@@ -1816,7 +1898,6 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		PanicoBizq.RenderModel();
 		/********************************************Furia****************************************************/
-		// Dentro de tu bucle de update/render:
 		{
 			bool up = keys[GLFW_KEY_UP];
 			bool down = keys[GLFW_KEY_DOWN];
@@ -1840,41 +1921,58 @@ int main()
 			prevLeft = left;
 			prevRight = right;
 
+			float legAngle = sin(walkCycle) * legSwing;
+			float armAngle = sin(walkCycle) * armSwing;
+
 			model = glm::mat4(1.0f);
 			model = glm::translate(model, furiaPos);
 			model = glm::rotate(model, furiaYaw, glm::vec3(0, 1, 0));
 			model = glm::scale(model, glm::vec3(20.0f, 20.0f, 20.0f));
 			modelaux = model;
-			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(modelaux));
-			Furia_cuerpo.RenderModel();
 
-			float legAngle = sin(walkCycle) * legSwing;
-			float armAngle = sin(walkCycle) * armSwing;
+			if (currentCameraMode != FIRST_PERSON) {
+				// Dibujar cuerpo completo solo si no es 1ra persona
+				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(modelaux));
+				Furia_cuerpo.RenderModel();
 
-			model = modelaux;
-			model = glm::translate(model, glm::vec3(0.145f, -0.125f, 0.0f));
-			model = glm::rotate(model, glm::radians(-legAngle), glm::vec3(1, 0, 0));
-			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-			Furia_PiernaIzq.RenderModel();
+				model = modelaux;
+				model = glm::translate(model, glm::vec3(0.145f, -0.125f, 0.0f));
+				model = glm::rotate(model, glm::radians(-legAngle), glm::vec3(1, 0, 0));
+				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+				Furia_PiernaIzq.RenderModel();
 
-			model = modelaux;
-			model = glm::translate(model, glm::vec3(-0.143f, -0.128f, 0.0f));
-			model = glm::rotate(model, glm::radians(legAngle), glm::vec3(1, 0, 0));
-			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-			Furia_PiernaDer.RenderModel();
+				model = modelaux;
+				model = glm::translate(model, glm::vec3(-0.143f, -0.128f, 0.0f));
+				model = glm::rotate(model, glm::radians(legAngle), glm::vec3(1, 0, 0));
+				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+				Furia_PiernaDer.RenderModel();
 
-			model = modelaux;
-			model = glm::translate(model, glm::vec3(0.275f, 0.085f, 0.0f));
-			model = glm::rotate(model, glm::radians(-armAngle), glm::vec3(1, 0, 0));
-			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-			Furia_BrazoIzq.RenderModel();
+				model = modelaux;
+				model = glm::translate(model, glm::vec3(0.275f, 0.085f, 0.0f));
+				model = glm::rotate(model, glm::radians(-armAngle), glm::vec3(1, 0, 0));
+				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+				Furia_BrazoIzq.RenderModel();
+			}
 
-			model = modelaux;
-			model = glm::translate(model, glm::vec3(-0.26f, 0.088f, 0.0f));
-			model = glm::rotate(model, glm::radians(armAngle), glm::vec3(1, 0, 0));
+			// Dibujar brazo derecho (siempre)
+			if (currentCameraMode == FIRST_PERSON) {
+				// En 1ra persona: brazo ajustado al hombro del jugador
+				model = glm::mat4(1.0f);
+				model = glm::translate(model, camera.getCameraPosition() + glm::vec3(0.3f, -0.2f, -0.5f));
+				model = glm::rotate(model, glm::radians(armAngle), glm::vec3(1, 0, 0));
+				model = glm::rotate(model, glm::radians(glm::degrees(furiaYaw)), glm::vec3(0, 1, 0));
+				model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
+			}
+			else {
+				model = modelaux;
+				model = glm::translate(model, glm::vec3(-0.26f, 0.088f, 0.0f));
+				model = glm::rotate(model, glm::radians(armAngle), glm::vec3(1, 0, 0));
+			}
+
 			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 			Furia_BrazoDer.RenderModel();
 		}
+
 		/********************************************Danny Phantom****************************************************/
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(81.0f, 16.0f, -67.0f));
