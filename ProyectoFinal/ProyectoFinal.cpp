@@ -1,7 +1,14 @@
 ﻿/*PROYECTO COMPUTACIÓN GRÁFICA*/
+//*****************************************FERIA PULQUE**********************************************
 /*GARCÍA SOTO JEAN CARLO
   MINO GUZMÁN YARA AMAIRANI
-  MORENO SANTOYO MARIANA*/
+  MORENO SANTOYO MARIANA
+
+  Materia: CGEIHC
+  Grupo:
+  Fecha:
+
+  */
 #define STB_IMAGE_IMPLEMENTATION
 
 #include <stdio.h>
@@ -36,17 +43,35 @@
 #include "Material.h"
 const float toRadians = 3.14159265f / 180.0f;
 
+// VARIABLES ESTATICAS PARA EL MOVIMIENTO DE FURIA 
+
+constexpr float turnSpeed = 90.0f;   // grados por segundo
+constexpr float moveSpeed= 0.3f;    // unidades por segundo
 
 //***************************************** Variable para ciclo Dia y Noche*****************************************
 float intensidad = 0.0f;
 float velocidadDN = 0.1f;	//Cercano a 1->Rapido	o	0->Lento
-//******************************************************************************************************************
-
 double lastToggleTime = glfwGetTime();
 float tiempoSkybox = 0.0f;
 bool esDeDia = true;
-
-
+//******************************************************************************************************************
+//***************************************** Variable para juego martillo*****************************************
+float anguloMartillo = 0.0f;
+float velocidadOscilacion = 2.0f;		// Puedes ajustar la velocidad
+bool direccionDerecha = true;
+float limiteAngulo = 90.0f;				// Máximo a cada lado: 90 grados
+//***************************************** Variable para juego carrusel*****************************************
+float angulovaria = 0.0f;
+//******************************************************************************************************************
+//***************************************** Variable animación de Danny Phantom*****************************************
+GLfloat vueloDP = 0.0f;
+//***************************************** Variable animación de Furia*****************************************
+GLfloat saltoFuria = 0.0f;
+GLfloat desplazamientoY_F = 0.0f;
+GLfloat anguloBrazoF = 0.0f;
+//***************************************** Variable animación de Panico*****************************************
+GLfloat anguloBrazoP = 0.0f;
+GLfloat mueveCuerpoPanico = 0.0f;
 
 
 Window mainWindow;
@@ -54,6 +79,9 @@ std::vector<Mesh*> meshList;
 std::vector<Shader> shaderList;
 
 Camera camera;
+Camera EyeCamera;
+Camera TopCamera;
+
 
 Texture brickTexture;
 Texture plainTexture;
@@ -133,18 +161,29 @@ Model Bat;
 //***************************************** PERSONAJES *****************************************
 
 Model Panico_Mar;
-Model Furia_Yara;
-Model Dany_Jean;
-
+Model PanicoBDer;
+Model PanicoBizq;
+Model PanicoPDer;
+Model PanicoPIzq;
+Model Furia_cuerpo;
+Model Furia_BrazoDer;
+Model Furia_BrazoIzq;
+Model Furia_PiernaDer;
+Model Furia_PiernaIzq;
+Model DannyP_cuerpo;
+Model DannyP_BrazoIzq;
+Model DannyP_BrazoDer;
+Model DannyP_PiernaIzq;
+Model DannyP_PiernaDer;
 
 //***************************************** COMIDA *****************************************
 
-Model Elotes;
+Model PuestoElotes;
 Model PuestoComida;
 Model PuestoTacos;
-Model Algodon;
-Model Dulces;
-
+Model PuestoAlgodon;
+Model PuestoDulces;
+Model Taco;
 
 //materiales
 Material Material_brillante;
@@ -287,7 +326,29 @@ int main()
 	CreateObjects();
 	CreateShaders();
 
-	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 0.3f, 0.5f);
+	static glm::vec3 furiaPos(-185.0f, 10.0f, 45.0f);
+
+	static float     furiaYaw = glm::radians(90.0f);
+
+	
+	// camera en tercera persona 
+	camera = Camera(glm::vec3(0.0f,0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 0.3f, 0.5f);
+	camera.terceraPersona(&furiaPos, &furiaYaw); // Cambia el puntero a la posición de Furia
+	//camera.syncWithTarget(); // Sincroniza la cámara con la posición de Furia
+
+
+	// camera en primera persona unicamente para los juegos 
+	EyeCamera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 0.3f, 0.5f);
+
+	//Camara superior 
+	TopCamera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 0.3f, 0.5f);
+
+
+
+	
+
+	
+
 
 	brickTexture = Texture("Textures/brick.png");
 	brickTexture.LoadTextureA();
@@ -450,18 +511,42 @@ int main()
 	//***************************************** PERSONAJES *****************************************
 
 	Panico_Mar = Model();
-	Panico_Mar.LoadModel("Models/Personajes/Panic.obj");
+	Panico_Mar.LoadModel("Models/Personajes/CuerpoPanico.obj");
+	PanicoBDer = Model();
+	PanicoBDer.LoadModel("Models/Personajes/PanicoBDer.obj");
+	PanicoBizq = Model();
+	PanicoBizq.LoadModel("Models/Personajes/PanicoBIzq.obj");
+	PanicoPDer = Model();
+	PanicoPDer.LoadModel("Models/Personajes/PanicoPDer.obj");
+	PanicoPIzq = Model();
+	PanicoPIzq.LoadModel("Models/Personajes/PanicoPIzq.obj");
 
-	Furia_Yara = Model();
-	Furia_Yara.LoadModel("Models/Personajes/Furia.obj");
+	Furia_cuerpo = Model();
+	Furia_cuerpo.LoadModel("Models/Personajes/Cuerpo_F.obj");
+	Furia_BrazoDer = Model();
+	Furia_BrazoDer.LoadModel("Models/Personajes/BrazoDer_F.obj");
+	Furia_BrazoIzq = Model();
+	Furia_BrazoIzq.LoadModel("Models/Personajes/BrazoIzq_F.obj");
+	Furia_PiernaIzq = Model();
+	Furia_PiernaIzq.LoadModel("Models/Personajes/PiernaIzq_F.obj");
+	Furia_PiernaDer = Model();
+	Furia_PiernaDer.LoadModel("Models/Personajes/PiernaDer_F.obj");
 
-	Dany_Jean = Model();
-	Dany_Jean.LoadModel("Models/Personajes/dannyphantom.obj");
+	DannyP_cuerpo = Model();
+	DannyP_cuerpo.LoadModel("Models/Personajes/dannyphantom.obj");
+	DannyP_BrazoIzq = Model();
+	DannyP_BrazoIzq.LoadModel("Models/Personajes/BrazoIzq_DP.obj");
+	DannyP_BrazoDer = Model();
+	DannyP_BrazoDer.LoadModel("Models/Personajes/BrazoDer_DP.obj");
+	DannyP_PiernaIzq = Model();
+	DannyP_PiernaIzq.LoadModel("Models/Personajes/PiernaIzq_DP.obj");
+	DannyP_PiernaDer = Model();
+	DannyP_PiernaDer.LoadModel("Models/Personajes/PiernaDer_DP.obj");
 
 	//***************************************** PUESTOS DE COMIDA ****************************************
 
-	Elotes = Model();
-	Elotes.LoadModel("Models/Puestos/PuestoElotes.obj");
+	PuestoElotes = Model();
+	PuestoElotes.LoadModel("Models/Puestos/PuestoElotes.obj");
 
 	PuestoTacos = Model();
 	PuestoTacos.LoadModel("Models/Puestos/puestotacos.obj");
@@ -469,16 +554,18 @@ int main()
 	PuestoComida = Model();
 	PuestoComida.LoadModel("Models/Puestos/PuestoComida.obj");
 
-	Algodon = Model();
-	Algodon.LoadModel("Models/Puestos/Algodones.obj");
+	PuestoAlgodon = Model();
+	PuestoAlgodon.LoadModel("Models/Puestos/Algodones.obj");
 
-	Dulces = Model();
-	Dulces.LoadModel("Models/Puestos/Dulces.obj");
+	PuestoDulces = Model();
+	PuestoDulces.LoadModel("Models/Puestos/Dulces.obj");
 
+	Taco = Model();
+	Taco.LoadModel("Models/Comida/Taco.obj");
 
 	// puestos
 
-	// Skybox Día
+	//skybox Día
 	std::vector<std::string> skyboxFacesDay = {
 
 
@@ -490,9 +577,7 @@ int main()
 		"Textures/Skybox/SunnyBack.tga"
 	};
 
-
-
-	// Skybox Noche
+	//skybox Noche
 	std::vector<std::string> skyboxFacesNight = {
 		"Textures/Skybox/nightright.tga",
 		"Textures/Skybox/nightleft.tga",
@@ -501,12 +586,10 @@ int main()
 		"Textures/Skybox/nightfront.tga",
 		"Textures/Skybox/nightback.tga"
 	};
-	
+
 	Skybox skybox(skyboxFacesDay, skyboxFacesNight);
 
-	// Skybox actual inicial: día
-	
-
+	//Skybox actual inicial: día
 
 	Material_brillante = Material(4.0f, 256);
 	Material_opaco = Material(0.3f, 4);
@@ -519,7 +602,8 @@ int main()
 
 
 	unsigned int pointLightCount_ARRAY1 = 0;
-//*************************************************************************************************************************************************
+
+	//*************************************************************************************************************************************************
 
 // Luz 1
 	pointLights1[0] = PointLight(
@@ -559,7 +643,8 @@ int main()
 
 
 
-//*************************************************************************************************************************************************
+	//*************************************************************************************************************************************************
+
 	unsigned int spotLightCount = 0;
 	//linterna
 	spotLights[0] = SpotLight(1.0f, 1.0f, 1.0f,
@@ -570,16 +655,25 @@ int main()
 		5.0f);
 	spotLightCount++;
 
-	spotLights[1] = SpotLight(0.8f, 0.8f, 0.0f, // color    // Color amarillo chillón (RGB)
-		0.5f, 0.1f,           // aIntensity y dIntensity
-		-3.0f, 0.0f, 0.0f,     // Posición del helicóptero en el centro y a 5 unidades de altura
-		-1.0f, 0.0f, 0.0f,    // La luz apunta hacia la izquierda (eje X negativo)
-		1.0f, 0.0f, 0.00f,
-		30.0f);
+	// Lámpara izquierda
+	spotLights[1] = SpotLight(1.0f, 0.843f, 0.6f,
+		10.0f, 80.0f,			// aIntensity y dIntensity
+		-28.0f, 9.0f, 93.0f,   // Posición
+		1.0f, 0.0f, 1.0f,      // Dirección
+		1.0f, 0.5f, 0.1f,
+		55.0f
+	);
 	spotLightCount++;
 
-
-
+	// Lámpara derecha
+	spotLights[2] = SpotLight(1.0f, 0.843f, 0.6f,
+		10.0f, 80.0f,
+		28.0f, 9.0f, 90.0f,
+		-1.0f, 0.0f, 1.0f,
+		1.0f, 0.5f, 0.1f,
+		55.0f
+	);
+	spotLightCount++;
 
 	//se crean mas luces puntuales y spotlight 
 
@@ -590,23 +684,62 @@ int main()
 	////Loop mientras no se cierra la ventana
 
 
+	/********************************************************************************************************************************/
+
+
+	static bool prevUp = false;
+	static bool prevDown = false;
+	static bool prevLeft = false;
+	static bool prevRight = false;
+
+
+	const float stepDist = 1.0f;            // paso de 0.3 unidades
+	const float stepAng = glm::radians(1.0f);// 1° en radianes
+
+
+	// —–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––—
+//  ANIMACIÓN DE CAMINATA: piernas y brazos al moverse hacia adelante/atrás
+// —–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––—
+
+	static float walkCycle = 0.0f;                   // acumula el ciclo de caminata
+	const float walkSpeed = 5.0f;                    // velocidad del ciclo (ajústala)
+	const float legSwing = 30.0f;                   // amplitud de pierna en grados
+	const float armSwing = 20.0f;                   // amplitud de brazo en grados
 
 
 
 
+	/**********************************************************************************************************************************/
 
-
-
-	while (!mainWindow.getShouldClose()) {
-
-
+	while (!mainWindow.getShouldClose())
+	{
 		GLfloat now = glfwGetTime();
 		deltaTime = now - lastTime;
 		deltaTime += (now - lastTime) / limitFPS;
 		lastTime = now;
 
 
-		// --- en tu main(), dentro del bucle de render ---
+		angulovaria += 0.3f * deltaTime;
+
+
+
+		// Movimiento alternante del martillo
+		// Movimiento alternante del martillo (gira de -90° a +90° suavemente)
+		if (direccionDerecha) {
+			anguloMartillo += velocidadOscilacion * deltaTime;
+			if (anguloMartillo >= 135.0f) {
+				anguloMartillo = 135.0f;
+				direccionDerecha = false;
+			}
+		}
+		else {
+			anguloMartillo -= velocidadOscilacion * deltaTime;
+			if (anguloMartillo <= -45.0f) {
+				anguloMartillo = -45.0;
+				direccionDerecha = true;
+			}
+		}
+
 		const float dayDuration = 20.0f;
 		const float nightDuration = 20.0f;
 		const float fadeDuration = 13.0f;
@@ -615,26 +748,44 @@ int main()
 		float t = fmod(glfwGetTime(), cycleTime);
 		float blendFactor = 0.0f;
 
-		//0.3->Dia		0.03->Noche
-		float intensidad = 0.03f + 0.27f * (0.5f + 0.5f * sin(lastTime * velocidadDN));
-		mainLight.UpdateLightIntensity(intensidad, intensidad);
+		mainLight.UpdateLightIntensity(0.3, 0.3);	//Cambiar al final 
+
+
+
 
 		//Recibir eventos del usuario
 		glfwPollEvents();
 		camera.keyControl(mainWindow.getsKeys(), deltaTime);
-		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
+		camera.syncWithTarget(); // Sincroniza la cámara con la posición de Furia
+		//camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
+	
+		// tras haber creado camera y tener tu furiaPos y furiaYaw:
 
-
-
-		// Limpieza de pantalla
+		bool* keys = mainWindow.getsKeys();
+		// Clear the window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
+
+
+		shaderList[0].UseShader();
+
+
+		// 6) Ahora dibuja TODO el resto de la escena sin volver a llamar a camera.calculateViewMatrix()
+
+
+		//información en el shader de intensidad especular y brillo
+		uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
+		uniformShininess = shaderList[0].GetShininessLocation();
+
+		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
+
+		glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
 
 		// día completo
 		if (t < dayDuration) {
 			blendFactor = 0.0f;
 		}
-		// fundido día → noche
+		// fundido día ? noche
 		else if (t < dayDuration + fadeDuration) {
 			blendFactor = (t - dayDuration) / fadeDuration;
 		}
@@ -642,20 +793,20 @@ int main()
 		else if (t < dayDuration + fadeDuration + nightDuration) {
 			blendFactor = 1.0f;
 		}
-		// fundido noche → día
+		// fundido noche ? día
 		else {
 			blendFactor = 1.0f - (t - dayDuration - fadeDuration - nightDuration) / fadeDuration;
 		}
 
 
-		// 2) Ángulo del sol [−90°, 270°): empieza en el horizonte este, sube al cenit, cae al horizonte oeste
+		// 2) Ángulo del sol [?90°, 270°): empieza en el horizonte este, sube al cenit, cae al horizonte oeste
 		float sunAngleDeg = (t / cycleTime) * 360.0f - 90.0f;
 		float sunRad = glm::radians(sunAngleDeg);
 
 		// 3) Vector dirección del sol: barrido en el plano X–Y (Z fijo o pequeño para inclinar)
 		glm::vec3 sunDir = glm::normalize(glm::vec3(
-			cosf(sunRad),      // componente X: este→oeste
-			sinf(sunRad),      // componente Y: horizonte→cenit→horizonte
+			cosf(sunRad),      // componente X: este?oeste
+			sinf(sunRad),      // componente Y: horizonte?cenit?horizonte
 			0.2f               // un poco de Z para que la luz no venga exactamente del foco
 		));
 
@@ -671,17 +822,7 @@ int main()
 			0.1f, 100.0f);
 		glDepthFunc(GL_LEQUAL);
 		skybox.DrawSkybox(viewMatrix, projectionMatrix, blendFactor);
-		// Dibujo del skybox
-
-		
-
-
-
-
-
 		// Dibuja skybox actual
-	
-
 		shaderList[0].UseShader();
 		uniformModel = shaderList[0].GetModelLocation();
 		uniformProjection = shaderList[0].GetProjectionLocation();
@@ -697,13 +838,11 @@ int main()
 		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
 		glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
 
-
 		// luz ligada a a cámara de tipo flash
 		//sirve para que en tiempo de ejecución (dentro del while) se cambien propiedades de la luz
 		glm::vec3 lowerLight = camera.getCameraPosition();
 		lowerLight.y -= 0.3f;
 		spotLights[0].SetFlash(lowerLight, camera.getCameraDirection());
-
 
 		//glm::vec3 lightPosition = glm::vec3(0.0f, 0.0f, 0.0f) + glm::vec3(0.0f, 0.0f, 0.1f) * (a1 + a2);
 
@@ -715,6 +854,7 @@ int main()
 
 		glm::mat4 model(1.0);
 		glm::mat4 modelaux(1.0);
+		glm::mat4 modelaux2(1.0);
 		glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
 
 
@@ -723,10 +863,8 @@ int main()
 		model = glm::scale(model, glm::vec3(30.0f, 1.0f, 30.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
-
 		pisoTexture.UseTexture();
 		Material_opaco.UseMaterial(uniformSpecularIntensity, uniformShininess);
-
 		meshList[2]->RenderMesh();
 
 		//****************************************** EDIFICIOS *****************************************
@@ -830,7 +968,6 @@ int main()
 		Bolaboliche.RenderModel();
 
 		//*****************************************************************************************
-
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-240.0f, -7.0f, -215.0f));
@@ -1008,15 +1145,15 @@ int main()
 		Letrero.RenderModel();
 
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(-24.0f, -3.0f, -25.0f));
-		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		model = glm::translate(model, glm::vec3(-24.0f, -2.3f, -25.0f));
+		model = glm::scale(model, glm::vec3(3.0f, -3.0f, 3.0f));
 		model = glm::rotate(model, glm::radians(-80.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		LamparaSuelo.RenderModel();
 
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(28.0f, -3.0f, -25.0f));
-		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		model = glm::translate(model, glm::vec3(28.0f, -2.3f, -25.0f));
+		model = glm::scale(model, glm::vec3(3.0f, -3.0f, 3.0f));
 		model = glm::rotate(model, glm::radians(-120.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		LamparaSuelo.RenderModel();
@@ -1104,28 +1241,29 @@ int main()
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(0.0f, 3.0f, 60.0f));
+		model = glm::rotate(model, glm::radians(angulovaria), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Carrousel.RenderModel();
 
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.2f, 1.0f, 3.2f));
+		model = glm::translate(model, glm::vec3(0.2f, 1.0f + 0.5 * sin(glm::radians(angulovaria * 3)), 3.2f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Caballo1.RenderModel();
 
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(-3.2f, 1.0f, 0.2));
+		model = glm::translate(model, glm::vec3(-3.2f, 1.0f + 0.5 * sin(glm::radians(angulovaria * 3)), 0.2));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Caballo2.RenderModel();
 
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(-0.15f, 1.0f, -3.2));
+		model = glm::translate(model, glm::vec3(-0.15f, 1.0f + 0.5 * sin(glm::radians(angulovaria * 3)), -3.2));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Caballo3.RenderModel();
 
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(3.2f, 1.0f, -0.2));
+		model = glm::translate(model, glm::vec3(3.2f, 1.0f + 0.5 * sin(glm::radians(angulovaria * 3)), -0.2));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Caballo4.RenderModel();
 
@@ -1137,13 +1275,19 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Martillo.RenderModel();
 
+		// Parte Frontal: rota en dirección opuesta a la trasera
+		// Martillo frontal - rota hacia un lado
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-0.6f, 7.1f, 0.0f));
+		model = glm::rotate(model, glm::radians(anguloMartillo), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		MartilloFrontal.RenderModel();
 
+		// Parte Trasera: rota en dirección contraria
+		// Martillo trasero - rota al lado opuesto
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.9f, 7.1f, 0.0f));
+		model = glm::rotate(model, glm::radians(-anguloMartillo), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		MartilloTrasero.RenderModel();
 
@@ -1393,26 +1537,187 @@ int main()
 		Bat.RenderModel();
 
 		//***************************************** PERSONAJES *****************************************
-
+		/********************************************Panico****************************************************/
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(93.0f, 3.0f, 100.0f));
+		model = glm::translate(model, glm::vec3(93.0f, 10.0f, 100.0f));
 		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
 		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		if (mainWindow.getAnimacion_Simp1_P()) {	//Activa animación
+			mueveCuerpoPanico += 0.3f * deltaTime;
+			model = glm::translate(model, glm::vec3(0.0f + 2 * sin(glm::radians(3 * mueveCuerpoPanico)),
+				0.0f,
+				0.0f));
+		}
+		else if (mainWindow.getAnimacion_Simp1_DP() == false) {
+			mueveCuerpoPanico = 0.0f;		//Reinicia el recorrido de la animación
+		}
+
+		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Panico_Mar.RenderModel();
 
-		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(-185.0f, 11.0f, 50.0f));
-		model = glm::scale(model, glm::vec3(20.0f, 20.0f, 20.0f));
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-0.6f, -1.3f, -0.15f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Furia_Yara.RenderModel();
+		PanicoPDer.RenderModel();
 
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(0.5f, -1.3f, -0.15f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PanicoPIzq.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-0.835f, 2.15f, 0.1f));
+		if (mainWindow.getAnimacion_Simp1_P()) {	//Activa animación
+			anguloBrazoP += 0.3f * deltaTime;
+			model = glm::rotate(model, glm::radians(-140.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(25 * sin(glm::radians(10 * anguloBrazoP))), glm::vec3(1.0f, 0.0f, 0.0f));
+		}
+		else if (mainWindow.getAnimacion_Simp1_DP() == false) {
+			anguloBrazoP = 0.0f;		//Reinicia el recorrido de la animación
+		}
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PanicoBDer.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(0.5f, 1.85f, -0.15f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PanicoBizq.RenderModel();
+		/********************************************Furia****************************************************/
+// Variables estáticas para estado previo y ciclo de caminata
+		static bool prevUp = false, prevDown = false;
+		static bool prevLeft = false, prevRight = false;
+		static float walkCycle = 0.0f;
+
+		// Parámetros generales
+		const float stepDist = 0.3f;
+		const float walkCycleStep = glm::radians(45.0f);
+		const float legSwing = 30.0f;
+		const float armSwing = 20.0f;
+		const float stepAng = glm::radians(1.0f);
+
+		// Dentro de tu bucle de update/render:
+		{
+			// 1) Leer teclado
+			bool up = keys[GLFW_KEY_UP];
+			bool down = keys[GLFW_KEY_DOWN];
+			bool left = keys[GLFW_KEY_RIGHT];
+			bool right = keys[GLFW_KEY_LEFT];
+
+			// 2) Vector “forward” según tu yaw actual
+			glm::vec3 forward = glm::vec3(sin(furiaYaw), 0.0f, cos(furiaYaw));
+
+			// 3) Detectar nuevos pasos/giros y actualizar posición + ciclo
+			int stepDir = 0;
+			if (up && !prevUp) { furiaPos += forward * stepDist; stepDir = +1; }
+			if (down && !prevDown) { furiaPos -= forward * stepDist; stepDir = -1; }
+			if (right && !prevRight) { furiaYaw += stepAng;           stepDir = +1; }
+			if (left && !prevLeft) { furiaYaw -= stepAng;           stepDir = +1; }
+
+			if (stepDir != 0) {
+				walkCycle += stepDir * walkCycleStep;
+			}
+
+			// 4) Actualizar los flags prev después de usarlos
+			prevUp = up;
+			prevDown = down;
+			prevLeft = left;
+			prevRight = right;
+
+			// 5) Construir matriz base y render cuerpo
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, furiaPos);
+			model = glm::rotate(model, furiaYaw, glm::vec3(0, 1, 0));
+			model = glm::scale(model, glm::vec3(20.0f, 20.0f, 20.0f));
+
+			// Guardamos la matriz del cuerpo para la jerarquía
+			modelaux = model;
+
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(modelaux));
+			Furia_cuerpo.RenderModel();
+
+			// 6) Calcular ángulos de piernas y brazos
+			float legAngle = sin(walkCycle) * legSwing;
+			float armAngle = sin(walkCycle) * armSwing;
+
+			// 7) Renderizar pierna izquierda
+			model = modelaux;
+			model = glm::translate(model, glm::vec3(0.145f, -0.125f, 0.0f));
+			model = glm::rotate(model, glm::radians(-legAngle), glm::vec3(1, 0, 0));
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			Furia_PiernaIzq.RenderModel();
+
+			// 8) Renderizar pierna derecha
+			model = modelaux;
+			model = glm::translate(model, glm::vec3(-0.143f, -0.128f, 0.0f));
+			model = glm::rotate(model, glm::radians(legAngle), glm::vec3(1, 0, 0));
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			Furia_PiernaDer.RenderModel();
+
+			// 9) Renderizar brazo izquierdo
+			model = modelaux;
+			model = glm::translate(model, glm::vec3(0.275f, 0.085f, 0.0f));
+			model = glm::rotate(model, glm::radians(-armAngle), glm::vec3(1, 0, 0));
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			Furia_BrazoIzq.RenderModel();
+
+			// 10) Renderizar brazo derecho
+			model = modelaux;
+			model = glm::translate(model, glm::vec3(-0.26f, 0.088f, 0.0f));
+			model = glm::rotate(model, glm::radians(armAngle), glm::vec3(1, 0, 0));
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			Furia_BrazoDer.RenderModel();
+		}
+
+
+
+		/********************************************Danny Phantom****************************************************/
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(81.0f, 3.0f, -67.0f));
+		model = glm::translate(model, glm::vec3(81.0f, 16.0f, -67.0f));
 		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		if (mainWindow.getAnimacion_Simp1_DP()) {	//Activa animación
+			vueloDP += 0.3f * deltaTime;
+			model = glm::rotate(model, glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::translate(model, glm::vec3(0.0f + 2 * sin(glm::radians(3 * vueloDP + 90.0f)),
+				5.0f + 3 * sin(glm::radians(3 * vueloDP)),
+				0.0f));
+		}
+		else if (mainWindow.getAnimacion_Simp1_DP() == false) {
+			vueloDP = 0.0f;		//Reinicia el recorrido de la animación
+		}
+		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Dany_Jean.RenderModel();
+		DannyP_cuerpo.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(0.19f, -1.57f, 0.09f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		DannyP_PiernaIzq.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-0.19f, -1.56f, 0.07f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		DannyP_PiernaDer.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(0.78f, 0.57f, -0.255f));
+		if (mainWindow.getAnimacion_Simp1_DP()) {	//Rota arriba brazo izquierdo
+			model = glm::rotate(model, glm::radians(-140.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		}
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		DannyP_BrazoIzq.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-0.84f, 0.52f, -0.23f));
+		if (mainWindow.getAnimacion_Simp1_DP()) {	//Rota arriba brazo derecho
+			model = glm::rotate(model, glm::radians(-140.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		}
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		DannyP_BrazoDer.RenderModel();
+
 
 		//***************************************** PUESTOS *****************************************
 
@@ -1427,7 +1732,7 @@ int main()
 		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Elotes.RenderModel();
+		PuestoElotes.RenderModel();
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-185.0f, 22.0f, 70.0f));
@@ -1440,14 +1745,14 @@ int main()
 		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Algodon.RenderModel();
+		PuestoAlgodon.RenderModel();
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-35.0f, 11.0f, -35.0f));
 		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Dulces.RenderModel();
+		PuestoDulces.RenderModel();
 
 		glDisable(GL_BLEND);
 
@@ -1458,3 +1763,4 @@ int main()
 
 	return 0;
 }
+

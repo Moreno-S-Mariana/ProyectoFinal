@@ -24,7 +24,13 @@ Window::Window(GLint windowWidth, GLint windowHeight)
 	articulacion5 = 0.0f;
 	valor2 = 0.0f;
 	valor3 = 0.0f;
-
+	mov_furia = 0.0f;
+	mov_furia2 = 0.0f;
+	furia_jump = 0.0f;
+	furia_jump_valid = false;
+	banderaAnimacion1_DP = false;	//Animación apagada por defecto 
+	banderaAnimacion1_F = false;	//Animación apagada por defecto 
+	banderaAnimacion1_P = false;	//Animación apagada por defecto 
 
 	for (size_t i = 0; i < 1024; i++)
 	{
@@ -48,7 +54,7 @@ int Window::Initialise()
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 	//CREAR VENTANA
-	mainWindow = glfwCreateWindow(width, height, "Practica XX: Nombre de la práctica", NULL, NULL);
+	mainWindow = glfwCreateWindow(width, height, "Proyecto CGEIHC: Feria", NULL, NULL);
 
 	if (!mainWindow)
 	{
@@ -148,7 +154,7 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
 	if (key == GLFW_KEY_M)
 	{
 		theWindow->articulacion5 -= 0.1;
-		}
+	}
 	if (key == GLFW_KEY_K)
 	{
 		if (theWindow->articulacion3 > -10)
@@ -217,6 +223,67 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
 			//printf("se solto la tecla %d'\n", key);
 		}
 	}
+	//Danny Phantom
+	if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
+		if (theWindow->banderaAnimacion1_DP) {
+			theWindow->banderaAnimacion1_DP = false;		//Apaga si está prendida
+		}
+		else if (theWindow->banderaAnimacion1_DP == false) {
+			theWindow->banderaAnimacion1_DP = true;			//Prende animación si está apagada
+		}
+
+	}
+	//Furia
+	if (key == GLFW_KEY_C && action == GLFW_PRESS) {
+		if (theWindow->banderaAnimacion1_F) {
+			theWindow->banderaAnimacion1_F = false;		//Apaga si está prendida
+		}
+		else if (theWindow->banderaAnimacion1_F == false) {
+			theWindow->banderaAnimacion1_F = true;			//Prende animación si está apagada
+		}
+
+	}
+	//Panico
+	if (key == GLFW_KEY_B && action == GLFW_PRESS) {
+		if (theWindow->banderaAnimacion1_P) {
+			theWindow->banderaAnimacion1_P = false;		//Apaga si está prendida
+		}
+		else if (theWindow->banderaAnimacion1_P == false) {
+			theWindow->banderaAnimacion1_P = true;			//Prende animación si está apagada
+		}
+
+	}
+
+	//Furia
+	if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
+		theWindow->mov_furia +=1 ;
+	}
+	else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
+		theWindow->mov_furia -= 1;
+	}
+	
+	if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
+		theWindow->mov_furia2 += 1;
+	}
+	else if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
+		theWindow->mov_furia2 -= 1;
+	}
+
+	if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
+		if (!theWindow->furia_jump_valid) {
+			// Primera pulsación: salto hacia atrás (-1) y activamos la bandera
+			theWindow->furia_jump = -0.1f;
+			theWindow->furia_jump_valid = true;
+		}
+		else {
+			// Siguiente pulsación: cancelamos el salto y desactivamos la bandera
+			theWindow->furia_jump = 0.0f;
+			theWindow->furia_jump_valid = false;
+		}
+	}
+
+
+
 }
 
 void Window::ManejaMouse(GLFWwindow* window, double xPos, double yPos)
