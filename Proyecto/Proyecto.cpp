@@ -71,6 +71,7 @@ const float walkCycleStep = glm::radians(45.0f);
 const float legSwing = 30.0f;
 const float armSwing = 20.0f;
 const float stepAng = glm::radians(1.0f);
+const float velocidadGiroFuria = glm::radians(2.0f);  
 //***************************************** Variable animación de Panico*****************************************
 GLfloat anguloBrazoP = 0.0f;
 GLfloat mueveCuerpoPanico = 0.0f;
@@ -603,17 +604,17 @@ int main()
 	unsigned int pointLightCount_ARRAY1 = 0;
 	// Luz 1
 	pointLights1[0] = PointLight(
-		1.0f, 1.0f, 1.0f,   // color blanco
-		4.0f, 30.0f,        // ambientIntensity = 1.5f, diffuseIntensity = 6.0f
+		1.0f, 1.0f, 1.0f,   
+		4.0f, 30.0f,        
 		160.0f, 60.0f, -185.0f,
-		0.0f, 0.05f, 0.3f   // atenuación más lenta para que llegue más lejos
+		0.0f, 0.05f, 0.3f   
 	);
 	pointLightCount_ARRAY1++;
 
 	// Luz 2
 	pointLights1[1] = PointLight(
 		1.0f, 1.0f, 1.0f,
-		4.0f, 30.0f,                 // ambientIntensity = 1.5f, diffuseIntensity = 8.0f
+		4.0f, 30.0f,                 
 		160.0f, 60.0f, 185.0f,
 		0.0f, 0.05f, 0.3f
 	);
@@ -622,7 +623,7 @@ int main()
 	// Luz 3
 	pointLights1[2] = PointLight(
 		1.0f, 1.0f, 1.0f,
-		4.0f, 30.0f,                 // ambientIntensity = 1.5f, diffuseIntensity = 6.0f
+		4.0f, 30.0f,                 
 		-160.0f, 60.0f, -185.0f,
 		0.0f, 0.05f, 0.3f
 	);
@@ -631,17 +632,17 @@ int main()
 	// Luz 4
 	pointLights1[3] = PointLight(
 		1.0f, 1.0f, 1.0f,
-		4.0f, 30.0f,                 // ambientIntensity = 1.5f, diffuseIntensity = 8.0f
+		4.0f, 30.0f,                
 		-160.0f, 60.0f, 185.0f,
 		0.0f, 0.05f, 0.3f
 	);
 	pointLightCount_ARRAY1++;
 
 	unsigned int pointLightCount_ARRAY2 = 0;
-	pointLights2[0] = PointLight(1.0f, 0.0f, 0.0f,   // color blanco
-		4.0f, 30.0f,				// ambientIntensity = 1.5f, diffuseIntensity = 6.0f
+	pointLights2[0] = PointLight(1.0f, 0.0f, 0.0f,  
+		4.0f, 30.0f,				
 		0.0f, 20.0f, 0.0f,
-		0.0f, 0.05f, 0.3f			// atenuación más lenta para que llegue más lejos
+		0.0f, 0.05f, 0.3f		
 	);
 	pointLightCount_ARRAY2++;
 	//*************************************************************************************************************************************************
@@ -649,9 +650,9 @@ int main()
 	unsigned int spotLightCount = 0;
 	// Lámpara izquierda
 	spotLights[0] = SpotLight(1.0f, 0.843f, 0.6f,
-		10.0f, 80.0f,			// aIntensity y dIntensity
-		-28.0f, 9.0f, 93.0f,   // Posición
-		1.0f, 0.0f, 1.0f,      // Dirección
+		10.0f, 80.0f,			
+		-28.0f, 9.0f, 93.0f,   
+		1.0f, 0.0f, 1.0f,      
 		1.0f, 0.5f, 0.1f,
 		55.0f
 	);
@@ -669,21 +670,21 @@ int main()
 
 	//Carrusel
 	spotLights[2] = SpotLight(1.0f, 0.843f, 0.6f,
-		10.0f, 80.0f,             // Intensidades: ambiente y difusa
+		10.0f, 80.0f,             
 		0.0f, 40.0f, 60.0f,
-		0.0f, -1.0f, 0.0f,       // Dirección (apunta hacia abajo)
-		1.0f, 0.09f, 0.032f,     // Atenuación
-		75.0f                    // Ángulo de corte (grado de apertura)
+		0.0f, -1.0f, 0.0f,       
+		1.0f, 0.09f, 0.032f,     
+		75.0f                    
 	);
 	spotLightCount++;
 
 	//Martillo
-	spotLights[3] = SpotLight(1.0f, 0.843f, 0.6f,  //amarillo cálido
-		10.0f, 80.0f,             // Intensidades: ambiente y difusa
+	spotLights[3] = SpotLight(1.0f, 0.843f, 0.6f, 
+		10.0f, 80.0f,             
 		0.0f, 60.0f, -50.0f,
-		0.0f, -1.0f, 0.0f,       // Dirección (apunta hacia abajo)
-		1.0f, 0.09f, 0.032f,     // Atenuación
-		80.0f                    // Ángulo de corte (grado de apertura)
+		0.0f, -1.0f, 0.0f,       
+		1.0f, 0.09f, 0.032f,     
+		80.0f                   
 	);
 	spotLightCount++;
 
@@ -691,41 +692,41 @@ int main()
 	
 	//Dardo y globos
 	spotLights2[0] = SpotLight(0.529f, 0.808f, 0.922f, //azul
-		10.0f, 80.0f,             // Intensidades: ambiente y difusa
+		10.0f, 80.0f,             
 		-80.0f, 40.0f, 108.0f,
-		0.0f, -1.0f, 0.0f,       // Dirección (apunta hacia abajo)
-		1.0f, 0.09f, 0.032f,     // Atenuación
-		90.0f                    // Ángulo de corte (grado de apertura)
+		0.0f, -1.0f, 0.0f,       
+		1.0f, 0.09f, 0.032f,     
+		90.0f                   
 	);
 	spotLightCount2++;
 	
 	//Hachas
 	spotLights2[1] = SpotLight(0.133f, 0.545f, 0.133f,  //verde
-		10.0f, 80.0f,             // Intensidades: ambiente y difusa
+		10.0f, 80.0f,             
 		70.0f, 45.0f, -90.0f,
-		0.0f, -1.0f, 0.0f,       // Dirección (apunta hacia abajo)
-		1.0f, 0.09f, 0.032f,     // Atenuación
-		80.0f                    // Ángulo de corte (grado de apertura)
+		0.0f, -1.0f, 0.0f,     
+		1.0f, 0.09f, 0.032f,     
+		80.0f                    
 	);
 	spotLightCount2++;
 
 	//Topo
 	spotLights2[2] = SpotLight(0.502f, 0.0f, 0.502f,  //morado
-		10.0f, 80.0f,             // Intensidades: ambiente y difusa
+		10.0f, 80.0f,             
 		-55.0f, 50.0f, -90.0f,
-		0.0f, -1.0f, 0.0f,       // Dirección (apunta hacia abajo)
-		1.0f, 0.09f, 0.032f,     // Atenuación
-		80.0f                    // Ángulo de corte (grado de apertura)
+		0.0f, -1.0f, 0.0f,       
+		1.0f, 0.09f, 0.032f,     
+		80.0f                   
 	);
 	spotLightCount2++;
 
 	//Dados
 	spotLights2[3] = SpotLight(1.0f, 1.0f, 0.0f,  
-		10.0f, 80.0f,             // Intensidades: ambiente y difusa
+		10.0f, 80.0f,             
 		85.0f, 30.0f, 100.0f,
-		0.0f, -1.0f, 0.0f,       // Dirección (apunta hacia abajo)
-		1.0f, 0.09f, 0.032f,     // Atenuación
-		55.0f                    // Ángulo de corte (grado de apertura)
+		0.0f, -1.0f, 0.0f,       
+		1.0f, 0.09f, 0.032f,     
+		55.0f                    
 	);
 	spotLightCount2++;
 
@@ -815,7 +816,6 @@ int main()
 		
 		intensidad = 0.1f + 0.2f * (0.5f + 0.5f * sin(lastTime * velocidadDN));
 		mainLight.UpdateLightIntensity(intensidad, intensidad);
-		//mainLight.UpdateLightIntensity(0.3, 0.3);	//Cambiar al final 
 
 		//Recibir eventos del usuario
 		glfwPollEvents();
@@ -832,6 +832,14 @@ int main()
 		if (keys[GLFW_KEY_4]) {
 			currentCameraMode = ATTRACTIONS;
 			attractionInitialized = false;  // Reinicia bandera de inicialización
+		}
+
+		// Control de giro de Furia con las flechas izquierda/derecha
+		if (keys[GLFW_KEY_LEFT]) {
+			furiaYaw -= velocidadGiroFuria * deltaTime;
+		}
+		if (keys[GLFW_KEY_RIGHT]) {
+			furiaYaw += velocidadGiroFuria * deltaTime;
 		}
 
 		static double lastSwitchTime = 0.0;
@@ -894,9 +902,8 @@ int main()
 			glm::vec3 up = glm::vec3(0.0f, 0.0f, -1.0f); // mantener eje horizontal como 'arriba'
 
 			view = glm::lookAt(pos, target, up);
+			break;
 		}
-		break;
-
 		case ATTRACTIONS:
 			if (!attractionInitialized) {
 				glm::vec3 attractionPos = spotLights2[attractionIndex].GetPosition();
@@ -970,14 +977,6 @@ int main()
 		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
 		glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
 
-		// luz ligada a a cámara de tipo flash
-		//sirve para que en tiempo de ejecución (dentro del while) se cambien propiedades de la luz
-		//glm::vec3 lowerLight = camera.getCameraPosition();
-		//lowerLight.y -= 0.3f;
-		//spotLights[0].SetFlash(lowerLight, camera.getCameraDirection());
-
-		//glm::vec3 lightPosition = glm::vec3(0.0f, 0.0f, 0.0f) + glm::vec3(0.0f, 0.0f, 0.1f) * (a1 + a2);
-
 		shaderList[0].SetDirectionalLight(&mainLight);							//Habilita luz principal
 		
 		//Arreglo para los arreglos de luces
@@ -1022,10 +1021,6 @@ int main()
 		// ---------- Activar luces finales
 		shaderList[0].SetSpotLights(lucesActivas, totalLucesActivas);
 		
-		//shaderList[0].SetSpotLights(spotLights, spotLightCount);				//Habilita las luces del spotlight
-		//shaderList[0].SetSpotLights(spotLights2, spotLightCount2);
-		//shaderList[0].SetSpotLights(spotLights3, spotLightCount3);
-
 		//0.3 dia
 		//0.1 noche
 		if (intensidad < 0.175f) {
@@ -1039,7 +1034,6 @@ int main()
 		glm::mat4 modelaux(1.0);
 		glm::mat4 modelaux2(1.0);
 		glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
-
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
@@ -1907,19 +1901,27 @@ int main()
 			glm::vec3 forward = glm::vec3(sin(furiaYaw), 0.0f, cos(furiaYaw));
 
 			int stepDir = 0;
-			if (up && !prevUp) { furiaPos += forward * stepDist; stepDir = +1; }
-			if (down && !prevDown) { furiaPos -= forward * stepDist; stepDir = -1; }
-			if (right && !prevRight) { furiaYaw += stepAng;           stepDir = +1; }
-			if (left && !prevLeft) { furiaYaw -= stepAng;           stepDir = +1; }
 
-			if (stepDir != 0) {
-				walkCycle += stepDir * walkCycleStep;
+			if (up) {
+				furiaPos += forward * stepDist * deltaTime * 0.5f;
+				stepDir = +1;
+			}
+			if (down) {
+				furiaPos -= forward * stepDist * deltaTime * 0.5f;
+				stepDir = -1;
+			}
+			if (right) {
+				furiaYaw += velocidadGiroFuria * deltaTime;
+				stepDir = +1;
+			}
+			if (left) {
+				furiaYaw -= velocidadGiroFuria * deltaTime;
+				stepDir = +1;
 			}
 
-			prevUp = up;
-			prevDown = down;
-			prevLeft = left;
-			prevRight = right;
+			if (stepDir != 0) {
+				walkCycle += stepDir * walkCycleStep * deltaTime * 5.0f;
+			}
 
 			float legAngle = sin(walkCycle) * legSwing;
 			float armAngle = sin(walkCycle) * armSwing;
@@ -1931,7 +1933,6 @@ int main()
 			modelaux = model;
 
 			if (currentCameraMode != FIRST_PERSON) {
-				// Dibujar cuerpo completo solo si no es 1ra persona
 				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(modelaux));
 				Furia_cuerpo.RenderModel();
 
@@ -1954,9 +1955,8 @@ int main()
 				Furia_BrazoIzq.RenderModel();
 			}
 
-			// Dibujar brazo derecho (siempre)
+			// Brazo derecho visible siempre
 			if (currentCameraMode == FIRST_PERSON) {
-				// En 1ra persona: brazo ajustado al hombro del jugador
 				model = glm::mat4(1.0f);
 				model = glm::translate(model, camera.getCameraPosition() + glm::vec3(0.3f, -0.2f, -0.5f));
 				model = glm::rotate(model, glm::radians(armAngle), glm::vec3(1, 0, 0));
