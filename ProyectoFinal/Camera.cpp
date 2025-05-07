@@ -77,11 +77,9 @@ void Camera::activateAutoFollow() {
 void Camera::keyControl(bool* keys, GLfloat deltaTime) {
     static bool prevUp = false;
     static bool prevDown = false;
-    static bool prevLeft = false;
-    static bool prevRight = false;
 
     GLfloat velocity = moveSpeed * deltaTime;
-    const float stepAngle = glm::radians(1.0f); // 1 grado por pulsación
+    GLfloat angVel = turnSpeed * deltaTime;
 
     if (followMode && targetPosPtr && targetYawPtr) {
         glm::vec3 forwardDir = glm::normalize(glm::vec3(sin(*targetYawPtr), 0.0f, cos(*targetYawPtr)));
@@ -96,15 +94,12 @@ void Camera::keyControl(bool* keys, GLfloat deltaTime) {
         }
         prevDown = keys[GLFW_KEY_DOWN];
 
-        if (keys[GLFW_KEY_LEFT] && !prevLeft) {
-            *targetYawPtr -= stepAngle;
+        if (keys[GLFW_KEY_LEFT]) {
+            *targetYawPtr -= angVel;
         }
-        prevLeft = keys[GLFW_KEY_LEFT];
-
-        if (keys[GLFW_KEY_RIGHT] && !prevRight) {
-            *targetYawPtr += stepAngle;
+        if (keys[GLFW_KEY_RIGHT]) {
+            *targetYawPtr += angVel;
         }
-        prevRight = keys[GLFW_KEY_RIGHT];
 
         syncWithTarget();
     }
