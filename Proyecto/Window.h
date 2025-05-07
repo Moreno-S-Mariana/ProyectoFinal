@@ -23,7 +23,7 @@ public:
 	GLfloat getrotaz() { return rotaz; }
 	GLfloat getarticulacion1() { return articulacion1; }
 	GLfloat getarticulacion2() { return articulacion2; }
-	
+
 	GLfloat getarticulacion3() { return articulacion3; }
 	GLfloat getvalor() { return valor; }
 	GLfloat getvalor2() { return valor2; }
@@ -43,7 +43,7 @@ public:
 private:
 	GLFWwindow* mainWindow;
 	GLint width, height;
-	GLfloat rotax, rotay, rotaz, articulacion1, articulacion2, articulacion3,valor,articulacion4, articulacion5,valor2 , valor3;
+	GLfloat rotax, rotay, rotaz, articulacion1, articulacion2, articulacion3, valor, articulacion4, articulacion5, valor2, valor3;
 	bool banderaAnimacion1_DP, banderaAnimacion1_F, banderaAnimacion1_P;
 	bool keys[1024];
 	GLint bufferWidth, bufferHeight;

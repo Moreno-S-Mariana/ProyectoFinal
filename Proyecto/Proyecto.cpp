@@ -677,7 +677,7 @@ int main()
 	spotLightCount++;
 
 	unsigned int spotLightCount2 = 0;
-
+	
 	//Dardo y globos
 	spotLights2[0] = SpotLight(0.529f, 0.808f, 0.922f, //azul
 		10.0f, 80.0f,             // Intensidades: ambiente y difusa
@@ -687,7 +687,7 @@ int main()
 		90.0f                    // Ángulo de corte (grado de apertura)
 	);
 	spotLightCount2++;
-
+	
 	//Hachas
 	spotLights2[1] = SpotLight(0.133f, 0.545f, 0.133f,  //verde
 		10.0f, 80.0f,             // Intensidades: ambiente y difusa
@@ -709,7 +709,7 @@ int main()
 	spotLightCount2++;
 
 	//Dados
-	spotLights2[3] = SpotLight(1.0f, 1.0f, 0.0f,
+	spotLights2[3] = SpotLight(1.0f, 1.0f, 0.0f,  
 		10.0f, 80.0f,             // Intensidades: ambiente y difusa
 		85.0f, 30.0f, 100.0f,
 		0.0f, -1.0f, 0.0f,       // Dirección (apunta hacia abajo)
@@ -719,12 +719,12 @@ int main()
 	spotLightCount2++;
 
 	unsigned int spotLightCount3 = 0;
-
+	
 	//Luz boliche 
 	spotLights3[0] = SpotLight(0.6f, 0.0f, 0.8f,
-		10.0f, 80.0f,
-		-80.0f, 9.0f, 250.0f,
-		1.0f, 0.0f, 0.0f,
+		10.0f, 80.0f,			
+		-80.0f, 9.0f, 250.0f,   
+		1.0f, 0.0f, 0.0f,      
 		1.0f, 0.09f, 0.032f,
 		70.0f
 	);
@@ -749,7 +749,7 @@ int main()
 		70.0f
 	);
 	spotLightCount3++;
-
+	
 	//Luz boliche 4
 	spotLights3[3] = SpotLight(1.0f, 0.0f, 0.5f,
 		10.0f, 80.0f,
@@ -889,7 +889,7 @@ int main()
 		//glm::vec3 lightPosition = glm::vec3(0.0f, 0.0f, 0.0f) + glm::vec3(0.0f, 0.0f, 0.1f) * (a1 + a2);
 
 		shaderList[0].SetDirectionalLight(&mainLight);							//Habilita luz principal
-
+		
 		//Arreglo para los arreglos de luces
 		// Obtenemos posición de la cámara
 		glm::vec3 camPos(camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
@@ -931,7 +931,7 @@ int main()
 
 		// ---------- Activar luces finales
 		shaderList[0].SetSpotLights(lucesActivas, totalLucesActivas);
-
+		
 		//shaderList[0].SetSpotLights(spotLights, spotLightCount);				//Habilita las luces del spotlight
 		//shaderList[0].SetSpotLights(spotLights2, spotLightCount2);
 		//shaderList[0].SetSpotLights(spotLights3, spotLightCount3);

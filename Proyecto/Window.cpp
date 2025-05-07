@@ -150,7 +150,7 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
 	if (key == GLFW_KEY_M)
 	{
 		theWindow->articulacion5 -= 0.1;
-		}
+	}
 	if (key == GLFW_KEY_K)
 	{
 		if (theWindow->articulacion3 > -10)
@@ -227,12 +227,12 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
 		else if (theWindow->banderaAnimacion1_DP == false) {
 			theWindow->banderaAnimacion1_DP = true;			//Prende animación si está apagada
 		}
-		
+
 	}
 	//Furia
 	if (key == GLFW_KEY_C && action == GLFW_PRESS) {
 		if (theWindow->banderaAnimacion1_F) {
-			theWindow->banderaAnimacion1_F= false;		//Apaga si está prendida
+			theWindow->banderaAnimacion1_F = false;		//Apaga si está prendida
 		}
 		else if (theWindow->banderaAnimacion1_F == false) {
 			theWindow->banderaAnimacion1_F = true;			//Prende animación si está apagada
