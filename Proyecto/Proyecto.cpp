@@ -173,6 +173,21 @@ Model DannyP_BrazoDer;
 Model DannyP_PiernaIzq;
 Model DannyP_PiernaDer;
 
+//***************************************** NPC´S  *****************************************
+//***************************************** Tristeza*****************************************
+Model Tristeza;
+Model BrazoIzq_T;
+Model BrazoDer_T;
+Model PiernaIzq_T;
+Model PiernaDer_T;
+//***************************************** Alegría*****************************************
+Model Alegria;
+Model BrazoIzq_A;
+Model BrazoDer_A;
+Model PiernaIzq_A;
+Model PiernaDer_A;
+
+
 //***************************************** COMIDA *****************************************
 
 Model PuestoElotes;
@@ -531,6 +546,29 @@ int main()
 	DannyP_PiernaDer = Model();
 	DannyP_PiernaDer.LoadModel("Models/Personajes/PiernaDer_DP.obj");
 
+	Tristeza = Model();
+	Tristeza.LoadModel("Models/Personajes/cuerpo_Tristeza.obj");
+	BrazoDer_T = Model();
+	BrazoDer_T.LoadModel("Models/Personajes/BrazoDer_T.obj");
+	BrazoIzq_T= Model();
+	BrazoIzq_T.LoadModel("Models/Personajes/BrazoIzq_T.obj");
+	PiernaDer_T = Model();
+	PiernaDer_T.LoadModel("Models/Personajes/PiernaDer_T.obj");
+	PiernaIzq_T= Model();
+	PiernaIzq_T.LoadModel("Models/Personajes/PiernaIzq_T.obj");
+
+	Alegria = Model();
+	Alegria.LoadModel("Models/Personajes/Cuerpo_A.obj");
+	BrazoDer_A = Model();
+	BrazoDer_A.LoadModel("Models/Personajes/BrazoDer_A.obj");
+	BrazoIzq_A = Model();
+	BrazoIzq_A.LoadModel("Models/Personajes/BrazoIzq_A.obj");
+	PiernaDer_A = Model();
+	PiernaDer_A.LoadModel("Models/Personajes/PiernaDer_A.obj");
+	PiernaIzq_A = Model();
+	PiernaIzq_A.LoadModel("Models/Personajes/PiernaIzq_A.obj");
+
+
 	//***************************************** PUESTOS DE COMIDA ****************************************
 
 	PuestoElotes = Model();
@@ -802,10 +840,10 @@ int main()
 		float blendFactor = 0.0f;
 
 		//0.3->Dia		0.1->Noche
-		/**/
+		/*
 		intensidad = 0.1f + 0.2f * (0.5f + 0.5f * sin(lastTime * velocidadDN));
-		mainLight.UpdateLightIntensity(intensidad, intensidad);
-		//mainLight.UpdateLightIntensity(0.3, 0.3);	//Cambiar al final 
+		mainLight.UpdateLightIntensity(intensidad, intensidad);*/
+		mainLight.UpdateLightIntensity(0.3, 0.3);	//Cambiar al final 
 
 		//Recibir eventos del usuario
 		glfwPollEvents();
@@ -1925,11 +1963,42 @@ int main()
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(35.0f, 3.0f, 35.0f));
+		modelaux = model;
 		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		PuestoElotes.RenderModel();
 
+		//******************************** NPC Alegría *************************************************************
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(0.0f, 11.0f, 10.0f));
+		model = glm::scale(model, glm::vec3(0.6f, 0.6f, 0.6f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelaux = model;
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Alegria.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(2.5f, -6.0f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PiernaIzq_A.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-2.2f, -6.0f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PiernaIzq_A.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(4.0f, 6.8f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		BrazoIzq_A.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-3.8f, 6.8f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		BrazoDer_A.RenderModel();
+
+		//*************************************************************************************************
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-185.0f, 22.0f, 70.0f));
 		model = glm::scale(model, glm::vec3(12.0f, 12.0f, 12.0f));
@@ -1944,11 +2013,44 @@ int main()
 		PuestoAlgodon.RenderModel();
 
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(-35.0f, 11.0f, -35.0f));
+		model = glm::translate(model, glm::vec3(-35.0f, 12.0f, -35.0f));
+		modelaux = model;
 		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		PuestoDulces.RenderModel();
+
+		//******************************** NPC Tristeza *************************************************************
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-10.0f, -5.5f, 10.0f));
+		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
+		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelaux = model;
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Tristeza.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(1.92f, -4.3f,0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PiernaIzq_T.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-3.1f, -4.3f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PiernaDer_T.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-7.0f, 4.9f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		BrazoDer_T.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(5.7f, 4.9f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		BrazoIzq_T.RenderModel();
+		
+		//*************************************************************************************************
+
 
 		glDisable(GL_BLEND);
 
