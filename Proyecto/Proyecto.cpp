@@ -1920,7 +1920,7 @@ int main()
 			}
 
 			if (stepDir != 0) {
-				walkCycle += stepDir * walkCycleStep * deltaTime * 5.0f;
+				walkCycle += stepDir * walkCycleStep * deltaTime * 0.2f;
 			}
 
 			float legAngle = sin(walkCycle) * legSwing;
