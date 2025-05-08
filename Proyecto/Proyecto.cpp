@@ -186,7 +186,30 @@ Model BrazoIzq_A;
 Model BrazoDer_A;
 Model PiernaIzq_A;
 Model PiernaDer_A;
-
+//***************************************** Pena *****************************************
+Model Pena;
+Model BrazoIzq_Pena;
+Model BrazoDer_Pena;
+Model PiernaIzq_Pena;
+Model PiernaDer_Pena;
+//***************************************** Hercules *****************************************
+Model Hercules;
+Model BrazoIzq_Hercules;
+Model BrazoDer_Hercules;
+Model PiernaIzq_Hercules;
+Model PiernaDer_Hercules;
+//***************************************** Ember *****************************************
+Model Ember;
+Model BrazoIzq_Ember;
+Model BrazoDer_Ember;
+Model PiernaIzq_Ember;
+Model PiernaDer_Ember;
+//***************************************** Sam *****************************************
+Model Sam;
+Model BrazoIzq_Sam;
+Model BrazoDer_Sam;
+Model PiernaIzq_Sam;
+Model PiernaDer_Ember;
 
 //***************************************** COMIDA *****************************************
 
@@ -567,6 +590,29 @@ int main()
 	PiernaDer_A.LoadModel("Models/Personajes/PiernaDer_A.obj");
 	PiernaIzq_A = Model();
 	PiernaIzq_A.LoadModel("Models/Personajes/PiernaIzq_A.obj");
+
+	Pena= Model();
+	Pena.LoadModel("Models/Personajes/CuerpoPena.obj");
+	BrazoDer_Pena = Model();
+	BrazoDer_Pena.LoadModel("Models/Personajes/BrazoDer_Pena.obj");
+	BrazoIzq_Pena = Model();
+	BrazoIzq_Pena.LoadModel("Models/Personajes/BrazoIzq_Pena.obj");
+	PiernaDer_Pena = Model();
+	PiernaDer_Pena.LoadModel("Models/Personajes/PiernaDer_Pena.obj");
+	PiernaIzq_Pena = Model();
+	PiernaIzq_Pena.LoadModel("Models/Personajes/PiernaIzq_Pena.obj");
+
+	Hercules = Model();
+	Hercules.LoadModel("Models/Personajes/CuerpoHercules.obj");
+	BrazoDer_Hercules = Model();
+	BrazoDer_Hercules.LoadModel("Models/Personajes/BrazoDer_H.obj");
+	BrazoIzq_Hercules = Model();
+	BrazoIzq_Hercules.LoadModel("Models/Personajes/BrazoIzq_H.obj");
+	PiernaDer_Hercules = Model();
+	PiernaDer_Hercules.LoadModel("Models/Personajes/PiernaDer_H.obj");
+	PiernaIzq_Hercules = Model();
+	PiernaIzq_Hercules.LoadModel("Models/Personajes/PiernaIzq_H.obj");
+
 
 
 	//***************************************** PUESTOS DE COMIDA ****************************************
@@ -1031,7 +1077,7 @@ int main()
 
 		//************************Boliche**********************************************************
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, -0.1f, 0.0f));
 		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Boliche.RenderModel();
@@ -1097,6 +1143,34 @@ int main()
 		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Bolaboliche.RenderModel();
+		
+		//************************* NPC Pena ***************************************************************
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(0.2f, 1.75f, -3.0f));
+		modelaux2 = model;
+		//model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Pena.RenderModel();
+
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(0.18f, -0.21f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PiernaIzq_Pena.RenderModel();
+		
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(-0.16f, -0.21f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PiernaDer_Pena.RenderModel();
+
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(-0.25f, 0.11f, -0.04f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		BrazoDer_Pena.RenderModel();
+
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(0.25f, 0.1f, -0.04f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		BrazoIzq_Pena.RenderModel();
 
 		//************************Mesa cobro moneda boliche************************************************ 
 		model = modelaux;
@@ -1597,6 +1671,34 @@ int main()
 		model = glm::rotate(model, glm::radians(-135.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Dardos.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-15.0f, 10.8f, -30.0f));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		model = glm::rotate(model, glm::radians(135.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelaux = model;
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Hercules.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(0.21f, -0.5f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PiernaIzq_Hercules.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-0.21f, -0.5f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PiernaDer_Hercules.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(1.0f, 0.98f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		BrazoIzq_Hercules.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-1.03f, 0.97f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		BrazoDer_Hercules.RenderModel();
 
 		//************************ Mesa cobro moneda Dardos ********************************************** 
 		model = modelaux2;
