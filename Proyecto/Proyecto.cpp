@@ -67,6 +67,10 @@ GLfloat anguloBrazoF = 0.0f;
 //***************************************** Variable animación de Panico*****************************************
 GLfloat anguloBrazoP = 0.0f;
 GLfloat mueveCuerpoPanico = 0.0f;
+//***************************************** Variable animación de Hercules*****************************************
+GLfloat anguloBrazoEspada = 0.0f;
+
+
 
 
 Window mainWindow;
@@ -1691,7 +1695,7 @@ int main()
 		model = glm::rotate(model, glm::radians(-135.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Dardos.RenderModel();
-
+		//******************************** NPC Hercules *************************************************************
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-15.0f, 10.8f, -30.0f));
 		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
@@ -1717,6 +1721,11 @@ int main()
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-1.03f, 0.97f, 0.0f));
+		//Animación de espadazos
+		model = glm::rotate(model, glm::radians(-130.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(50 * sin(glm::radians(10 * anguloBrazoEspada))), glm::vec3(1.0f, -1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		BrazoDer_Hercules.RenderModel();
 
