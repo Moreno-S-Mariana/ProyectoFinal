@@ -209,7 +209,7 @@ Model Sam;
 Model BrazoIzq_Sam;
 Model BrazoDer_Sam;
 Model PiernaIzq_Sam;
-Model PiernaDer_Ember;
+Model PiernaDer_Sam;
 
 //***************************************** COMIDA *****************************************
 
@@ -613,7 +613,27 @@ int main()
 	PiernaIzq_Hercules = Model();
 	PiernaIzq_Hercules.LoadModel("Models/Personajes/PiernaIzq_H.obj");
 
+	Ember = Model();
+	Ember.LoadModel("Models/Personajes/cuerpo_Ember.obj");
+	BrazoDer_Ember = Model();
+	BrazoDer_Ember.LoadModel("Models/Personajes/BrazoDer_Ember.obj");
+	BrazoIzq_Ember = Model();
+	BrazoIzq_Ember.LoadModel("Models/Personajes/BrazoIzq_Ember.obj");
+	PiernaDer_Ember = Model();
+	PiernaDer_Ember.LoadModel("Models/Personajes/PiernaDer_Ember.obj");
+	PiernaIzq_Ember = Model();
+	PiernaIzq_Ember.LoadModel("Models/Personajes/PiernaIzq_Ember.obj");
 
+	Sam = Model();
+	Sam.LoadModel("Models/Personajes/Cuerpo_Sam.obj");
+	BrazoDer_Sam = Model();
+	BrazoDer_Sam.LoadModel("Models/Personajes/BrazoDer_Sam.obj");
+	BrazoIzq_Sam = Model();
+	BrazoIzq_Sam.LoadModel("Models/Personajes/BrazoIzq_Sam.obj");
+	PiernaDer_Sam = Model();
+	PiernaDer_Sam.LoadModel("Models/Personajes/PiernaDer_Sam.obj");
+	PiernaIzq_Sam = Model();
+	PiernaIzq_Sam.LoadModel("Models/Personajes/PiernaIzq_Sam.obj");
 
 	//***************************************** PUESTOS DE COMIDA ****************************************
 
@@ -1756,6 +1776,34 @@ int main()
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Mazo.RenderModel();
+		/**/
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(15.0f, 11.8f, -18.0f));
+		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
+		modelaux = model;
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Ember.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(0.05f, -0.13f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PiernaIzq_Ember.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-0.05f, -0.13f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PiernaDer_Ember.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(0.085f, 0.227f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		BrazoIzq_Ember.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-0.09f, 0.225f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		BrazoDer_Ember.RenderModel();
 
 		//************************ Mesa cobro moneda topos ********************************************** 
 		model = modelaux2;
