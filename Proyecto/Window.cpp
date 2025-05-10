@@ -4,8 +4,7 @@ Window::Window()
 {
 	width = 800;
 	height = 600;
-	animacionTopos = false;
-	furiaTieneMazo = false;  // NUEVO
+
 
 	for (size_t i = 0; i < 1024; i++)
 		keys[i] = 0;
@@ -18,8 +17,7 @@ Window::Window(GLint windowWidth, GLint windowHeight)
 	rotax = rotay = rotaz = 0.0f;
 	banderaAnimacion1_DP = false;
 	banderaAnimacion1_P = false;
-	animacionTopos = false;
-	furiaTieneMazo = false;  // NUEVO
+	dadosGirando = false;
 
 	for (size_t i = 0; i < 1024; i++)
 		keys[i] = 0;
@@ -110,14 +108,12 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
 	if (key == GLFW_KEY_B && action == GLFW_PRESS)
 		theWindow->banderaAnimacion1_P = !theWindow->banderaAnimacion1_P;
 
-	// ACTIVAR animación de topos
-	if (key == GLFW_KEY_T && action == GLFW_PRESS)
-		theWindow->animacionTopos = true;
-
-	// DESACTIVAR animación de topos
-	if (key == GLFW_KEY_Y && action == GLFW_PRESS)
-		theWindow->animacionTopos = false;
-
+	//Dados : girar mientras se mantiene presionada H
+	if (key == GLFW_KEY_H && action == GLFW_PRESS)
+		theWindow->dadosGirando = true;
+	if (key == GLFW_KEY_H && action == GLFW_RELEASE)
+		theWindow->dadosGirando = false;
+	//*************************************************//
 	if (key >= 0 && key < 1024)
 	{
 		if (action == GLFW_PRESS)
