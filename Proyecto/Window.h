@@ -41,6 +41,12 @@ public:
     //Animacion monedas
     GLfloat getMonedaEnElAire() { return monedaEnElAire; }
 
+    // Lanzamiento de dardo (tecla G)
+    bool getDardoLanzado() const { return dardoLanzado; }
+    void activarDardoLanzado() { dardoLanzado = true; }
+    void desactivarDardoLanzado() { dardoLanzado = false; }
+
+
     // Mazo de Furia
     bool getFuriaTieneMazo() const { return furiaTieneMazo; }
     void soltarMazo() { furiaTieneMazo = false; } // opcional
@@ -58,6 +64,7 @@ private:
     bool furiaTieneMazo; // NUEVO
     bool dadosGirando;
     bool monedaEnElAire;
+    bool dardoLanzado;
 
     bool keys[1024];
     GLint bufferWidth, bufferHeight;

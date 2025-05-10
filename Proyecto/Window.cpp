@@ -20,6 +20,7 @@ Window::Window(GLint windowWidth, GLint windowHeight)
 	banderaAnimacion1_P = false;
 	animacionTopos = false;
 	furiaTieneMazo = false;			// NUEVO
+	dardoLanzado = false;			// NUEVO
 	banderaLuces = false;			//Apagado por defecto
 	dadosGirando = false;
 	monedaEnElAire = false;
@@ -132,7 +133,6 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
 		theWindow->dadosGirando = false;
 
 	//Monedas
-	//Monedas
 	if (key == GLFW_KEY_K && action == GLFW_PRESS) {
 		theWindow->monedaEnElAire = true;
 	}
@@ -140,6 +140,13 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
 		theWindow->monedaEnElAire = false;
 	}
 
+	// Lanzar dardo con tecla G
+	if (key == GLFW_KEY_G && action == GLFW_PRESS) {
+		theWindow->dardoLanzado = true;
+	}
+	if (key == GLFW_KEY_G && action == GLFW_RELEASE) {
+		theWindow->dardoLanzado = false;
+	}
 
 
 	if (key >= 0 && key < 1024)

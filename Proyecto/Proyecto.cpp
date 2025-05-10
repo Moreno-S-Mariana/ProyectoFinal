@@ -89,7 +89,18 @@ bool animarMoneda = false;
 bool monedaMostrada = false;
 float alturaMoneda = 0.8f;
 float velocidadMoneda = 0.5f;
-
+//***************************************** JUEGO DARDOS VS GLOBOS *****************************************
+bool dardoLanzado = false;
+bool globoVisible[12] = { true, true, true, true, true, true, true, true, true, true, true, true };
+glm::vec3 posicionDardo = glm::vec3(-90.0f, 4.0f, 83.0f);
+glm::vec3 posicionesGlobos[12] = {
+	{-80.0f, 26.0f, 99.0f}, {-80.0f, 20.0f, 99.0f}, {-80.0f, 14.0f, 99.0f}, {-80.0f, 8.0f, 99.0f},
+	{-88.0f, 26.0f, 91.0f}, {-88.0f, 20.0f, 91.0f}, {-88.0f, 14.0f, 91.0f}, {-88.0f, 8.0f, 91.0f},
+	{-72.0f, 26.0f, 107.0f}, {-72.0f, 20.0f, 107.0f}, {-72.0f, 14.0f, 107.0f}, {-72.0f, 8.0f, 107.0f}
+};
+float velocidadDardo = 10.0f;
+glm::vec3 direccionDardo = glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)); // Dirección hacia adelante (ajusta según tu orientación)
+float tiempoDardo = 0.0f;
 //*****************************************Parámetros generales*****************************************
 Window mainWindow;
 std::vector<Mesh*> meshList;
@@ -240,8 +251,20 @@ Model PuestoDulces;
 Model Taco;
 
 //materiales
-Material Material_brillante;
-Material Material_opaco;
+Material Plastico_mate;
+Material Plastico_brillante;
+Material Aluminio;
+Material Acero;
+Material Hormigon;
+Material Madera;
+Material Piel;
+Material Oro;
+Material Fantasma;
+Material Peluche;
+
+
+
+
 
 
 //Sphere cabeza = Sphere(0.5, 20, 20);
@@ -710,9 +733,16 @@ int main()
 	Skybox skybox(skyboxFacesDay, skyboxFacesNight);
 
 	//Skybox actual inicial: día
-
-	Material_brillante = Material(4.0f, 256);
-	Material_opaco = Material(0.3f, 4);
+	Plastico_mate = Material(0.2f, 8);			//Botes de basura, dados
+	Plastico_brillante = Material(0.6f, 64);	//Topos
+	Aluminio = Material(0.9f, 128);				//Puestos y bate 
+	Acero = Material(0.7f, 64);					//Martillo y Carrusel
+	Hormigon = Material(0.1f, 4);				//Edificios 
+	Madera = Material(0.5f, 32);				//Pared
+	Piel = Material(0.3f, 16);					//Personajes
+	Oro = Material(1.0f, 64); ;					//Moneda
+	Fantasma = Material(0.8f, 128);				//Danny phantom y Ember
+	Peluche = Material(0.1f, 4);				//Furia, Alegria y Tristeza
 
 
 	//luz direccional, sólo 1 y siempre debe de existir
@@ -1019,7 +1049,28 @@ int main()
 			}
 		}
 
+		//Animacion globos y dardos
+		// Lanzamiento de dardo (tecla G)
+		if (mainWindow.getDardoLanzado()) {
+			posicionDardo.z += velocidadDardo * deltaTime;
 
+			for (int i = 0; i < 12; ++i) {
+				if (globoVisible[i]) {
+					float distancia = glm::distance(posicionDardo, posicionesGlobos[i]);
+					if (distancia < 5.0f) { // Umbral de colisión
+						globoVisible[i] = false;
+						mainWindow.desactivarDardoLanzado();
+						posicionDardo = glm::vec3(-90.0f, 4.0f, 83.0f); // Reset
+						break;
+					}
+				}
+			}
+
+			if (posicionDardo.z > 130.0f) {
+				mainWindow.desactivarDardoLanzado();
+				posicionDardo = glm::vec3(-90.0f, 4.0f, 83.0f);
+			}
+		}
 
 
 		cycleTime = dayDuration + nightDuration + 2 * fadeDuration;
@@ -1283,7 +1334,7 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
 		pisoTexture.UseTexture();
-		Material_opaco.UseMaterial(uniformSpecularIntensity, uniformShininess);
+		Hormigon.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		meshList[2]->RenderMesh();
 
 		//****************************************** EDIFICIOS *****************************************
@@ -1293,6 +1344,7 @@ int main()
 		model = glm::scale(model, glm::vec3(14.0f, 14.0f, 14.0f));
 		model = glm::rotate(model, glm::radians(-180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Hormigon.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Iglesia.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1300,6 +1352,7 @@ int main()
 		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Hormigon.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Portales.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1307,6 +1360,7 @@ int main()
 		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
 		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Hormigon.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Portales.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1315,6 +1369,7 @@ int main()
 		model = glm::rotate(model, glm::radians(-180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Hormigon.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		chaparrin.RenderModel();
 
 		//************************Boliche**********************************************************
@@ -1328,51 +1383,61 @@ int main()
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-7.0f, 1.5f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Pino.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-7.2f, 1.5f, 0.15f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Pino.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-7.2f, 1.5f, -0.15f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Pino.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-7.4f, 1.5f, 0.3f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Pino.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-7.4f, 1.5f, -0.3f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Pino.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-7.0f, 1.5f, -3.4f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Pino.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-7.2f, 1.5f, -3.25f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Pino.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-7.2f, 1.5f, -3.55f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Pino.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-7.4f, 1.5f, -3.1f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Pino.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-7.4f, 1.5f, -3.7f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Pino.RenderModel();
 
 		model = modelaux;
@@ -1393,26 +1458,31 @@ int main()
 		modelaux2 = model;
 		//model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Pena.RenderModel();
 
 		model = modelaux2;
 		model = glm::translate(model, glm::vec3(0.18f, -0.21f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PiernaIzq_Pena.RenderModel();
 
 		model = modelaux2;
 		model = glm::translate(model, glm::vec3(-0.16f, -0.21f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PiernaDer_Pena.RenderModel();
 
 		model = modelaux2;
 		model = glm::translate(model, glm::vec3(-0.25f, 0.11f, -0.04f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoDer_Pena.RenderModel();
 
 		model = modelaux2;
 		model = glm::translate(model, glm::vec3(0.25f, 0.1f, -0.04f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoIzq_Pena.RenderModel();
 
 		//************************Mesa cobro moneda boliche************************************************ 
@@ -1421,6 +1491,7 @@ int main()
 		modelaux = model;
 		model = glm::scale(model, glm::vec3(0.005f, 0.01f, 0.01f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Mesa.RenderModel();
 
 		model = modelaux;
@@ -1428,6 +1499,7 @@ int main()
 		modelaux = model;
 		model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Cuenco.RenderModel();
 
 		//Moneda - Utilizar en los casos necesarios 
@@ -1435,6 +1507,7 @@ int main()
 		model = glm::translate(model, glm::vec3(0.0f, 0.1f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.03f, 0.03f, 0.03f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Oro.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Coin.RenderModel();
 
 		//*****************************************************************************************
@@ -1443,12 +1516,14 @@ int main()
 		model = glm::translate(model, glm::vec3(-240.0f, -7.0f, -215.0f));
 		model = glm::scale(model, glm::vec3(12.0f, 12.0f, 12.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Hormigon.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		rojita.RenderModel();
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(240.0f, -7.0f, -215.0f));
 		model = glm::scale(model, glm::vec3(12.0f, 12.0f, 12.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Hormigon.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		verde.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1456,6 +1531,7 @@ int main()
 		model = glm::scale(model, glm::vec3(12.0f, 12.0f, 12.0f));
 		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Hormigon.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		rosa.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1463,6 +1539,7 @@ int main()
 		model = glm::scale(model, glm::vec3(12.0f, 12.0f, 12.0f));
 		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Hormigon.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		aqua.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1470,6 +1547,7 @@ int main()
 		model = glm::scale(model, glm::vec3(10.0f, 12.0f, 17.0f));
 		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Hormigon.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		banqueta.RenderModel();
 
 		//***************************************** DECORACIONES DE CALLE *****************************************
@@ -1479,6 +1557,7 @@ int main()
 		model = glm::scale(model, glm::vec3(24.0f, 24.0f, 24.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Banca.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1486,6 +1565,7 @@ int main()
 		model = glm::scale(model, glm::vec3(24.0f, 24.0f, 24.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Banca.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1493,6 +1573,7 @@ int main()
 		model = glm::scale(model, glm::vec3(24.0f, 24.0f, 24.0f));
 		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Banca.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1500,6 +1581,7 @@ int main()
 		model = glm::scale(model, glm::vec3(24.0f, 24.0f, 24.0f));
 		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Banca.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1507,6 +1589,7 @@ int main()
 		model = glm::scale(model, glm::vec3(20.0f, 20.0f, 20.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Plastico_mate.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BoteBasuraVerde.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1514,6 +1597,7 @@ int main()
 		model = glm::scale(model, glm::vec3(20.0f, 20.0f, 20.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Plastico_mate.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BoteBasuraVerde.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1521,6 +1605,7 @@ int main()
 		model = glm::scale(model, glm::vec3(20.0f, 20.0f, 20.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Plastico_mate.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BoteBasuraVerde.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1528,6 +1613,7 @@ int main()
 		model = glm::scale(model, glm::vec3(20.0f, 20.0f, 20.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Plastico_mate.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BoteBasuraVerde.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1535,6 +1621,7 @@ int main()
 		model = glm::scale(model, glm::vec3(20.0f, 20.0f, 20.0f));
 		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Plastico_mate.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BoteBasuraAzul.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1542,6 +1629,7 @@ int main()
 		model = glm::scale(model, glm::vec3(20.0f, 20.0f, 20.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Plastico_mate.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BoteBasuraAzul.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1549,6 +1637,7 @@ int main()
 		model = glm::scale(model, glm::vec3(20.0f, 20.0f, 20.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Lamparas.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1556,6 +1645,7 @@ int main()
 		model = glm::scale(model, glm::vec3(15.0f, 15.0f, 15.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Lamparas.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1563,6 +1653,7 @@ int main()
 		model = glm::scale(model, glm::vec3(15.0f, 15.0f, 15.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Lamparas.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1570,6 +1661,7 @@ int main()
 		model = glm::scale(model, glm::vec3(20.0f, 20.0f, 20.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Lamparas.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1577,6 +1669,7 @@ int main()
 		model = glm::scale(model, glm::vec3(20.0f, 20.0f, 20.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Lamparas.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1584,6 +1677,7 @@ int main()
 		model = glm::scale(model, glm::vec3(15.0f, 15.0f, 15.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Lamparas.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1591,6 +1685,7 @@ int main()
 		model = glm::scale(model, glm::vec3(15.0f, 15.0f, 15.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Lamparas.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1598,12 +1693,14 @@ int main()
 		model = glm::scale(model, glm::vec3(20.0f, 20.0f, 20.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Lamparas.RenderModel();
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(0.0f, 3.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Quiosco_modelo.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1612,6 +1709,7 @@ int main()
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(12.0f, 12.0f, 12.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Acero.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Letrero.RenderModel();
 
 		model = modelaux;
@@ -1619,6 +1717,7 @@ int main()
 		model = glm::scale(model, glm::vec3(3.0f, -3.0f, 3.0f));
 		model = glm::rotate(model, glm::radians(-80.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		LamparaSuelo.RenderModel();
 
 		model = modelaux;
@@ -1626,6 +1725,7 @@ int main()
 		model = glm::scale(model, glm::vec3(3.0f, -3.0f, 3.0f));
 		model = glm::rotate(model, glm::radians(-120.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		LamparaSuelo.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1633,6 +1733,7 @@ int main()
 		model = glm::scale(model, glm::vec3(15.0f, 15.0f, 15.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Parquimetro.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1640,6 +1741,7 @@ int main()
 		model = glm::scale(model, glm::vec3(15.0f, 15.0f, 15.0f));
 		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Parquimetro.RenderModel();
 
 		//***************************************** AREAS VERDES *****************************************
@@ -1715,26 +1817,31 @@ int main()
 		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Carrousel.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.2f, 1.0f + 0.5 * sin(glm::radians(angulovaria * 3)), 3.2f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Plastico_brillante.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Caballo1.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-3.2f, 1.0f + 0.5 * sin(glm::radians(angulovaria * 3)), 0.2));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Plastico_brillante.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Caballo2.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-0.15f, 1.0f + 0.5 * sin(glm::radians(angulovaria * 3)), -3.2));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Plastico_brillante.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Caballo3.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(3.2f, 1.0f + 0.5 * sin(glm::radians(angulovaria * 3)), -0.2));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Plastico_brillante.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Caballo4.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -1743,6 +1850,7 @@ int main()
 		model = glm::scale(model, glm::vec3(5.0f, 5.0f, 5.0f));
 		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Acero.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Martillo.RenderModel();
 
 		// Parte Frontal: rota en dirección opuesta a la trasera
@@ -1751,6 +1859,7 @@ int main()
 		model = glm::translate(model, glm::vec3(-0.6f, 7.1f, 0.0f));
 		model = glm::rotate(model, glm::radians(anguloMartillo), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Acero.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		MartilloFrontal.RenderModel();
 
 		// Parte Trasera: rota en dirección contraria
@@ -1759,6 +1868,7 @@ int main()
 		model = glm::translate(model, glm::vec3(0.9f, 7.1f, 0.0f));
 		model = glm::rotate(model, glm::radians(-anguloMartillo), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Acero.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		MartilloTrasero.RenderModel();
 
 		//***************************************** JUEGOS DE LA FERIA *****************************************
@@ -1770,6 +1880,7 @@ int main()
 		modelaux2 = model;
 		model = glm::scale(model, glm::vec3(0.15f, 0.15f, 0.15f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		mesa_dado.RenderModel();
 
 		model = modelaux;
@@ -1777,6 +1888,7 @@ int main()
 		modelaux = model;
 		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Mesa_Pock.RenderModel();
 
 		// Primer dado
@@ -1787,6 +1899,7 @@ int main()
 		else
 			model = glm::rotate(model, glm::radians(rotacionFinalDado1), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Plastico_mate.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Dados.RenderModel();
 
 		// Segundo dado
@@ -1797,6 +1910,7 @@ int main()
 		else
 			model = glm::rotate(model, glm::radians(rotacionFinalDado2), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Plastico_mate.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Dados.RenderModel();
 
 		//************************cobro moneda dados************************************************ 
@@ -1805,6 +1919,7 @@ int main()
 		modelaux2 = model;
 		//model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Cuenco.RenderModel();
 
 		//Moneda - Utilizar en los casos necesarios 
@@ -1812,115 +1927,40 @@ int main()
 		model = glm::translate(model, glm::vec3(0.0f, alturaMoneda, 0.0f));
 		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Oro.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Coin.RenderModel();
 
 		//***************************************** GLOBOS *****************************************
 
-		model = glm::mat4(1.0);
+		// Globos principales
+		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(-80.0f, 3.0f, 105.0f));
 		modelaux = model;
-		modelaux2 = model;
-		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
+		model = glm::scale(model, glm::vec3(6.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Plastico_brillante.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		GlobosP.RenderModel();
 
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.0f, 23.0f, -6.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
+		// Globos individuales con visibilidad
+		for (int i = 0; i < 12; ++i) {
+			if (!globoVisible[i]) continue;
 
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.0f, 17.0f, -6.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, posicionesGlobos[i]);
+			model = glm::scale(model, glm::vec3(2.0f));
+			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			Plastico_brillante.UseMaterial(uniformSpecularIntensity, uniformShininess);
+			Globos.RenderModel();
+		}
 
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.0f, 11.0f, -6.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.0f, 5.0f, -6.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(-8.0f, 23.0f, -14.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(-8.0f, 17.0f, -14.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(-8.0f, 11.0f, -14.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(-8.0f, 5.0f, -14.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(8.0f, 23.0f, 2.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(8.0f, 17.0f, 2.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(8.0f, 11.0f, 2.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(8.0f, 5.0f, 2.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
-
-		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(-90.0f, 4.0f, 83.0f));
-		model = glm::scale(model, glm::vec3(7.0f, 7.0f, 7.0f));
-		model = glm::rotate(model, glm::radians(135.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Dardos.RenderModel();
-
-		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(-90.0f, 4.0f, 83.0f));
-		model = glm::scale(model, glm::vec3(7.0f, 7.0f, 7.0f));
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, posicionDardo);
+		model = glm::scale(model, glm::vec3(7.0f));
 		model = glm::rotate(model, glm::radians(-135.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Dardos.RenderModel();
 
 		//******************************** NPC Hercules *************************************************************
@@ -1930,21 +1970,25 @@ int main()
 		model = glm::rotate(model, glm::radians(135.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Hercules.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.21f, -0.5f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PiernaIzq_Hercules.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-0.21f, -0.5f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PiernaDer_Hercules.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(1.0f, 0.98f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoIzq_Hercules.RenderModel();
 
 		model = modelaux;
@@ -1956,6 +2000,7 @@ int main()
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoDer_Hercules.RenderModel();
 
 		//************************ Mesa cobro moneda Dardos ********************************************** 
@@ -1964,6 +2009,7 @@ int main()
 		modelaux2 = model;
 		model = glm::scale(model, glm::vec3(0.05f, 0.15f, 0.10f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Mesa.RenderModel();
 
 		model = modelaux2;
@@ -1971,6 +2017,7 @@ int main()
 		modelaux2 = model;
 		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Cuenco.RenderModel();
 
 		//Moneda - Utilizar en los casos necesarios 
@@ -1978,6 +2025,7 @@ int main()
 		model = glm::translate(model, glm::vec3(0.0f, 0.8f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Oro.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Coin.RenderModel();
 
 		//***************************************** TOPOS *****************************************
@@ -1989,30 +2037,35 @@ int main()
 		modelaux2 = model;
 		model = glm::scale(model, glm::vec3(40.0f, 40.0f, 40.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Plastico_brillante.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Topo.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.5f, 11.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Plastico_mate.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Monito_TOPO.RenderModel();		//Primer topo
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(4.5f, 11.0f, 2.5f));
 		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Plastico_mate.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Monito_TOPO.RenderModel();		//Segundo topo
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(4.5f, 11.0f, -2.5f));
 		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Plastico_mate.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Monito_TOPO.RenderModel();		//Tercer topo
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(25.0f, 0.0f, -10.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Plastico_mate.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Mazo.RenderModel();
 
 		model = modelaux;
@@ -2021,26 +2074,31 @@ int main()
 		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
 		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Fantasma.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Ember.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.05f, -0.13f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Fantasma.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PiernaIzq_Ember.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-0.05f, -0.13f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Fantasma.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PiernaDer_Ember.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.085f, 0.227f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Fantasma.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoIzq_Ember.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-0.09f, 0.225f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Fantasma.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoDer_Ember.RenderModel();
 
 		//************************ Mesa cobro moneda topos ********************************************** 
@@ -2049,6 +2107,7 @@ int main()
 		modelaux2 = model;
 		model = glm::scale(model, glm::vec3(0.05f, 0.15f, 0.10f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Mesa.RenderModel();
 
 		model = modelaux2;
@@ -2056,6 +2115,7 @@ int main()
 		modelaux2 = model;
 		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Cuenco.RenderModel();
 
 		//Moneda - Utilizar en los casos necesarios 
@@ -2063,6 +2123,7 @@ int main()
 		model = glm::translate(model, glm::vec3(0.0f, 0.8f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Oro.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Coin.RenderModel();
 
 		//***************************************** HACHAS *****************************************
@@ -2074,6 +2135,7 @@ int main()
 		model = glm::scale(model, glm::vec3(8.0f, 5.0f, 8.0f));
 		model = glm::rotate(model, glm::radians(135.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		HachasP.RenderModel();
 
 		model = modelaux;
@@ -2081,6 +2143,7 @@ int main()
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
 		model = glm::rotate(model, glm::radians(225.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Centro.RenderModel();
 
 		model = modelaux;
@@ -2089,6 +2152,7 @@ int main()
 		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Centro.RenderModel();
 
 		model = modelaux;
@@ -2097,6 +2161,7 @@ int main()
 		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Centro.RenderModel();
 
 		model = modelaux;
@@ -2105,6 +2170,7 @@ int main()
 		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Acero.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Hacha.RenderModel();
 
 		//************************ Mesa cobro moneda hachas ********************************************** 
@@ -2113,6 +2179,7 @@ int main()
 		modelaux2 = model;
 		model = glm::scale(model, glm::vec3(0.05f, 0.15f, 0.10f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Mesa.RenderModel();
 
 		model = modelaux2;
@@ -2120,6 +2187,7 @@ int main()
 		modelaux2 = model;
 		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Cuenco.RenderModel();
 
 		//Moneda - Utilizar en los casos necesarios 
@@ -2127,6 +2195,7 @@ int main()
 		model = glm::translate(model, glm::vec3(0.0f, 0.8f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Oro.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Coin.RenderModel();
 
 		//***************************************** JAULA BATEO *****************************************
@@ -2135,6 +2204,7 @@ int main()
 		modelaux2 = model;
 		model = glm::scale(model, glm::vec3(5.0f, 5.0f, 5.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Jaula.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -2142,6 +2212,7 @@ int main()
 		model = glm::scale(model, glm::vec3(5.0f, 5.0f, 2.0f));
 		model = glm::rotate(model, glm::radians(-65.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Jaula.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -2149,18 +2220,21 @@ int main()
 		model = glm::scale(model, glm::vec3(5.0f, 5.0f, 2.0f));
 		model = glm::rotate(model, glm::radians(65.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Jaula.RenderModel();
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(0.0f, 3.0f, -100.0f));
 		model = glm::scale(model, glm::vec3(5.0f, 6.0f, 5.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Plastico_mate.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Bola.RenderModel();
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(0.0f, 3.0f, -90.0f));
 		model = glm::scale(model, glm::vec3(5.0f, 6.0f, 5.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Bat.RenderModel();
 
 		//************************ Mesa cobro moneda Baseball ********************************************** 
@@ -2169,6 +2243,7 @@ int main()
 		modelaux2 = model;
 		model = glm::scale(model, glm::vec3(0.05f, 0.10f, 0.10f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Mesa.RenderModel();
 
 		model = modelaux2;
@@ -2176,6 +2251,7 @@ int main()
 		modelaux2 = model;
 		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Cuenco.RenderModel();
 
 		//Moneda - Utilizar en los casos necesarios 
@@ -2183,6 +2259,7 @@ int main()
 		model = glm::translate(model, glm::vec3(0.0f, 0.8f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Oro.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Coin.RenderModel();
 
 		//***************************************** PERSONAJES *****************************************
@@ -2203,16 +2280,19 @@ int main()
 
 		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Panico_Mar.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-0.6f, -1.3f, -0.15f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PanicoPDer.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.5f, -1.3f, -0.15f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PanicoPIzq.RenderModel();
 
 		model = modelaux;
@@ -2227,11 +2307,13 @@ int main()
 			anguloBrazoP = 0.0f;		//Reinicia el recorrido de la animación
 		}
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PanicoBDer.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.5f, 1.85f, -0.15f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PanicoBizq.RenderModel();
 		/********************************************Furia****************************************************/
 		{
@@ -2276,24 +2358,28 @@ int main()
 
 			if (currentCameraMode != FIRST_PERSON) {
 				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(modelaux));
+				Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
 				Furia_cuerpo.RenderModel();
 
 				model = modelaux;
 				model = glm::translate(model, glm::vec3(0.145f, -0.125f, 0.0f));
 				model = glm::rotate(model, glm::radians(-legAngle), glm::vec3(1, 0, 0));
 				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+				Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
 				Furia_PiernaIzq.RenderModel();
 
 				model = modelaux;
 				model = glm::translate(model, glm::vec3(-0.143f, -0.128f, 0.0f));
 				model = glm::rotate(model, glm::radians(legAngle), glm::vec3(1, 0, 0));
 				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+				Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
 				Furia_PiernaDer.RenderModel();
 
 				model = modelaux;
 				model = glm::translate(model, glm::vec3(0.275f, 0.085f, 0.0f));
 				model = glm::rotate(model, glm::radians(-armAngle), glm::vec3(1, 0, 0));
 				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+				Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
 				Furia_BrazoIzq.RenderModel();
 			}
 
@@ -2312,6 +2398,7 @@ int main()
 			}
 
 			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
 			Furia_BrazoDer.RenderModel();
 		}
 		/********************************************Danny Phantom****************************************************/
@@ -2332,16 +2419,19 @@ int main()
 		}
 		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Fantasma.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		DannyP_cuerpo.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.19f, -1.57f, 0.09f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Fantasma.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		DannyP_PiernaIzq.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-0.19f, -1.56f, 0.07f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Fantasma.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		DannyP_PiernaDer.RenderModel();
 
 		model = modelaux;
@@ -2350,6 +2440,7 @@ int main()
 			model = glm::rotate(model, glm::radians(-140.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		}
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Fantasma.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		DannyP_BrazoIzq.RenderModel();
 
 		model = modelaux;
@@ -2358,6 +2449,7 @@ int main()
 			model = glm::rotate(model, glm::radians(-140.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		}
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Fantasma.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		DannyP_BrazoDer.RenderModel();
 
 		//***************************************** PUESTOS *****************************************
@@ -2366,6 +2458,7 @@ int main()
 		model = glm::translate(model, glm::vec3(-93.0f, 3.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(19.0f, 19.0f, 19.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PuestoComida.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -2374,6 +2467,7 @@ int main()
 		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PuestoElotes.RenderModel();
 
 		//******************************** NPC Alegría *************************************************************
@@ -2383,26 +2477,31 @@ int main()
 		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Alegria.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(2.5f, -6.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PiernaIzq_A.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-2.2f, -6.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PiernaIzq_A.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(4.0f, 6.8f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoIzq_A.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-3.8f, 6.8f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoDer_A.RenderModel();
 
 		//*************************************************************************************************
@@ -2410,6 +2509,7 @@ int main()
 		model = glm::translate(model, glm::vec3(-185.0f, 22.0f, 70.0f));
 		model = glm::scale(model, glm::vec3(12.0f, 12.0f, 12.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PuestoTacos.RenderModel();
 
 		model = glm::mat4(1.0);
@@ -2418,6 +2518,7 @@ int main()
 		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PuestoAlgodon.RenderModel();
 
 		//******************************** NPC Sam*************************************************************
@@ -2427,26 +2528,31 @@ int main()
 		model = glm::scale(model, glm::vec3(1.3f, 1.3f, 1.3f));
 		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Sam.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.4f, -1.5f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PiernaIzq_Sam.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-0.4f, -1.5f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PiernaDer_Sam.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(1.2f, 2.72f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoIzq_Sam.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-1.2f, 2.72f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoDer_Sam.RenderModel();
 
 		//*********************************************************************************************
@@ -2456,6 +2562,7 @@ int main()
 		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PuestoDulces.RenderModel();
 
 		//******************************** NPC Tristeza *************************************************************
@@ -2465,26 +2572,31 @@ int main()
 		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Tristeza.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(1.92f, -4.3f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PiernaIzq_T.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-3.1f, -4.3f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PiernaDer_T.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-7.0f, 4.9f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoDer_T.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(5.7f, 4.9f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoIzq_T.RenderModel();
 
 		//*************************************************************************************************
