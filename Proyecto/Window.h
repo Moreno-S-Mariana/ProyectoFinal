@@ -23,17 +23,17 @@ public:
     GLfloat getrotax() { return rotax; }
     GLfloat getrotaz() { return rotaz; }
 
-    //Iluminación por teclado
+    // Iluminación por teclado
     GLfloat getIluminacionTeclado() { return banderaLuces; }
 
     // Animaciones específicas
     GLfloat getAnimacion_Simp1_DP() { return banderaAnimacion1_DP; }
     GLfloat getAnimacion_Simp1_P() { return banderaAnimacion1_P; }
 
-    //Animacion dados
+    // Animación dados
     GLfloat getDadosGirando() { return dadosGirando; }
 
-    //Animacion monedas
+    // Animación monedas
     GLfloat getMonedaEnElAire() { return monedaEnElAire; }
 
     // Lanzamiento de dardo (tecla G)
@@ -51,16 +51,13 @@ public:
     void setTeclaMHacha(bool estado) { teclaMHacha = estado; }
     ~Window();
 
-    ~Window();
-
 private:
     GLFWwindow* mainWindow;
     GLint width, height;
     GLfloat rotax, rotay, rotaz;
-    bool banderaLuces;  //Bandera para luces de teclado
+    bool banderaLuces;
     bool banderaAnimacion1_DP, banderaAnimacion1_P;
     bool animacionTopos;
-    bool furiaTieneMazo; // NUEVO
     bool dadosGirando;
     bool monedaEnElAire;
     bool dardoLanzado;

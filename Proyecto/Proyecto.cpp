@@ -105,7 +105,7 @@ float tiempoDardo = 0.0f;
 float tiempoDesaparicionTopo = 0.0f;
 bool mazoGolpeando = false;
 float anguloMazo = 0.0f;
-float velocidadGolpe = 180.0f;
+float velocidadGolpe = 10.0f;
 float tiempoEsperaReaparicion = 5.0f;
 float tiempoAnimacionMazo = 0.0f;
 bool mazoBajando = true;
@@ -121,6 +121,7 @@ float tiempoTopo3Oculto = 0.0f;
 bool topo1Golpeado = false;
 bool topo2Golpeado = false;
 bool topo3Golpeado = false;
+int mazoAparece = 0;
 //*********************** Variables para animación del juego de las hachas ***********************
 GLfloat desplazamientoHacha = 0.0f;
 bool hachaVolando = false;
@@ -1054,7 +1055,6 @@ int main()
 		}
 
 		//Animación moneda
-		// Animación de moneda
 		if (mainWindow.getMonedaEnElAire()) {
 			animarMoneda = true;
 			monedaMostrada = true;
@@ -1101,20 +1101,23 @@ int main()
 		if (mainWindow.getMazoGolpeando()) {
 			anguloMazo += velocidadGolpe * deltaTime;
 
-			if (anguloMazo >= 90.0f) {
-				anguloMazo = 90.0f;
+			if (anguloMazo >= 45.0f) {
+				anguloMazo = 45.0f;
 
 				if (topo1Visible) {
 					topo1Visible = false;
 					topo1Golpeado = true;
+					mazoAparece = 1;		//	Solo aparece el primer mazo
 				}
 				else if (topo2Visible) {
 					topo2Visible = false;
 					topo2Golpeado = true;
+					mazoAparece = 2;		//	Solo aparece el segundo mazo
 				}
 				else if (topo3Visible) {
 					topo3Visible = false;
 					topo3Golpeado = true;
+					mazoAparece = 0;		//	Solo aparece el tercer mazo
 				}
 
 				// Todos cuentan su tiempo si fueron golpeados
@@ -1304,7 +1307,7 @@ int main()
 
 		// 2) Ángulo del sol [?90°, 270°): empieza en el horizonte este, sube al cenit, cae al horizonte oeste
 		sunAngleDeg = (t / cycleTime) * 360.0f - 90.0f;
-		
+
 
 		// 3) Vector dirección del sol: barrido en el plano X–Y (Z fijo o pequeño para inclinar)
 		glm::vec3 sunDir = glm::normalize(glm::vec3(
@@ -1374,12 +1377,12 @@ int main()
 
 		//tiempoAcumulado = 0.0f;
 		tiempoAcumulado += deltaTime;
-		
+
 		if (mainWindow.getIluminacionTeclado()) {
 			totalLucesActivas = 0;
 			for (int i = 0; i < spotLightCount4; ++i) {
-					lucesActivas[i] = spotLights4[i];
-					totalLucesActivas++;
+				lucesActivas[i] = spotLights4[i];
+				totalLucesActivas++;
 			}
 		}
 		else if (camaraCercaDeLuces3) {
@@ -1387,7 +1390,7 @@ int main()
 			int indiceActivo = static_cast<int>(tiempoAcumulado / 10.0f) % spotLightCount3;
 			lucesActivas[totalLucesActivas++] = spotLights3[indiceActivo];
 		}
-		
+
 
 		// ---------- Activar luces finales
 		shaderList[0].SetSpotLights(lucesActivas, totalLucesActivas);
@@ -2100,7 +2103,7 @@ int main()
 
 		//Moneda - Utilizar en los casos necesarios 
 		model = modelaux2;
-		model = glm::translate(model, glm::vec3(0.0f, 0.8f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, alturaMoneda, 0.0f));
 		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Oro.UseMaterial(uniformSpecularIntensity, uniformShininess);
@@ -2124,6 +2127,16 @@ int main()
 			model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 			Monito_TOPO.RenderModel();
+
+			model = modelaux;
+			model = glm::translate(model, glm::vec3(14.0f, 15.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(-anguloMazo), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			Mazo.RenderModel();
+
 		}
 
 		// Topo 2
@@ -2134,6 +2147,17 @@ int main()
 			model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 			Monito_TOPO.RenderModel();
+			if (mazoAparece == 1) {
+				model = modelaux;
+				model = glm::translate(model, glm::vec3(14.0f, 15.0f, 4.5f));
+				model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+				model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+				model = glm::rotate(model, glm::radians(-anguloMazo), glm::vec3(0.0f, 1.0f, 0.0f));
+				model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+				Mazo.RenderModel();
+			}
+			
 		}
 
 		// Topo 3
@@ -2144,14 +2168,19 @@ int main()
 			model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 			Monito_TOPO.RenderModel();
+			if (mazoAparece == 2) {
+				model = modelaux;
+				model = glm::translate(model, glm::vec3(14.0f, 15.0f, -2.5f));
+				model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+				model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+				model = glm::rotate(model, glm::radians(-anguloMazo), glm::vec3(0.0f, 1.0f, 0.0f));
+				model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+				Mazo.RenderModel();
+			}
+			
 		}
 
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(25.0f, 0.0f, -10.0f));
-		model = glm::rotate(model, glm::radians(anguloMazo), glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Mazo.RenderModel();
 
 		//******************************* EMBER *****************************************************
 		model = modelaux;
@@ -2206,7 +2235,7 @@ int main()
 
 		//Moneda - Utilizar en los casos necesarios 
 		model = modelaux2;
-		model = glm::translate(model, glm::vec3(0.0f, 0.8f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, alturaMoneda, 0.0f));
 		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Oro.UseMaterial(uniformSpecularIntensity, uniformShininess);
@@ -2278,7 +2307,7 @@ int main()
 
 		//Moneda - Utilizar en los casos necesarios 
 		model = modelaux2;
-		model = glm::translate(model, glm::vec3(0.0f, 0.8f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, alturaMoneda, 0.0f));
 		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Oro.UseMaterial(uniformSpecularIntensity, uniformShininess);
@@ -2342,7 +2371,7 @@ int main()
 
 		//Moneda - Utilizar en los casos necesarios 
 		model = modelaux2;
-		model = glm::translate(model, glm::vec3(0.0f, 0.8f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, alturaMoneda, 0.0f));
 		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Oro.UseMaterial(uniformSpecularIntensity, uniformShininess);
