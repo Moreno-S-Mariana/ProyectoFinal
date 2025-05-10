@@ -101,6 +101,26 @@ glm::vec3 posicionesGlobos[12] = {
 float velocidadDardo = 10.0f;
 glm::vec3 direccionDardo = glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)); // Dirección hacia adelante (ajusta según tu orientación)
 float tiempoDardo = 0.0f;
+//*********************** Variables para animación del juego del topo ***********************
+float tiempoDesaparicionTopo = 0.0f;
+bool mazoGolpeando = false;
+float anguloMazo = 0.0f;
+float velocidadGolpe = 180.0f;
+float tiempoEsperaReaparicion = 5.0f;
+float tiempoAnimacionMazo = 0.0f;
+bool mazoBajando = true;
+float tiempoTopoOculto = 0.0f;         // Tiempo que el topo está oculto
+float tiempoParaMostrarTopo = 2.0f;    // Tiempo que tarda en reaparecer el topo
+float anguloRotacionTopo = 0.0f;
+bool topo1Visible = true;
+bool topo2Visible = true;
+bool topo3Visible = true;
+float tiempoTopo1Oculto = 0.0f;
+float tiempoTopo2Oculto = 0.0f;
+float tiempoTopo3Oculto = 0.0f;
+bool topo1Golpeado = false;
+bool topo2Golpeado = false;
+bool topo3Golpeado = false;
 //*****************************************Parámetros generales*****************************************
 Window mainWindow;
 std::vector<Mesh*> meshList;
@@ -251,8 +271,20 @@ Model PuestoDulces;
 Model Taco;
 
 //materiales
-Material Material_brillante;
-Material Material_opaco;
+Material Plastico_mate;
+Material Plastico_brillante;
+Material Aluminio;
+Material Acero;
+Material Hormigon;
+Material Madera;
+Material Piel;
+Material Oro;
+Material Fantasma;
+Material Peluche;
+
+
+
+
 
 
 //Sphere cabeza = Sphere(0.5, 20, 20);
@@ -721,9 +753,16 @@ int main()
 	Skybox skybox(skyboxFacesDay, skyboxFacesNight);
 
 	//Skybox actual inicial: día
-
-	Material_brillante = Material(4.0f, 256);
-	Material_opaco = Material(0.3f, 4);
+	Plastico_mate = Material(0.2f, 8);			//Botes de basura, dados
+	Plastico_brillante = Material(0.6f, 64);	//Topos
+	Aluminio = Material(0.9f, 128);				//Puestos y bate 
+	Acero = Material(0.7f, 64);					//Martillo y Carrusel
+	Hormigon = Material(0.1f, 4);				//Edificios 
+	Madera = Material(0.5f, 32);				//Pared
+	Piel = Material(0.3f, 16);					//Personajes
+	Oro = Material(1.0f, 64); ;					//Moneda
+	Fantasma = Material(0.8f, 128);				//Danny phantom y Ember
+	Peluche = Material(0.1f, 4);				//Furia, Alegria y Tristeza
 
 
 	//luz direccional, sólo 1 y siempre debe de existir
@@ -1009,7 +1048,7 @@ int main()
 			anguloDados = 0.0f;
 		}
 
-		// Animación de moneda
+		//Animación moneda
 		if (mainWindow.getMonedaEnElAire()) {
 			animarMoneda = true;
 			monedaMostrada = true;
@@ -1052,6 +1091,58 @@ int main()
 			}
 		}
 
+		// Animación mazo y topo
+		if (mainWindow.getMazoGolpeando()) {
+			anguloMazo += velocidadGolpe * deltaTime;
+
+			if (anguloMazo >= 90.0f) {
+				anguloMazo = 90.0f;
+
+				if (topo1Visible) {
+					topo1Visible = false;
+					topo1Golpeado = true;
+				}
+				else if (topo2Visible) {
+					topo2Visible = false;
+					topo2Golpeado = true;
+				}
+				else if (topo3Visible) {
+					topo3Visible = false;
+					topo3Golpeado = true;
+				}
+
+				// Todos cuentan su tiempo si fueron golpeados
+				if (topo1Golpeado) tiempoTopo1Oculto += deltaTime;
+				if (topo2Golpeado) tiempoTopo2Oculto += deltaTime;
+				if (topo3Golpeado) tiempoTopo3Oculto += deltaTime;
+
+				// Verifica si ya pueden reaparecer
+				if (tiempoTopo1Oculto >= tiempoParaMostrarTopo) {
+					topo1Visible = true;
+					topo1Golpeado = false;
+					tiempoTopo1Oculto = 0.0f;
+				}
+				if (tiempoTopo2Oculto >= tiempoParaMostrarTopo) {
+					topo2Visible = true;
+					topo2Golpeado = false;
+					tiempoTopo2Oculto = 0.0f;
+				}
+				if (tiempoTopo3Oculto >= tiempoParaMostrarTopo) {
+					topo3Visible = true;
+					topo3Golpeado = false;
+					tiempoTopo3Oculto = 0.0f;
+				}
+
+				mainWindow.desactivarMazoGolpeando();
+				anguloMazo = 0.0f;
+			}
+		}
+
+		anguloRotacionTopo += 10.0f * deltaTime;  // Velocidad de rotación
+		if (anguloRotacionTopo >= 360.0f) {
+			anguloRotacionTopo -= 360.0f;
+		}
+	
 		cycleTime = dayDuration + nightDuration + 2 * fadeDuration;
 
 		t = fmod(glfwGetTime(), cycleTime);
@@ -1296,7 +1387,7 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
 		pisoTexture.UseTexture();
-		Material_opaco.UseMaterial(uniformSpecularIntensity, uniformShininess);
+		//Material_opaco.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		meshList[2]->RenderMesh();
 
 		//****************************************** EDIFICIOS *****************************************
@@ -1849,7 +1940,7 @@ int main()
 			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 			Globos.RenderModel();
 		}
-		
+
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, posicionDardo);
 		model = glm::scale(model, glm::vec3(7.0f));
@@ -1916,6 +2007,7 @@ int main()
 
 		//***************************************** TOPOS *****************************************
 
+		//***************************************** TOPOS *****************************************
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-70.0f, 3.0f, -90.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -1925,30 +2017,44 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Topo.RenderModel();
 
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.5f, 11.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Monito_TOPO.RenderModel();		//Primer topo
+		// Topo 1
+		if (topo1Visible) {
+			model = modelaux;
+			model = glm::translate(model, glm::vec3(0.5f, 11.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(anguloRotacionTopo), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			Monito_TOPO.RenderModel();
+		}
 
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(4.5f, 11.0f, 2.5f));
-		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Monito_TOPO.RenderModel();		//Segundo topo
+		// Topo 2
+		if (topo2Visible) {
+			model = modelaux;
+			model = glm::translate(model, glm::vec3(4.5f, 11.0f, 2.5f));
+			model = glm::rotate(model, glm::radians(anguloRotacionTopo), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			Monito_TOPO.RenderModel();
+		}
 
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(4.5f, 11.0f, -2.5f));
-		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Monito_TOPO.RenderModel();		//Tercer topo
+		// Topo 3
+		if (topo3Visible) {
+			model = modelaux;
+			model = glm::translate(model, glm::vec3(4.5f, 11.0f, -2.5f));
+			model = glm::rotate(model, glm::radians(anguloRotacionTopo), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			Monito_TOPO.RenderModel();
+		}
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(25.0f, 0.0f, -10.0f));
+		model = glm::rotate(model, glm::radians(anguloMazo), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Mazo.RenderModel();
 
+		//***************************************************************************************++//
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(15.0f, 11.8f, -18.0f));
 		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -1994,7 +2100,7 @@ int main()
 
 		//Moneda - Utilizar en los casos necesarios 
 		model = modelaux2;
-		model = glm::translate(model, glm::vec3(0.0f, 0.8f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, alturaMoneda, 0.0f));
 		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Coin.RenderModel();
