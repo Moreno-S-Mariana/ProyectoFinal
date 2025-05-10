@@ -101,6 +101,27 @@ glm::vec3 posicionesGlobos[12] = {
 float velocidadDardo = 10.0f;
 glm::vec3 direccionDardo = glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)); // Dirección hacia adelante (ajusta según tu orientación)
 float tiempoDardo = 0.0f;
+//*********************** Variables para animación del juego del topo ***********************
+float tiempoDesaparicionTopo = 0.0f;
+bool mazoGolpeando = false;
+float anguloMazo = 0.0f;
+float velocidadGolpe = 180.0f;
+float tiempoEsperaReaparicion = 5.0f;
+float tiempoAnimacionMazo = 0.0f;
+bool mazoBajando = true;
+float tiempoTopoOculto = 0.0f;         // Tiempo que el topo está oculto
+float tiempoParaMostrarTopo = 2.0f;    // Tiempo que tarda en reaparecer el topo
+float anguloRotacionTopo = 0.0f;
+bool topo1Visible = true;
+bool topo2Visible = true;
+bool topo3Visible = true;
+float tiempoTopo1Oculto = 0.0f;
+float tiempoTopo2Oculto = 0.0f;
+float tiempoTopo3Oculto = 0.0f;
+bool topo1Golpeado = false;
+bool topo2Golpeado = false;
+bool topo3Golpeado = false;
+
 //*****************************************Parámetros generales*****************************************
 Window mainWindow;
 std::vector<Mesh*> meshList;
@@ -1072,6 +1093,58 @@ int main()
 			}
 		}
 
+		// Animación mazo y topo
+		if (mainWindow.getMazoGolpeando()) {
+			anguloMazo += velocidadGolpe * deltaTime;
+
+			if (anguloMazo >= 90.0f) {
+				anguloMazo = 90.0f;
+
+				if (topo1Visible) {
+					topo1Visible = false;
+					topo1Golpeado = true;
+				}
+				else if (topo2Visible) {
+					topo2Visible = false;
+					topo2Golpeado = true;
+				}
+				else if (topo3Visible) {
+					topo3Visible = false;
+					topo3Golpeado = true;
+				}
+
+				// Todos cuentan su tiempo si fueron golpeados
+				if (topo1Golpeado) tiempoTopo1Oculto += deltaTime;
+				if (topo2Golpeado) tiempoTopo2Oculto += deltaTime;
+				if (topo3Golpeado) tiempoTopo3Oculto += deltaTime;
+
+				// Verifica si ya pueden reaparecer
+				if (tiempoTopo1Oculto >= tiempoParaMostrarTopo) {
+					topo1Visible = true;
+					topo1Golpeado = false;
+					tiempoTopo1Oculto = 0.0f;
+				}
+				if (tiempoTopo2Oculto >= tiempoParaMostrarTopo) {
+					topo2Visible = true;
+					topo2Golpeado = false;
+					tiempoTopo2Oculto = 0.0f;
+				}
+				if (tiempoTopo3Oculto >= tiempoParaMostrarTopo) {
+					topo3Visible = true;
+					topo3Golpeado = false;
+					tiempoTopo3Oculto = 0.0f;
+				}
+
+				mainWindow.desactivarMazoGolpeando();
+				anguloMazo = 0.0f;
+			}
+		}
+
+		anguloRotacionTopo += 10.0f * deltaTime;  // Velocidad de rotación
+		if (anguloRotacionTopo >= 360.0f) {
+			anguloRotacionTopo -= 360.0f;
+		}
+
 
 		cycleTime = dayDuration + nightDuration + 2 * fadeDuration;
 
@@ -1111,23 +1184,6 @@ int main()
 			furiaYaw += velocidadGiroFuria * deltaTime;
 		}
 
-		// Cambiar el estado del mazo SOLO si está en primera persona
-		if (currentCameraMode == FIRST_PERSON) {
-			if (keys[GLFW_KEY_M]) mainWindow.setFuriaTieneMazo(true);  // Agarra
-			if (keys[GLFW_KEY_N]) mainWindow.setFuriaTieneMazo(false); // Suelta
-		}
-
-		if (currentCameraMode == FIRST_PERSON && mainWindow.getFuriaTieneMazo()) {
-			if (keys[GLFW_KEY_Q] && !teclaGolpePresionada) {
-				teclaGolpePresionada = true;
-				animandoGolpe = true;
-				golpeBajando = true;
-			}
-			if (!keys[GLFW_KEY_Q]) {
-				teclaGolpePresionada = false;
-			}
-		}
-
 		lastSwitchTime = 0.0f;
 		currentTime = glfwGetTime();
 		if (currentCameraMode == ATTRACTIONS) {
@@ -1150,6 +1206,7 @@ int main()
 			}
 
 		}
+
 
 		// Clear the window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -1286,13 +1343,13 @@ int main()
 		}
 
 		// ---------- Arreglo 3: spotLights3[] (una luz encendida a la vez cíclicamente)
-		/*camaraCercaDeLuces3 = false;
+		camaraCercaDeLuces3 = false;
 		for (int i = 0; i < spotLightCount3; ++i) {
 			if (estaCerca(camPos, spotLights3[i].GetPosition(), 90.0f)) {
 				camaraCercaDeLuces3 = true;
 				break;
 			}
-		}*/
+		}
 
 		//tiempoAcumulado = 0.0f;
 		tiempoAcumulado += deltaTime;
@@ -1303,12 +1360,12 @@ int main()
 					lucesActivas[i] = spotLights4[i];
 					totalLucesActivas++;
 			}
-		}/*
+		}
 		else if (camaraCercaDeLuces3) {
 			totalLucesActivas = 0;
 			int indiceActivo = static_cast<int>(tiempoAcumulado / 10.0f) % spotLightCount3;
 			lucesActivas[totalLucesActivas++] = spotLights3[indiceActivo];
-		}*/
+		}
 		
 
 		// ---------- Activar luces finales
@@ -2029,7 +2086,6 @@ int main()
 		Coin.RenderModel();
 
 		//***************************************** TOPOS *****************************************
-
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-70.0f, 3.0f, -90.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -2037,37 +2093,46 @@ int main()
 		modelaux2 = model;
 		model = glm::scale(model, glm::vec3(40.0f, 40.0f, 40.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Plastico_brillante.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Topo.RenderModel();
 
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.5f, 11.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Plastico_mate.UseMaterial(uniformSpecularIntensity, uniformShininess);
-		Monito_TOPO.RenderModel();		//Primer topo
+		// Topo 1
+		if (topo1Visible) {
+			model = modelaux;
+			model = glm::translate(model, glm::vec3(0.5f, 11.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(anguloRotacionTopo), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			Monito_TOPO.RenderModel();
+		}
 
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(4.5f, 11.0f, 2.5f));
-		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Plastico_mate.UseMaterial(uniformSpecularIntensity, uniformShininess);
-		Monito_TOPO.RenderModel();		//Segundo topo
+		// Topo 2
+		if (topo2Visible) {
+			model = modelaux;
+			model = glm::translate(model, glm::vec3(4.5f, 11.0f, 2.5f));
+			model = glm::rotate(model, glm::radians(anguloRotacionTopo), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			Monito_TOPO.RenderModel();
+		}
 
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(4.5f, 11.0f, -2.5f));
-		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Plastico_mate.UseMaterial(uniformSpecularIntensity, uniformShininess);
-		Monito_TOPO.RenderModel();		//Tercer topo
+		// Topo 3
+		if (topo3Visible) {
+			model = modelaux;
+			model = glm::translate(model, glm::vec3(4.5f, 11.0f, -2.5f));
+			model = glm::rotate(model, glm::radians(anguloRotacionTopo), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			Monito_TOPO.RenderModel();
+		}
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(25.0f, 0.0f, -10.0f));
+		model = glm::rotate(model, glm::radians(anguloMazo), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Plastico_mate.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Mazo.RenderModel();
 
+		//******************************* EMBER *****************************************************
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(15.0f, 11.8f, -18.0f));
 		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));

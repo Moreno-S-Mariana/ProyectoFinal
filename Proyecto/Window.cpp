@@ -21,9 +21,11 @@ Window::Window(GLint windowWidth, GLint windowHeight)
 	animacionTopos = false;
 	furiaTieneMazo = false;			// NUEVO
 	dardoLanzado = false;			// NUEVO
+	mazoGolpeando = false;     // NUEVO
 	banderaLuces = false;			//Apagado por defecto
 	dadosGirando = false;
 	monedaEnElAire = false;
+
 	for (size_t i = 0; i < 1024; i++)
 		keys[i] = 0;
 }
@@ -148,6 +150,11 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
 		theWindow->dardoLanzado = false;
 	}
 
+	// Golpe de mazo con tecla SPACE
+	if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+		theWindow->mazoGolpeando = true;
+	if (key == GLFW_KEY_SPACE && action == GLFW_RELEASE)
+		theWindow->mazoGolpeando = false;
 
 	if (key >= 0 && key < 1024)
 	{

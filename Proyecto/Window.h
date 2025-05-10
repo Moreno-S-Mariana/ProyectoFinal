@@ -30,11 +30,6 @@ public:
     GLfloat getAnimacion_Simp1_DP() { return banderaAnimacion1_DP; }
     GLfloat getAnimacion_Simp1_P() { return banderaAnimacion1_P; }
 
-    // Animación topos
-    bool getAnimacionTopos() const { return animacionTopos; }
-    void activarAnimacionTopos() { animacionTopos = true; }
-    void desactivarAnimacionTopos() { animacionTopos = false; }
-
     //Animacion dados
     GLfloat getDadosGirando() { return dadosGirando; }
 
@@ -46,11 +41,10 @@ public:
     void activarDardoLanzado() { dardoLanzado = true; }
     void desactivarDardoLanzado() { dardoLanzado = false; }
 
-
-    // Mazo de Furia
-    bool getFuriaTieneMazo() const { return furiaTieneMazo; }
-    void soltarMazo() { furiaTieneMazo = false; } // opcional
-    void setFuriaTieneMazo(bool valor) { furiaTieneMazo = valor; }
+    // Golpe de mazo (tecla SPACE)
+    bool getMazoGolpeando() const { return mazoGolpeando; }
+    void activarMazoGolpeando() { mazoGolpeando = true; }
+    void desactivarMazoGolpeando() { mazoGolpeando = false; }
 
     ~Window();
 
@@ -65,6 +59,7 @@ private:
     bool dadosGirando;
     bool monedaEnElAire;
     bool dardoLanzado;
+    bool mazoGolpeando;
 
     bool keys[1024];
     GLint bufferWidth, bufferHeight;
