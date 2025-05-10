@@ -1876,6 +1876,7 @@ int main()
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-1.03f, 0.97f, 0.0f));
 		//Animación de espadazos
+		anguloBrazoEspada += 0.5 * deltaTime;
 		model = glm::rotate(model, glm::radians(-130.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(50 * sin(glm::radians(10 * anguloBrazoEspada))), glm::vec3(1.0f, -1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
