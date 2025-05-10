@@ -23,6 +23,9 @@ public:
     GLfloat getrotax() { return rotax; }
     GLfloat getrotaz() { return rotaz; }
 
+    //Iluminación por teclado
+    GLfloat getIluminacionTeclado() { return banderaLuces; }
+
     // Animaciones específicas
     GLfloat getAnimacion_Simp1_DP() { return banderaAnimacion1_DP; }
     GLfloat getAnimacion_Simp1_P() { return banderaAnimacion1_P; }
@@ -31,6 +34,12 @@ public:
     bool getAnimacionTopos() const { return animacionTopos; }
     void activarAnimacionTopos() { animacionTopos = true; }
     void desactivarAnimacionTopos() { animacionTopos = false; }
+
+    //Animacion dados
+    GLfloat getDadosGirando() { return dadosGirando; }
+
+    //Animacion monedas
+    GLfloat getMonedaEnElAire() { return monedaEnElAire; }
 
     // Mazo de Furia
     bool getFuriaTieneMazo() const { return furiaTieneMazo; }
@@ -43,9 +52,12 @@ private:
     GLFWwindow* mainWindow;
     GLint width, height;
     GLfloat rotax, rotay, rotaz;
+    bool banderaLuces;  //Bandera para luces de teclado
     bool banderaAnimacion1_DP, banderaAnimacion1_P;
     bool animacionTopos;
     bool furiaTieneMazo; // NUEVO
+    bool dadosGirando;
+    bool monedaEnElAire;
 
     bool keys[1024];
     GLint bufferWidth, bufferHeight;

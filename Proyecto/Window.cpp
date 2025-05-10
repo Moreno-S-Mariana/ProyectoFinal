@@ -19,8 +19,10 @@ Window::Window(GLint windowWidth, GLint windowHeight)
 	banderaAnimacion1_DP = false;
 	banderaAnimacion1_P = false;
 	animacionTopos = false;
-	furiaTieneMazo = false;  // NUEVO
-
+	furiaTieneMazo = false;			// NUEVO
+	banderaLuces = false;			//Apagado por defecto
+	dadosGirando = false;
+	monedaEnElAire = false;
 	for (size_t i = 0; i < 1024; i++)
 		keys[i] = 0;
 }
@@ -117,6 +119,28 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
 	// DESACTIVAR animación de topos
 	if (key == GLFW_KEY_Y && action == GLFW_PRESS)
 		theWindow->animacionTopos = false;
+
+	// Activar luces por teclado
+	if (key == GLFW_KEY_L && action == GLFW_PRESS) {
+		theWindow->banderaLuces = !theWindow->banderaLuces;
+	}
+
+	//Dados : girar mientras se mantiene presionada H
+	if (key == GLFW_KEY_H && action == GLFW_PRESS)
+		theWindow->dadosGirando = true;
+	if (key == GLFW_KEY_H && action == GLFW_RELEASE)
+		theWindow->dadosGirando = false;
+
+	//Monedas
+	//Monedas
+	if (key == GLFW_KEY_K && action == GLFW_PRESS) {
+		theWindow->monedaEnElAire = true;
+	}
+	if (key == GLFW_KEY_K && action == GLFW_RELEASE) {
+		theWindow->monedaEnElAire = false;
+	}
+
+
 
 	if (key >= 0 && key < 1024)
 	{
