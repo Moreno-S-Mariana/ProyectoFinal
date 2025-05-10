@@ -4,73 +4,55 @@ Window::Window()
 {
 	width = 800;
 	height = 600;
+	animacionTopos = false;
+	furiaTieneMazo = false;  // NUEVO
+
 	for (size_t i = 0; i < 1024; i++)
-	{
 		keys[i] = 0;
-	}
 }
+
 Window::Window(GLint windowWidth, GLint windowHeight)
 {
 	width = windowWidth;
 	height = windowHeight;
-	rotax = 0.0f;
-	rotay = 0.0f;
-	rotaz = 0.0f;
-	articulacion1 = 0.0f;
-	articulacion2 = 0.0f;
-	articulacion3 = 0.0f;
-	valor = 0.0f;
-	articulacion4 = 0.0f;
-	articulacion5 = 0.0f;
-	valor2 = 0.0f;
-	valor3 = 0.0f;
-	banderaAnimacion1_DP = false;	//Animación apagada por defecto 
-	banderaAnimacion1_F = false;	//Animación apagada por defecto 
-	banderaAnimacion1_P = false;	//Animación apagada por defecto 
+	rotax = rotay = rotaz = 0.0f;
+	banderaAnimacion1_DP = false;
+	banderaAnimacion1_P = false;
+	animacionTopos = false;
+	furiaTieneMazo = false;  // NUEVO
 
 	for (size_t i = 0; i < 1024; i++)
-	{
 		keys[i] = 0;
-	}
 }
+
 int Window::Initialise()
 {
-	//Inicialización de GLFW
 	if (!glfwInit())
 	{
 		printf("Falló inicializar GLFW");
 		glfwTerminate();
 		return 1;
 	}
-	//Asignando variables de GLFW y propiedades de ventana
+
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	//para solo usar el core profile de OpenGL y no tener retrocompatibilidad
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-	//CREAR VENTANA
 	mainWindow = glfwCreateWindow(width, height, "Proyecto CGEIHC: Feria", NULL, NULL);
-
 	if (!mainWindow)
 	{
 		printf("Fallo en crearse la ventana con GLFW");
 		glfwTerminate();
 		return 1;
 	}
-	//Obtener tamaño de Buffer
-	glfwGetFramebufferSize(mainWindow, &bufferWidth, &bufferHeight);
 
-	//asignar el contexto
+	glfwGetFramebufferSize(mainWindow, &bufferWidth, &bufferHeight);
 	glfwMakeContextCurrent(mainWindow);
 
-	//MANEJAR TECLADO y MOUSE
 	createCallbacks();
 
-
-	//permitir nuevas extensiones
 	glewExperimental = GL_TRUE;
-
 	if (glewInit() != GLEW_OK)
 	{
 		printf("Falló inicialización de GLEW");
@@ -79,13 +61,11 @@ int Window::Initialise()
 		return 1;
 	}
 
-	glEnable(GL_DEPTH_TEST); //HABILITAR BUFFER DE PROFUNDIDAD
-	// Asignar valores de la ventana y coordenadas
-
-	//Asignar Viewport
+	glEnable(GL_DEPTH_TEST);
 	glViewport(0, 0, bufferWidth, bufferHeight);
-	//Callback para detectar que se está usando la ventana
 	glfwSetWindowUserPointer(mainWindow, this);
+
+	return 0;
 }
 
 void Window::createCallbacks()
@@ -113,144 +93,38 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
 	Window* theWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
 
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-	{
 		glfwSetWindowShouldClose(window, GL_TRUE);
-	}
-
 
 	if (key == GLFW_KEY_E)
-	{
 		theWindow->rotax += 10.0;
-	}
 	if (key == GLFW_KEY_R)
-	{
-		theWindow->rotay += 10.0; //rotar sobre el eje y 10 grados
-	}
+		theWindow->rotay += 10.0;
 	if (key == GLFW_KEY_T)
-	{
 		theWindow->rotaz += 10.0;
-	}
 
-	if (key == GLFW_KEY_F)
-	{
-		theWindow->articulacion1 += 10.0;
-		theWindow->valor3 = 1.0;
+	// Danny Phantom
+	if (key == GLFW_KEY_Z && action == GLFW_PRESS)
+		theWindow->banderaAnimacion1_DP = !theWindow->banderaAnimacion1_DP;
 
-	}
-	if (key == GLFW_KEY_G)
-	{
-		theWindow->articulacion2 -= 10.0;
-		theWindow->valor3 = 0.0;
+	// Pánico
+	if (key == GLFW_KEY_B && action == GLFW_PRESS)
+		theWindow->banderaAnimacion1_P = !theWindow->banderaAnimacion1_P;
 
-	}
-	if (key == GLFW_KEY_N)
-	{
-		theWindow->articulacion4 += 0.1;
-	}
-	if (key == GLFW_KEY_M)
-	{
-		theWindow->articulacion5 -= 0.1;
-	}
-	if (key == GLFW_KEY_K)
-	{
-		if (theWindow->articulacion3 > -10)
-		{
-		}
-		else
-		{
-			theWindow->articulacion3 += 10.0;
-		}
-	}
-	if (key == GLFW_KEY_L)
-	{
-		if (theWindow->articulacion3 < -40)
-		{
-		}
-		else
-		{
-			theWindow->articulacion3 -= 10.0;
-		}
-	}
+	// ACTIVAR animación de topos
+	if (key == GLFW_KEY_T && action == GLFW_PRESS)
+		theWindow->animacionTopos = true;
 
+	// DESACTIVAR animación de topos
+	if (key == GLFW_KEY_Y && action == GLFW_PRESS)
+		theWindow->animacionTopos = false;
 
-	static bool hPressed = false;
-	if (key == GLFW_KEY_H && action == GLFW_PRESS) {
-		if (!hPressed) {
-			if (theWindow->valor == 0.0f)
-				theWindow->valor = 1.0f;
-			else if (theWindow->valor == 1.0f)
-				theWindow->valor = 0.0f;
-			hPressed = true;
-		}
-	}
-	if (key == GLFW_KEY_H && action == GLFW_RELEASE) {
-		hPressed = false;
-	}
-
-	static bool hPressed2 = false;
-	if (key == GLFW_KEY_J && action == GLFW_PRESS) {
-		if (!hPressed2) {
-			if (theWindow->valor2 == 0.0f)
-				theWindow->valor2 = 1.0f;
-			else if (theWindow->valor2 == 1.0f)
-				theWindow->valor2 = 0.0f;
-			hPressed2 = true;
-		}
-	}
-	if (key == GLFW_KEY_J && action == GLFW_RELEASE) {
-		hPressed2 = false;
-	}
-
-	if (key == GLFW_KEY_D && action == GLFW_PRESS)
-	{
-		const char* key_name = glfwGetKeyName(GLFW_KEY_D, 0);
-		//printf("se presiono la tecla: %s\n",key_name);
-	}
 	if (key >= 0 && key < 1024)
 	{
 		if (action == GLFW_PRESS)
-		{
 			theWindow->keys[key] = true;
-			//printf("se presiono la tecla %d'\n", key);
-		}
 		else if (action == GLFW_RELEASE)
-		{
 			theWindow->keys[key] = false;
-			//printf("se solto la tecla %d'\n", key);
-		}
 	}
-	//Danny Phantom
-	if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
-		if (theWindow->banderaAnimacion1_DP) {
-			theWindow->banderaAnimacion1_DP = false;		//Apaga si está prendida
-		}
-		else if (theWindow->banderaAnimacion1_DP == false) {
-			theWindow->banderaAnimacion1_DP = true;			//Prende animación si está apagada
-		}
-
-	}
-	//Furia
-	if (key == GLFW_KEY_C && action == GLFW_PRESS) {
-		if (theWindow->banderaAnimacion1_F) {
-			theWindow->banderaAnimacion1_F = false;		//Apaga si está prendida
-		}
-		else if (theWindow->banderaAnimacion1_F == false) {
-			theWindow->banderaAnimacion1_F = true;			//Prende animación si está apagada
-		}
-
-	}
-	//Panico
-	if (key == GLFW_KEY_B && action == GLFW_PRESS) {
-		if (theWindow->banderaAnimacion1_P) {
-			theWindow->banderaAnimacion1_P = false;		//Apaga si está prendida
-		}
-		else if (theWindow->banderaAnimacion1_P == false) {
-			theWindow->banderaAnimacion1_P = true;			//Prende animación si está apagada
-		}
-
-	}
-
-
 }
 
 void Window::ManejaMouse(GLFWwindow* window, double xPos, double yPos)
@@ -271,10 +145,8 @@ void Window::ManejaMouse(GLFWwindow* window, double xPos, double yPos)
 	theWindow->lastY = yPos;
 }
 
-
 Window::~Window()
 {
 	glfwDestroyWindow(mainWindow);
 	glfwTerminate();
-
 }

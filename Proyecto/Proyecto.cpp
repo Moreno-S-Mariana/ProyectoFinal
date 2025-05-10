@@ -3,11 +3,6 @@
 /*GARCÍA SOTO JEAN CARLO
   MINO GUZMÁN YARA AMAIRANI
   MORENO SANTOYO MARIANA
-
-  Materia: CGEIHC
-  Grupo:
-  Fecha:
-  hola
   */
 #define STB_IMAGE_IMPLEMENTATION
 
@@ -64,15 +59,32 @@ GLfloat vueloDP = 0.0f;
 GLfloat saltoFuria = 0.0f;
 GLfloat desplazamientoY_F = 0.0f;
 GLfloat anguloBrazoF = 0.0f;
+static bool prevUp = false, prevDown = false;
+static bool prevLeft = false, prevRight = false;
+static float walkCycle = 0.0f;
+const float stepDist = 0.3f;
+const float walkCycleStep = glm::radians(45.0f);
+const float legSwing = 30.0f;
+const float armSwing = 20.0f;
+const float stepAng = glm::radians(1.0f);
+const float velocidadGiroFuria = glm::radians(2.0f); 
+float furiaGolpe = 0.0f;
+bool animandoGolpe = false;
+bool golpeBajando = false;
+bool teclaGolpePresionada = false;
 //***************************************** Variable animación de Panico*****************************************
 GLfloat anguloBrazoP = 0.0f;
 GLfloat mueveCuerpoPanico = 0.0f;
+//***************************************** Variable animación de Topo*****************************************
+float topoPosY[3] = { 0.0f, 0.0f, 0.0f };
+float topoAngulo[3] = { 0.0f, 0.0f, 0.0f };
+bool topoSubiendo[3] = { true, true, true };
+float topoTiempoMaximo[3] = { 0.0f, 0.0f, 0.0f };
+float topoTiempoActual[3] = { 0.0f, 0.0f, 0.0f };
+bool topoVisible[3] = { true, true, true };
 //***************************************** Variable animación de Hercules*****************************************
 GLfloat anguloBrazoEspada = 0.0f;
-
-
-
-
+//*****************************************Parámetros generales*****************************************
 Window mainWindow;
 std::vector<Mesh*> meshList;
 std::vector<Shader> shaderList;
@@ -82,7 +94,6 @@ Camera camera;
 Texture brickTexture;
 Texture plainTexture;
 Texture pisoTexture;
-
 
 //***************************************** EDIFICIOS *****************************************
 
@@ -176,7 +187,6 @@ Model DannyP_BrazoIzq;
 Model DannyP_BrazoDer;
 Model DannyP_PiernaIzq;
 Model DannyP_PiernaDer;
-
 //***************************************** NPC´S  *****************************************
 //***************************************** Tristeza*****************************************
 Model Tristeza;
@@ -214,7 +224,6 @@ Model BrazoIzq_Sam;
 Model BrazoDer_Sam;
 Model PiernaIzq_Sam;
 Model PiernaDer_Sam;
-
 //***************************************** COMIDA *****************************************
 
 Model PuestoElotes;
@@ -249,6 +258,10 @@ static const char* vShader = "shaders/shader_light.vert";
 
 // Fragment Shader
 static const char* fShader = "shaders/shader_light.frag";
+
+CameraMode currentCameraMode = THIRD_PERSON;
+int attractionIndex = 0;
+bool attractionInitialized = false;
 
 //función de calculo de normales por promedio de vértices 
 void calcAverageNormals(unsigned int* indices, unsigned int indiceCount, GLfloat* vertices, unsigned int verticeCount,
@@ -372,6 +385,8 @@ int main()
 
 	camera = Camera(glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 0.3f, 0.5f);
 
+	static glm::vec3 furiaPos(-185.0f, 10.0f, 45.0f);
+	static float furiaYaw = glm::radians(90.0f);
 	brickTexture = Texture("Textures/brick.png");
 	brickTexture.LoadTextureA();
 
@@ -577,11 +592,11 @@ int main()
 	Tristeza.LoadModel("Models/Personajes/cuerpo_Tristeza.obj");
 	BrazoDer_T = Model();
 	BrazoDer_T.LoadModel("Models/Personajes/BrazoDer_T.obj");
-	BrazoIzq_T= Model();
+	BrazoIzq_T = Model();
 	BrazoIzq_T.LoadModel("Models/Personajes/BrazoIzq_T.obj");
 	PiernaDer_T = Model();
 	PiernaDer_T.LoadModel("Models/Personajes/PiernaDer_T.obj");
-	PiernaIzq_T= Model();
+	PiernaIzq_T = Model();
 	PiernaIzq_T.LoadModel("Models/Personajes/PiernaIzq_T.obj");
 
 	Alegria = Model();
@@ -595,7 +610,7 @@ int main()
 	PiernaIzq_A = Model();
 	PiernaIzq_A.LoadModel("Models/Personajes/PiernaIzq_A.obj");
 
-	Pena= Model();
+	Pena = Model();
 	Pena.LoadModel("Models/Personajes/CuerpoPena.obj");
 	BrazoDer_Pena = Model();
 	BrazoDer_Pena.LoadModel("Models/Personajes/BrazoDer_Pena.obj");
@@ -638,7 +653,6 @@ int main()
 	PiernaDer_Sam.LoadModel("Models/Personajes/PiernaDer_Sam.obj");
 	PiernaIzq_Sam = Model();
 	PiernaIzq_Sam.LoadModel("Models/Personajes/PiernaIzq_Sam.obj");
-
 	//***************************************** PUESTOS DE COMIDA ****************************************
 
 	PuestoElotes = Model();
@@ -700,17 +714,17 @@ int main()
 	unsigned int pointLightCount_ARRAY1 = 0;
 	// Luz 1
 	pointLights1[0] = PointLight(
-		1.0f, 1.0f, 1.0f,   // color blanco
-		4.0f, 30.0f,        // ambientIntensity = 1.5f, diffuseIntensity = 6.0f
+		1.0f, 1.0f, 1.0f,   
+		4.0f, 30.0f,        
 		160.0f, 60.0f, -185.0f,
-		0.0f, 0.05f, 0.3f   // atenuación más lenta para que llegue más lejos
+		0.0f, 0.05f, 0.3f   
 	);
 	pointLightCount_ARRAY1++;
 
 	// Luz 2
 	pointLights1[1] = PointLight(
 		1.0f, 1.0f, 1.0f,
-		4.0f, 30.0f,                 // ambientIntensity = 1.5f, diffuseIntensity = 8.0f
+		4.0f, 30.0f,                 
 		160.0f, 60.0f, 185.0f,
 		0.0f, 0.05f, 0.3f
 	);
@@ -719,7 +733,7 @@ int main()
 	// Luz 3
 	pointLights1[2] = PointLight(
 		1.0f, 1.0f, 1.0f,
-		4.0f, 30.0f,                 // ambientIntensity = 1.5f, diffuseIntensity = 6.0f
+		4.0f, 30.0f,                 
 		-160.0f, 60.0f, -185.0f,
 		0.0f, 0.05f, 0.3f
 	);
@@ -728,17 +742,17 @@ int main()
 	// Luz 4
 	pointLights1[3] = PointLight(
 		1.0f, 1.0f, 1.0f,
-		4.0f, 30.0f,                 // ambientIntensity = 1.5f, diffuseIntensity = 8.0f
+		4.0f, 30.0f,                
 		-160.0f, 60.0f, 185.0f,
 		0.0f, 0.05f, 0.3f
 	);
 	pointLightCount_ARRAY1++;
 
 	unsigned int pointLightCount_ARRAY2 = 0;
-	pointLights2[0] = PointLight(1.0f, 0.0f, 0.0f,   // color blanco
-		4.0f, 30.0f,				// ambientIntensity = 1.5f, diffuseIntensity = 6.0f
+	pointLights2[0] = PointLight(1.0f, 0.0f, 0.0f,  
+		4.0f, 30.0f,				
 		0.0f, 20.0f, 0.0f,
-		0.0f, 0.05f, 0.3f			// atenuación más lenta para que llegue más lejos
+		0.0f, 0.05f, 0.3f		
 	);
 	pointLightCount_ARRAY2++;
 	//*************************************************************************************************************************************************
@@ -746,9 +760,9 @@ int main()
 	unsigned int spotLightCount = 0;
 	// Lámpara izquierda
 	spotLights[0] = SpotLight(1.0f, 0.843f, 0.6f,
-		10.0f, 80.0f,			// aIntensity y dIntensity
-		-28.0f, 9.0f, 93.0f,   // Posición
-		1.0f, 0.0f, 1.0f,      // Dirección
+		10.0f, 80.0f,			
+		-28.0f, 9.0f, 93.0f,   
+		1.0f, 0.0f, 1.0f,      
 		1.0f, 0.5f, 0.1f,
 		55.0f
 	);
@@ -766,21 +780,21 @@ int main()
 
 	//Carrusel
 	spotLights[2] = SpotLight(1.0f, 0.843f, 0.6f,
-		10.0f, 80.0f,             // Intensidades: ambiente y difusa
+		10.0f, 80.0f,             
 		0.0f, 40.0f, 60.0f,
-		0.0f, -1.0f, 0.0f,       // Dirección (apunta hacia abajo)
-		1.0f, 0.09f, 0.032f,     // Atenuación
-		75.0f                    // Ángulo de corte (grado de apertura)
+		0.0f, -1.0f, 0.0f,       
+		1.0f, 0.09f, 0.032f,     
+		75.0f                    
 	);
 	spotLightCount++;
 
 	//Martillo
-	spotLights[3] = SpotLight(1.0f, 0.843f, 0.6f,  //amarillo cálido
-		10.0f, 80.0f,             // Intensidades: ambiente y difusa
+	spotLights[3] = SpotLight(1.0f, 0.843f, 0.6f, 
+		10.0f, 80.0f,             
 		0.0f, 60.0f, -50.0f,
-		0.0f, -1.0f, 0.0f,       // Dirección (apunta hacia abajo)
-		1.0f, 0.09f, 0.032f,     // Atenuación
-		80.0f                    // Ángulo de corte (grado de apertura)
+		0.0f, -1.0f, 0.0f,       
+		1.0f, 0.09f, 0.032f,     
+		80.0f                   
 	);
 	spotLightCount++;
 
@@ -788,41 +802,41 @@ int main()
 	
 	//Dardo y globos
 	spotLights2[0] = SpotLight(0.529f, 0.808f, 0.922f, //azul
-		10.0f, 80.0f,             // Intensidades: ambiente y difusa
+		10.0f, 80.0f,             
 		-80.0f, 40.0f, 108.0f,
-		0.0f, -1.0f, 0.0f,       // Dirección (apunta hacia abajo)
-		1.0f, 0.09f, 0.032f,     // Atenuación
-		90.0f                    // Ángulo de corte (grado de apertura)
+		0.0f, -1.0f, 0.0f,       
+		1.0f, 0.09f, 0.032f,     
+		90.0f                   
 	);
 	spotLightCount2++;
 	
 	//Hachas
 	spotLights2[1] = SpotLight(0.133f, 0.545f, 0.133f,  //verde
-		10.0f, 80.0f,             // Intensidades: ambiente y difusa
+		10.0f, 80.0f,             
 		70.0f, 45.0f, -90.0f,
-		0.0f, -1.0f, 0.0f,       // Dirección (apunta hacia abajo)
-		1.0f, 0.09f, 0.032f,     // Atenuación
-		80.0f                    // Ángulo de corte (grado de apertura)
+		0.0f, -1.0f, 0.0f,     
+		1.0f, 0.09f, 0.032f,     
+		80.0f                    
 	);
 	spotLightCount2++;
 
 	//Topo
 	spotLights2[2] = SpotLight(0.502f, 0.0f, 0.502f,  //morado
-		10.0f, 80.0f,             // Intensidades: ambiente y difusa
+		10.0f, 80.0f,             
 		-55.0f, 50.0f, -90.0f,
-		0.0f, -1.0f, 0.0f,       // Dirección (apunta hacia abajo)
-		1.0f, 0.09f, 0.032f,     // Atenuación
-		80.0f                    // Ángulo de corte (grado de apertura)
+		0.0f, -1.0f, 0.0f,       
+		1.0f, 0.09f, 0.032f,     
+		80.0f                   
 	);
 	spotLightCount2++;
 
 	//Dados
 	spotLights2[3] = SpotLight(1.0f, 1.0f, 0.0f,  
-		10.0f, 80.0f,             // Intensidades: ambiente y difusa
+		10.0f, 80.0f,             
 		85.0f, 30.0f, 100.0f,
-		0.0f, -1.0f, 0.0f,       // Dirección (apunta hacia abajo)
-		1.0f, 0.09f, 0.032f,     // Atenuación
-		55.0f                    // Ángulo de corte (grado de apertura)
+		0.0f, -1.0f, 0.0f,       
+		0.5f, 0.6f, 0.15f,     
+		55.0f                    
 	);
 	spotLightCount2++;
 
@@ -884,8 +898,54 @@ int main()
 
 		angulovaria += 0.3f * deltaTime;
 
+		//Animacion topos
+		if (mainWindow.getAnimacionTopos()) {
+			for (int i = 0; i < 3; i++) {
+				// Rotación continua más lenta aún
+				topoAngulo[i] += 2.0f * deltaTime;
+				if (topoAngulo[i] > 360.0f) topoAngulo[i] -= 360.0f;
+
+				// Temporizador de visibilidad
+				topoTiempoActual[i] += deltaTime;
+
+				if (topoVisible[i]) {
+					if (topoTiempoActual[i] >= 10.0f) {
+						topoVisible[i] = false;
+						topoTiempoActual[i] = 0.0f;
+					}
+				}
+				else {
+					if (topoTiempoActual[i] >= 5.0f) {
+						topoVisible[i] = true;
+						topoTiempoActual[i] = 0.0f;
+					}
+				}
+
+				// Movimiento vertical muy suave
+				if (topoVisible[i]) {
+					if (topoSubiendo[i]) {
+						topoPosY[i] += 10.0f * deltaTime;
+						if (topoPosY[i] >= 3.0f) {
+							topoPosY[i] = 3.0f;
+							topoSubiendo[i] = false;
+						}
+					}
+					else {
+						topoPosY[i] = 3.0f;
+					}
+				}
+				else {
+					topoSubiendo[i] = true;
+					topoPosY[i] -= 10.0f * deltaTime;
+					if (topoPosY[i] <= 0.0f) {
+						topoPosY[i] = 0.0f;
+					}
+				}
+			}
+		}
+
+
 		// Movimiento alternante del martillo
-		// Movimiento alternante del martillo (gira de -90° a +90° suavemente)
 		if (direccionDerecha) {
 			anguloMartillo += velocidadOscilacion * deltaTime;
 			if (anguloMartillo >= 135.0f) {
@@ -910,15 +970,77 @@ int main()
 		float blendFactor = 0.0f;
 
 		//0.3->Dia		0.1->Noche
-		/*
+		
 		intensidad = 0.1f + 0.2f * (0.5f + 0.5f * sin(lastTime * velocidadDN));
-		mainLight.UpdateLightIntensity(intensidad, intensidad);*/
-		mainLight.UpdateLightIntensity(0.3, 0.3);	//Cambiar al final 
+		mainLight.UpdateLightIntensity(intensidad, intensidad);
 
 		//Recibir eventos del usuario
 		glfwPollEvents();
-		camera.keyControl(mainWindow.getsKeys(), deltaTime);
+
+
+		if (currentCameraMode != ATTRACTIONS) {
+			camera.keyControl(mainWindow.getsKeys(), deltaTime, currentCameraMode);
+		}
 		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
+
+		bool* keys = mainWindow.getsKeys();
+
+
+		if (keys[GLFW_KEY_1]) currentCameraMode = FIRST_PERSON;
+		if (keys[GLFW_KEY_2]) currentCameraMode = THIRD_PERSON;
+		if (keys[GLFW_KEY_3]) currentCameraMode = TOP_VIEW;
+		if (keys[GLFW_KEY_4]) {
+			currentCameraMode = ATTRACTIONS;
+			attractionInitialized = false;  // Reinicia bandera de inicialización
+		}
+
+		// Control de giro de Furia con las flechas izquierda/derecha
+		if (keys[GLFW_KEY_LEFT]) {
+			furiaYaw -= velocidadGiroFuria * deltaTime;
+		}
+		if (keys[GLFW_KEY_RIGHT]) {
+			furiaYaw += velocidadGiroFuria * deltaTime;
+		}
+
+		// Cambiar el estado del mazo SOLO si está en primera persona
+		if (currentCameraMode == FIRST_PERSON) {
+			if (keys[GLFW_KEY_M]) mainWindow.setFuriaTieneMazo(true);  // Agarra
+			if (keys[GLFW_KEY_N]) mainWindow.setFuriaTieneMazo(false); // Suelta
+		}
+
+		if (currentCameraMode == FIRST_PERSON && mainWindow.getFuriaTieneMazo()) {
+			if (keys[GLFW_KEY_Q] && !teclaGolpePresionada) {
+				teclaGolpePresionada = true;
+				animandoGolpe = true;
+				golpeBajando = true;
+			}
+			if (!keys[GLFW_KEY_Q]) {
+				teclaGolpePresionada = false;
+			}
+		}
+
+		static double lastSwitchTime = 0.0;
+		double currentTime = glfwGetTime();
+		if (currentCameraMode == ATTRACTIONS) {
+			if (keys[GLFW_KEY_E] && currentTime - lastSwitchTime > 0.3) {
+				attractionIndex = (attractionIndex + 1) % 4;
+				glm::vec3 attractionPos = spotLights2[attractionIndex].GetPosition();
+				glm::vec3 offset = glm::vec3(0.0f, 10.0f, 30.0f); // puedes ajustar esto
+				camera.setPosition(attractionPos + offset);
+				camera.setDirection(glm::normalize(attractionPos - (attractionPos + offset)));
+				lastSwitchTime = currentTime;
+			}
+
+			if (keys[GLFW_KEY_Q] && currentTime - lastSwitchTime > 0.3) {
+				attractionIndex = (attractionIndex + 3) % 4;
+				glm::vec3 attractionPos = spotLights2[attractionIndex].GetPosition();
+				glm::vec3 offset = glm::vec3(0.0f, 10.0f, 30.0f);
+				camera.setPosition(attractionPos + offset);
+				camera.setDirection(glm::normalize(attractionPos - (attractionPos + offset)));
+				lastSwitchTime = currentTime;
+			}
+
+		}
 
 		// Clear the window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -928,7 +1050,51 @@ int main()
 		uniformShininess = shaderList[0].GetShininessLocation();
 
 		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
-		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
+		//glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
+		glm::mat4 view;
+		switch (currentCameraMode) {
+		case FIRST_PERSON:
+			camera.setPosition(furiaPos + glm::vec3(0.0f, 8.0f, 0.0f));
+			view = camera.calculateViewMatrix();  // ¡NO ajustes el yaw manualmente!
+			break;
+		case THIRD_PERSON:
+		{
+			glm::vec3 offset = glm::vec3(0.0f, 10.0f, 20.0f); // distancia detrás de Furia
+			glm::vec3 thirdPersonPos = furiaPos - glm::normalize(camera.getCameraDirection()) * 20.0f + glm::vec3(0.0f, 10.0f, 0.0f);
+			camera.setPosition(thirdPersonPos);
+			view = camera.calculateViewMatrix();
+			break;
+		}
+		case TOP_VIEW:
+		{
+			static bool primeraVez = true;
+			if (primeraVez) {
+				camera.setPosition(glm::vec3(0.0f, 150.0f, 0.0f));
+				primeraVez = false;
+			}
+
+			// Fijar la dirección de la cámara hacia abajo
+			glm::vec3 pos = camera.getCameraPosition();
+			glm::vec3 target = pos + glm::vec3(0.0f, -1.0f, 0.0f); // mira hacia abajo
+			glm::vec3 up = glm::vec3(0.0f, 0.0f, -1.0f); // mantener eje horizontal como 'arriba'
+
+			view = glm::lookAt(pos, target, up);
+			break;
+		}
+		case ATTRACTIONS:
+			if (!attractionInitialized) {
+				glm::vec3 attractionPos = spotLights2[attractionIndex].GetPosition();
+				camera.setPosition(attractionPos + glm::vec3(0.0f, 5.0f, 30.0f));  // Vista desde enfrente
+				camera.setDirection(glm::normalize(attractionPos - camera.getCameraPosition()));
+				camera.setYaw(glm::radians(180.0f));  // Opcional: ajusta orientación
+				attractionInitialized = true;
+			}
+			view = camera.calculateViewMatrix();
+		break;
+		}
+
+		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
+
 		glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
 
 		// día completo
@@ -955,7 +1121,7 @@ int main()
 
 		// 3) Vector dirección del sol: barrido en el plano X–Y (Z fijo o pequeño para inclinar)
 		glm::vec3 sunDir = glm::normalize(glm::vec3(
-			cosf(sunRad),      // componente X: este?oeste
+			cosf(sunRad),      // componente X: este/oeste
 			sinf(sunRad),      // componente Y: horizonte?cenit?horizonte
 			0.2f               // un poco de Z para que la luz no venga exactamente del foco
 		));
@@ -988,14 +1154,6 @@ int main()
 		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
 		glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
 
-		// luz ligada a a cámara de tipo flash
-		//sirve para que en tiempo de ejecución (dentro del while) se cambien propiedades de la luz
-		//glm::vec3 lowerLight = camera.getCameraPosition();
-		//lowerLight.y -= 0.3f;
-		//spotLights[0].SetFlash(lowerLight, camera.getCameraDirection());
-
-		//glm::vec3 lightPosition = glm::vec3(0.0f, 0.0f, 0.0f) + glm::vec3(0.0f, 0.0f, 0.1f) * (a1 + a2);
-
 		shaderList[0].SetDirectionalLight(&mainLight);							//Habilita luz principal
 		
 		//Arreglo para los arreglos de luces
@@ -1008,14 +1166,14 @@ int main()
 
 		// ---------- Arreglo 1: spotLights[] (enciende solo si están cerca)
 		for (int i = 0; i < spotLightCount; ++i) {
-			if (estaCerca(camPos, spotLights[i].GetPosition(), 100.0f)) {
+			if (estaCerca(camPos, spotLights[i].GetPosition(), 90.0f)) {
 				lucesActivas[totalLucesActivas++] = spotLights[i];
 			}
 		}
 
 		// ---------- Arreglo 2: spotLights2[] (una por atracción, solo si cerca)
 		for (int i = 0; i < spotLightCount2; ++i) {
-			if (estaCerca(camPos, spotLights2[i].GetPosition(), 80.0f)) {
+			if (estaCerca(camPos, spotLights2[i].GetPosition(), 60.0f)) {
 				lucesActivas[totalLucesActivas++] = spotLights2[i];
 			}
 		}
@@ -1023,7 +1181,7 @@ int main()
 		// ---------- Arreglo 3: spotLights3[] (una luz encendida a la vez cíclicamente)
 		bool camaraCercaDeLuces3 = false;
 		for (int i = 0; i < spotLightCount3; ++i) {
-			if (estaCerca(camPos, spotLights3[i].GetPosition(), 100.0f)) {
+			if (estaCerca(camPos, spotLights3[i].GetPosition(), 90.0f)) {
 				camaraCercaDeLuces3 = true;
 				break;
 			}
@@ -1040,10 +1198,6 @@ int main()
 		// ---------- Activar luces finales
 		shaderList[0].SetSpotLights(lucesActivas, totalLucesActivas);
 		
-		//shaderList[0].SetSpotLights(spotLights, spotLightCount);				//Habilita las luces del spotlight
-		//shaderList[0].SetSpotLights(spotLights2, spotLightCount2);
-		//shaderList[0].SetSpotLights(spotLights3, spotLightCount3);
-
 		//0.3 dia
 		//0.1 noche
 		if (intensidad < 0.175f) {
@@ -1057,7 +1211,6 @@ int main()
 		glm::mat4 modelaux(1.0);
 		glm::mat4 modelaux2(1.0);
 		glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
-
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
@@ -1167,7 +1320,7 @@ int main()
 		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Bolaboliche.RenderModel();
-		
+
 		//************************* NPC Pena ***************************************************************
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.2f, 1.75f, -3.0f));
@@ -1180,7 +1333,7 @@ int main()
 		model = glm::translate(model, glm::vec3(0.18f, -0.21f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		PiernaIzq_Pena.RenderModel();
-		
+
 		model = modelaux2;
 		model = glm::translate(model, glm::vec3(-0.16f, -0.21f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -1695,6 +1848,7 @@ int main()
 		model = glm::rotate(model, glm::radians(-135.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Dardos.RenderModel();
+
 		//******************************** NPC Hercules *************************************************************
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-15.0f, 10.8f, -30.0f));
@@ -1722,6 +1876,7 @@ int main()
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-1.03f, 0.97f, 0.0f));
 		//Animación de espadazos
+		anguloBrazoEspada += 0.5 * deltaTime;
 		model = glm::rotate(model, glm::radians(-130.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(50 * sin(glm::radians(10 * anguloBrazoEspada))), glm::vec3(1.0f, -1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -1752,67 +1907,43 @@ int main()
 		Coin.RenderModel();
 
 		//***************************************** TOPOS *****************************************
-
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-70.0f, 3.0f, -90.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		modelaux = model;
-		modelaux2 = model;
 		model = glm::scale(model, glm::vec3(40.0f, 40.0f, 40.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Topo.RenderModel();
 
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.5f, 11.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Monito_TOPO.RenderModel();		//Primer topo
+		// Posiciones relativas de cada topo
+		glm::vec3 posicionesTopos[3] = {
+			glm::vec3(0.5f, 8.0f, 0.0f),
+			glm::vec3(4.5f, 8.0f, 2.5f),
+			glm::vec3(4.5f, 8.0f, -2.5f)
+		};
 
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(4.5f, 11.0f, 2.5f));
-		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Monito_TOPO.RenderModel();		//Segundo topo
+		// Renderizado de cada Monito_TOPO
+		if (mainWindow.getAnimacionTopos()) {
+			for (int i = 0; i < 3; i++) {
+				if (topoVisible[i]) {
+					model = modelaux;
+					model = glm::translate(model, posicionesTopos[i] + glm::vec3(0.0f, topoPosY[i], 0.0f));
+					model = glm::rotate(model, glm::radians(topoAngulo[i]), glm::vec3(0.0f, 1.0f, 0.0f));
+					model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+					glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+					Monito_TOPO.RenderModel();
+				}
+			}
+		}
 
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(4.5f, 11.0f, -2.5f));
-		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Monito_TOPO.RenderModel();		//Tercer topo
+		if (!mainWindow.getFuriaTieneMazo()) {
+			model = modelaux;
+			model = glm::translate(model, glm::vec3(25.0f, 0.0f, -10.0f));
+			model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			Mazo.RenderModel();
+		}
 
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(25.0f, 0.0f, -10.0f));
-		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Mazo.RenderModel();
-		/**/
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(15.0f, 11.8f, -18.0f));
-		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
-		modelaux = model;
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Ember.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.05f, -0.13f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		PiernaIzq_Ember.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(-0.05f, -0.13f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		PiernaDer_Ember.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.085f, 0.227f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		BrazoIzq_Ember.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(-0.09f, 0.225f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		BrazoDer_Ember.RenderModel();
 
 		//************************ Mesa cobro moneda topos ********************************************** 
 		model = modelaux2;
@@ -2005,66 +2136,122 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		PanicoBizq.RenderModel();
 		/********************************************Furia****************************************************/
-		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(-185.0f, 11.0f, 45.0f));
-		model = glm::scale(model, glm::vec3(20.0f, 20.0f, 20.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		{
+			bool up = keys[GLFW_KEY_UP];
+			bool down = keys[GLFW_KEY_DOWN];
+			bool left = keys[GLFW_KEY_LEFT];
+			bool right = keys[GLFW_KEY_RIGHT];
 
-		if (mainWindow.getAnimacion_Simp1_F()) {	//Activa animación
-			saltoFuria += 0.1f * deltaTime;
-			desplazamientoY_F = fabs(sin(saltoFuria)) * 0.7f;		//Valor abs para no desplazarse hacia abajo
-			model = glm::translate(model, glm::vec3(0.0f,
-				0.0f + desplazamientoY_F,
-				0.0f));
+			glm::vec3 forward = glm::vec3(sin(furiaYaw), 0.0f, cos(furiaYaw));
+			int stepDir = 0;
+
+			if (up) {
+				furiaPos += forward * stepDist * deltaTime * 0.5f;
+				stepDir = +1;
+			}
+			if (down) {
+				furiaPos -= forward * stepDist * deltaTime * 0.5f;
+				stepDir = -1;
+			}
+			if (right) {
+				furiaYaw += velocidadGiroFuria * deltaTime;
+				stepDir = +1;
+			}
+			if (left) {
+				furiaYaw -= velocidadGiroFuria * deltaTime;
+				stepDir = +1;
+			}
+
+			if (stepDir != 0) {
+				walkCycle += stepDir * walkCycleStep * deltaTime * 0.2f;
+			}
+
+			float legAngle = sin(walkCycle) * legSwing;
+			float armAngle = sin(walkCycle) * armSwing;
+
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, furiaPos);
+			model = glm::rotate(model, furiaYaw, glm::vec3(0, 1, 0));
+			model = glm::scale(model, glm::vec3(20.0f, 20.0f, 20.0f));
+			modelaux = model;
+
+			if (currentCameraMode != FIRST_PERSON) {
+				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(modelaux));
+				Furia_cuerpo.RenderModel();
+
+				model = modelaux;
+				model = glm::translate(model, glm::vec3(0.145f, -0.125f, 0.0f));
+				model = glm::rotate(model, glm::radians(-legAngle), glm::vec3(1, 0, 0));
+				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+				Furia_PiernaIzq.RenderModel();
+
+				model = modelaux;
+				model = glm::translate(model, glm::vec3(-0.143f, -0.128f, 0.0f));
+				model = glm::rotate(model, glm::radians(legAngle), glm::vec3(1, 0, 0));
+				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+				Furia_PiernaDer.RenderModel();
+
+				model = modelaux;
+				model = glm::translate(model, glm::vec3(0.275f, 0.085f, 0.0f));
+				model = glm::rotate(model, glm::radians(-armAngle), glm::vec3(1, 0, 0));
+				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+				Furia_BrazoIzq.RenderModel();
+
+				// Brazo derecho también visible en 3ra persona
+				model = modelaux;
+				model = glm::translate(model, glm::vec3(-0.26f, 0.088f, 0.0f));
+				model = glm::rotate(model, glm::radians(armAngle), glm::vec3(1, 0, 0));
+				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+				Furia_BrazoDer.RenderModel();
+			}
+			else {
+				// SOLO se muestra el brazo derecho en 1ra persona
+				if (mainWindow.getFuriaTieneMazo()) {
+					model = modelaux;
+
+					// Posicionamiento del brazo con el mazo
+					model = glm::translate(model, glm::vec3(-0.26f, 0.2f, 0.5f));
+
+					// Animación de golpeo con rotación vertical sincronizada
+					if (animandoGolpe) {
+						if (golpeBajando) {
+							furiaGolpe += 90.0f * deltaTime;
+							if (furiaGolpe >= 50.0f) {
+								furiaGolpe = 50.0f;
+								golpeBajando = false;
+
+								// Aquí puedes activar lógica de impacto con el topo
+								// if (topoVisible[...] && ...) { /* lógica */ }
+							}
+						}
+						else {
+							furiaGolpe -= 90.0f * deltaTime;
+							if (furiaGolpe <= 0.0f) {
+								furiaGolpe = 0.0f;
+								animandoGolpe = false;
+							}
+						}
+					}
+
+					model = glm::rotate(model, glm::radians(-85.0f - furiaGolpe), glm::vec3(1.0f, 0.0f, 0.0f));
+					glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+					Furia_BrazoDer.RenderModel();
+
+					// Dibuja el mazo en la mano
+					model = glm::mat4(1.0f);
+					model = glm::translate(modelaux, glm::vec3(-0.15f, 0.08f, 0.39f));
+					model = glm::rotate(model, glm::radians(-85.0f - furiaGolpe), glm::vec3(1.0f, 0.0f, 0.0f));
+					model = glm::rotate(model, glm::radians(-40.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+					model = glm::rotate(model, glm::radians(80.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+					model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+					glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+					Mazo.RenderModel();
+				}
+
+
+			}
 		}
-		else if (mainWindow.getAnimacion_Simp1_DP() == false) {
-			saltoFuria = 0.0f;		//Reinicia el recorrido de la animación
-		}
 
-		modelaux = model;
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Furia_cuerpo.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.145f, -0.125f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Furia_PiernaIzq.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(-0.143f, -0.128f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Furia_PiernaDer.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.275f, 0.085f, 0.0f));
-		if (mainWindow.getAnimacion_Simp1_F()) {	//Activa animación
-			anguloBrazoF += 0.7f * deltaTime;
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, -0.05f));
-			model = glm::rotate(model, glm::radians(-130.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(50 * sin(glm::radians(10 * anguloBrazoF))), glm::vec3(1.0f, 0.0f, 0.0f));
-		}
-		else if (mainWindow.getAnimacion_Simp1_DP() == false) {
-			anguloBrazoF = 0.0f;
-		}
-		modelaux2 = model;
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Furia_BrazoIzq.RenderModel();
-
-		model = modelaux2;
-		model = glm::translate(model, glm::vec3(0.06f, -0.2f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.1f, 0.1, 0.1f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Taco.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(-0.26f, 0.088f, 0.0f));
-		if (mainWindow.getAnimacion_Simp1_F()) {	//Activa animación
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, -0.05f));
-			model = glm::rotate(model, glm::radians(-130.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(50 * sin(glm::radians(10 * anguloBrazoF))), glm::vec3(1.0f, 0.0f, 0.0f));
-		}
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Furia_BrazoDer.RenderModel();
 		/********************************************Danny Phantom****************************************************/
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(81.0f, 16.0f, -67.0f));
@@ -2111,7 +2298,6 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		DannyP_BrazoDer.RenderModel();
 
-
 		//***************************************** PUESTOS *****************************************
 
 		model = glm::mat4(1.0);
@@ -2122,7 +2308,6 @@ int main()
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(35.0f, 3.0f, 35.0f));
-		modelaux = model;
 		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -2166,9 +2351,8 @@ int main()
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-35.0f, 10.0f, 35.0f));
-		modelaux = model;
-		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		PuestoAlgodon.RenderModel();
 
@@ -2203,8 +2387,7 @@ int main()
 
 		//*********************************************************************************************
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(-35.0f, 12.0f, -35.0f));
-		modelaux = model;
+		model = glm::translate(model, glm::vec3(-35.0f, 11.0f, -35.0f));
 		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -2220,7 +2403,7 @@ int main()
 		Tristeza.RenderModel();
 
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(1.92f, -4.3f,0.0f));
+		model = glm::translate(model, glm::vec3(1.92f, -4.3f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		PiernaIzq_T.RenderModel();
 
@@ -2238,9 +2421,8 @@ int main()
 		model = glm::translate(model, glm::vec3(5.7f, 4.9f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		BrazoIzq_T.RenderModel();
-		
-		//*************************************************************************************************
 
+		//*************************************************************************************************
 
 		glDisable(GL_BLEND);
 
@@ -2248,6 +2430,5 @@ int main()
 
 		mainWindow.swapBuffers();
 	}
-
 	return 0;
 }
