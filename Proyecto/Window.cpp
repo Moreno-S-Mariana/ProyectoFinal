@@ -5,6 +5,7 @@ Window::Window()
 	width = 800;
 	height = 600;
 	animacionTopos = false;
+	furiaTieneMazo = false;  // NUEVO
 
 	for (size_t i = 0; i < 1024; i++)
 		keys[i] = 0;
@@ -18,6 +19,7 @@ Window::Window(GLint windowWidth, GLint windowHeight)
 	banderaAnimacion1_DP = false;
 	banderaAnimacion1_P = false;
 	animacionTopos = false;
+	furiaTieneMazo = false;  // NUEVO
 
 	for (size_t i = 0; i < 1024; i++)
 		keys[i] = 0;

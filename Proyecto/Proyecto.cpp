@@ -67,7 +67,11 @@ const float walkCycleStep = glm::radians(45.0f);
 const float legSwing = 30.0f;
 const float armSwing = 20.0f;
 const float stepAng = glm::radians(1.0f);
-const float velocidadGiroFuria = glm::radians(2.0f);  
+const float velocidadGiroFuria = glm::radians(2.0f); 
+float furiaGolpe = 0.0f;
+bool animandoGolpe = false;
+bool golpeBajando = false;
+bool teclaGolpePresionada = false;
 //***************************************** Variable animación de Panico*****************************************
 GLfloat anguloBrazoP = 0.0f;
 GLfloat mueveCuerpoPanico = 0.0f;
@@ -78,6 +82,8 @@ bool topoSubiendo[3] = { true, true, true };
 float topoTiempoMaximo[3] = { 0.0f, 0.0f, 0.0f };
 float topoTiempoActual[3] = { 0.0f, 0.0f, 0.0f };
 bool topoVisible[3] = { true, true, true };
+//***************************************** Variable animación de Hercules*****************************************
+GLfloat anguloBrazoEspada = 0.0f;
 //*****************************************Parámetros generales*****************************************
 Window mainWindow;
 std::vector<Mesh*> meshList;
@@ -181,7 +187,43 @@ Model DannyP_BrazoIzq;
 Model DannyP_BrazoDer;
 Model DannyP_PiernaIzq;
 Model DannyP_PiernaDer;
-
+//***************************************** NPC´S  *****************************************
+//***************************************** Tristeza*****************************************
+Model Tristeza;
+Model BrazoIzq_T;
+Model BrazoDer_T;
+Model PiernaIzq_T;
+Model PiernaDer_T;
+//***************************************** Alegría*****************************************
+Model Alegria;
+Model BrazoIzq_A;
+Model BrazoDer_A;
+Model PiernaIzq_A;
+Model PiernaDer_A;
+//***************************************** Pena *****************************************
+Model Pena;
+Model BrazoIzq_Pena;
+Model BrazoDer_Pena;
+Model PiernaIzq_Pena;
+Model PiernaDer_Pena;
+//***************************************** Hercules *****************************************
+Model Hercules;
+Model BrazoIzq_Hercules;
+Model BrazoDer_Hercules;
+Model PiernaIzq_Hercules;
+Model PiernaDer_Hercules;
+//***************************************** Ember *****************************************
+Model Ember;
+Model BrazoIzq_Ember;
+Model BrazoDer_Ember;
+Model PiernaIzq_Ember;
+Model PiernaDer_Ember;
+//***************************************** Sam *****************************************
+Model Sam;
+Model BrazoIzq_Sam;
+Model BrazoDer_Sam;
+Model PiernaIzq_Sam;
+Model PiernaDer_Sam;
 //***************************************** COMIDA *****************************************
 
 Model PuestoElotes;
@@ -546,6 +588,71 @@ int main()
 	DannyP_PiernaDer = Model();
 	DannyP_PiernaDer.LoadModel("Models/Personajes/PiernaDer_DP.obj");
 
+	Tristeza = Model();
+	Tristeza.LoadModel("Models/Personajes/cuerpo_Tristeza.obj");
+	BrazoDer_T = Model();
+	BrazoDer_T.LoadModel("Models/Personajes/BrazoDer_T.obj");
+	BrazoIzq_T = Model();
+	BrazoIzq_T.LoadModel("Models/Personajes/BrazoIzq_T.obj");
+	PiernaDer_T = Model();
+	PiernaDer_T.LoadModel("Models/Personajes/PiernaDer_T.obj");
+	PiernaIzq_T = Model();
+	PiernaIzq_T.LoadModel("Models/Personajes/PiernaIzq_T.obj");
+
+	Alegria = Model();
+	Alegria.LoadModel("Models/Personajes/Cuerpo_A.obj");
+	BrazoDer_A = Model();
+	BrazoDer_A.LoadModel("Models/Personajes/BrazoDer_A.obj");
+	BrazoIzq_A = Model();
+	BrazoIzq_A.LoadModel("Models/Personajes/BrazoIzq_A.obj");
+	PiernaDer_A = Model();
+	PiernaDer_A.LoadModel("Models/Personajes/PiernaDer_A.obj");
+	PiernaIzq_A = Model();
+	PiernaIzq_A.LoadModel("Models/Personajes/PiernaIzq_A.obj");
+
+	Pena = Model();
+	Pena.LoadModel("Models/Personajes/CuerpoPena.obj");
+	BrazoDer_Pena = Model();
+	BrazoDer_Pena.LoadModel("Models/Personajes/BrazoDer_Pena.obj");
+	BrazoIzq_Pena = Model();
+	BrazoIzq_Pena.LoadModel("Models/Personajes/BrazoIzq_Pena.obj");
+	PiernaDer_Pena = Model();
+	PiernaDer_Pena.LoadModel("Models/Personajes/PiernaDer_Pena.obj");
+	PiernaIzq_Pena = Model();
+	PiernaIzq_Pena.LoadModel("Models/Personajes/PiernaIzq_Pena.obj");
+
+	Hercules = Model();
+	Hercules.LoadModel("Models/Personajes/CuerpoHercules.obj");
+	BrazoDer_Hercules = Model();
+	BrazoDer_Hercules.LoadModel("Models/Personajes/BrazoDer_H.obj");
+	BrazoIzq_Hercules = Model();
+	BrazoIzq_Hercules.LoadModel("Models/Personajes/BrazoIzq_H.obj");
+	PiernaDer_Hercules = Model();
+	PiernaDer_Hercules.LoadModel("Models/Personajes/PiernaDer_H.obj");
+	PiernaIzq_Hercules = Model();
+	PiernaIzq_Hercules.LoadModel("Models/Personajes/PiernaIzq_H.obj");
+
+	Ember = Model();
+	Ember.LoadModel("Models/Personajes/cuerpo_Ember.obj");
+	BrazoDer_Ember = Model();
+	BrazoDer_Ember.LoadModel("Models/Personajes/BrazoDer_Ember.obj");
+	BrazoIzq_Ember = Model();
+	BrazoIzq_Ember.LoadModel("Models/Personajes/BrazoIzq_Ember.obj");
+	PiernaDer_Ember = Model();
+	PiernaDer_Ember.LoadModel("Models/Personajes/PiernaDer_Ember.obj");
+	PiernaIzq_Ember = Model();
+	PiernaIzq_Ember.LoadModel("Models/Personajes/PiernaIzq_Ember.obj");
+
+	Sam = Model();
+	Sam.LoadModel("Models/Personajes/Cuerpo_Sam.obj");
+	BrazoDer_Sam = Model();
+	BrazoDer_Sam.LoadModel("Models/Personajes/BrazoDer_Sam.obj");
+	BrazoIzq_Sam = Model();
+	BrazoIzq_Sam.LoadModel("Models/Personajes/BrazoIzq_Sam.obj");
+	PiernaDer_Sam = Model();
+	PiernaDer_Sam.LoadModel("Models/Personajes/PiernaDer_Sam.obj");
+	PiernaIzq_Sam = Model();
+	PiernaIzq_Sam.LoadModel("Models/Personajes/PiernaIzq_Sam.obj");
 	//***************************************** PUESTOS DE COMIDA ****************************************
 
 	PuestoElotes = Model();
@@ -869,12 +976,15 @@ int main()
 
 		//Recibir eventos del usuario
 		glfwPollEvents();
+
+
 		if (currentCameraMode != ATTRACTIONS) {
 			camera.keyControl(mainWindow.getsKeys(), deltaTime, currentCameraMode);
 		}
 		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
 
 		bool* keys = mainWindow.getsKeys();
+
 
 		if (keys[GLFW_KEY_1]) currentCameraMode = FIRST_PERSON;
 		if (keys[GLFW_KEY_2]) currentCameraMode = THIRD_PERSON;
@@ -890,6 +1000,23 @@ int main()
 		}
 		if (keys[GLFW_KEY_RIGHT]) {
 			furiaYaw += velocidadGiroFuria * deltaTime;
+		}
+
+		// Cambiar el estado del mazo SOLO si está en primera persona
+		if (currentCameraMode == FIRST_PERSON) {
+			if (keys[GLFW_KEY_M]) mainWindow.setFuriaTieneMazo(true);  // Agarra
+			if (keys[GLFW_KEY_N]) mainWindow.setFuriaTieneMazo(false); // Suelta
+		}
+
+		if (currentCameraMode == FIRST_PERSON && mainWindow.getFuriaTieneMazo()) {
+			if (keys[GLFW_KEY_Q] && !teclaGolpePresionada) {
+				teclaGolpePresionada = true;
+				animandoGolpe = true;
+				golpeBajando = true;
+			}
+			if (!keys[GLFW_KEY_Q]) {
+				teclaGolpePresionada = false;
+			}
 		}
 
 		static double lastSwitchTime = 0.0;
@@ -1127,7 +1254,7 @@ int main()
 
 		//************************Boliche**********************************************************
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, -0.1f, 0.0f));
 		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Boliche.RenderModel();
@@ -1193,6 +1320,34 @@ int main()
 		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Bolaboliche.RenderModel();
+
+		//************************* NPC Pena ***************************************************************
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(0.2f, 1.75f, -3.0f));
+		modelaux2 = model;
+		//model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Pena.RenderModel();
+
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(0.18f, -0.21f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PiernaIzq_Pena.RenderModel();
+
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(-0.16f, -0.21f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PiernaDer_Pena.RenderModel();
+
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(-0.25f, 0.11f, -0.04f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		BrazoDer_Pena.RenderModel();
+
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(0.25f, 0.1f, -0.04f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		BrazoIzq_Pena.RenderModel();
 
 		//************************Mesa cobro moneda boliche************************************************ 
 		model = modelaux;
@@ -1694,6 +1849,40 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Dardos.RenderModel();
 
+		//******************************** NPC Hercules *************************************************************
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-15.0f, 10.8f, -30.0f));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		model = glm::rotate(model, glm::radians(135.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelaux = model;
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Hercules.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(0.21f, -0.5f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PiernaIzq_Hercules.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-0.21f, -0.5f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PiernaDer_Hercules.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(1.0f, 0.98f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		BrazoIzq_Hercules.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-1.03f, 0.97f, 0.0f));
+		//Animación de espadazos
+		model = glm::rotate(model, glm::radians(-130.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(50 * sin(glm::radians(10 * anguloBrazoEspada))), glm::vec3(1.0f, -1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		BrazoDer_Hercules.RenderModel();
+
 		//************************ Mesa cobro moneda Dardos ********************************************** 
 		model = modelaux2;
 		model = glm::translate(model, glm::vec3(25.0f, -1.0f, 0.0f));
@@ -1746,12 +1935,14 @@ int main()
 			}
 		}
 
-		// MAZO
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(25.0f, 0.0f, -10.0f));
-		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Mazo.RenderModel();
+		if (!mainWindow.getFuriaTieneMazo()) {
+			model = modelaux;
+			model = glm::translate(model, glm::vec3(25.0f, 0.0f, -10.0f));
+			model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			Mazo.RenderModel();
+		}
+
 
 		//************************ Mesa cobro moneda topos ********************************************** 
 		model = modelaux2;
@@ -2014,11 +2205,49 @@ int main()
 			}
 			else {
 				// SOLO se muestra el brazo derecho en 1ra persona
-				model = modelaux;
-				model = glm::translate(model, glm::vec3(-0.26f, 0.2f, 0.5f)); // misma posición que en 3ra
-				model = glm::rotate(model, glm::radians(armAngle), glm::vec3(1, 0, 0));
-				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-				Furia_BrazoDer.RenderModel();
+				if (mainWindow.getFuriaTieneMazo()) {
+					model = modelaux;
+
+					// Posicionamiento del brazo con el mazo
+					model = glm::translate(model, glm::vec3(-0.26f, 0.2f, 0.5f));
+
+					// Animación de golpeo con rotación vertical sincronizada
+					if (animandoGolpe) {
+						if (golpeBajando) {
+							furiaGolpe += 90.0f * deltaTime;
+							if (furiaGolpe >= 50.0f) {
+								furiaGolpe = 50.0f;
+								golpeBajando = false;
+
+								// Aquí puedes activar lógica de impacto con el topo
+								// if (topoVisible[...] && ...) { /* lógica */ }
+							}
+						}
+						else {
+							furiaGolpe -= 90.0f * deltaTime;
+							if (furiaGolpe <= 0.0f) {
+								furiaGolpe = 0.0f;
+								animandoGolpe = false;
+							}
+						}
+					}
+
+					model = glm::rotate(model, glm::radians(-85.0f - furiaGolpe), glm::vec3(1.0f, 0.0f, 0.0f));
+					glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+					Furia_BrazoDer.RenderModel();
+
+					// Dibuja el mazo en la mano
+					model = glm::mat4(1.0f);
+					model = glm::translate(modelaux, glm::vec3(-0.15f, 0.08f, 0.39f));
+					model = glm::rotate(model, glm::radians(-85.0f - furiaGolpe), glm::vec3(1.0f, 0.0f, 0.0f));
+					model = glm::rotate(model, glm::radians(-40.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+					model = glm::rotate(model, glm::radians(80.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+					model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+					glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+					Mazo.RenderModel();
+				}
+
+
 			}
 		}
 
@@ -2083,6 +2312,36 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		PuestoElotes.RenderModel();
 
+		//******************************** NPC Alegría *************************************************************
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(0.0f, 11.0f, 10.0f));
+		model = glm::scale(model, glm::vec3(0.6f, 0.6f, 0.6f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelaux = model;
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Alegria.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(2.5f, -6.0f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PiernaIzq_A.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-2.2f, -6.0f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PiernaIzq_A.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(4.0f, 6.8f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		BrazoIzq_A.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-3.8f, 6.8f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		BrazoDer_A.RenderModel();
+
+		//*************************************************************************************************
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-185.0f, 22.0f, 70.0f));
 		model = glm::scale(model, glm::vec3(12.0f, 12.0f, 12.0f));
@@ -2096,6 +2355,36 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		PuestoAlgodon.RenderModel();
 
+		//******************************** NPC Sam*************************************************************
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-15.0f, 1.3f, 0.0f));
+		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(1.3f, 1.3f, 1.3f));
+		modelaux = model;
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Sam.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(0.4f, -1.5f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PiernaIzq_Sam.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-0.4f, -1.5f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PiernaDer_Sam.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(1.2f, 2.72f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		BrazoIzq_Sam.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-1.2f, 2.72f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		BrazoDer_Sam.RenderModel();
+
+		//*********************************************************************************************
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-35.0f, 11.0f, -35.0f));
 		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
@@ -2103,12 +2392,42 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		PuestoDulces.RenderModel();
 
+		//******************************** NPC Tristeza *************************************************************
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-10.0f, -5.5f, 10.0f));
+		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
+		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelaux = model;
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Tristeza.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(1.92f, -4.3f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PiernaIzq_T.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-3.1f, -4.3f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PiernaDer_T.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(-7.0f, 4.9f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		BrazoDer_T.RenderModel();
+
+		model = modelaux;
+		model = glm::translate(model, glm::vec3(5.7f, 4.9f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		BrazoIzq_T.RenderModel();
+
+		//*************************************************************************************************
+
 		glDisable(GL_BLEND);
 
 		glUseProgram(0);
 
 		mainWindow.swapBuffers();
 	}
-
 	return 0;
 }

@@ -22,7 +22,7 @@ public:
     GLfloat getrotay() { return rotay; }
     GLfloat getrotax() { return rotax; }
     GLfloat getrotaz() { return rotaz; }
-   
+
     // Animaciones específicas
     GLfloat getAnimacion_Simp1_DP() { return banderaAnimacion1_DP; }
     GLfloat getAnimacion_Simp1_P() { return banderaAnimacion1_P; }
@@ -32,6 +32,11 @@ public:
     void activarAnimacionTopos() { animacionTopos = true; }
     void desactivarAnimacionTopos() { animacionTopos = false; }
 
+    // Mazo de Furia
+    bool getFuriaTieneMazo() const { return furiaTieneMazo; }
+    void soltarMazo() { furiaTieneMazo = false; } // opcional
+    void setFuriaTieneMazo(bool valor) { furiaTieneMazo = valor; }
+
     ~Window();
 
 private:
@@ -39,7 +44,9 @@ private:
     GLint width, height;
     GLfloat rotax, rotay, rotaz;
     bool banderaAnimacion1_DP, banderaAnimacion1_P;
-    bool animacionTopos; 
+    bool animacionTopos;
+    bool furiaTieneMazo; // NUEVO
+
     bool keys[1024];
     GLint bufferWidth, bufferHeight;
     GLfloat lastX, lastY;
