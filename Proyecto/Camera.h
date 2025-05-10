@@ -26,7 +26,7 @@ public:
 	glm::vec3 getCameraDirection();
 	glm::mat4 calculateViewMatrix();
 
-	// ? Getters añadidos
+	//  Getters añadidos
 	float getYaw() const { return yaw; }
 	float getPitch() const { return pitch; }
 
@@ -42,6 +42,10 @@ public:
 		front = glm::normalize(newFront);
 		update();
 	}
+
+	// Métodos añadidos para tercera persona
+	void setCameraPosition(const glm::vec3& pos) { position = pos; }
+	void setCameraFront(const glm::vec3& frontVec) { front = glm::normalize(frontVec); }
 
 	~Camera();
 

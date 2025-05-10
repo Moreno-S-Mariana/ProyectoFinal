@@ -1,5 +1,35 @@
-# Blender 4.4.0 MTL File: 'None'
+# Blender 4.3.2 MTL File: 'None'
 # www.blender.org
+
+newmtl TextureDer
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Furia1.png
+
+newmtl TextureFront
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Hercules2.png
+
+newmtl TextureIzq
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Dark Danny.png
 
 newmtl tripo_mat_2d39a9ab-bb05-4527-bfed-f132b1bfb2b6
 Ka 1.000000 1.000000 1.000000

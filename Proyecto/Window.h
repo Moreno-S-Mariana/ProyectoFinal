@@ -49,6 +49,11 @@ public:
     //Hacha (tecla M)
     GLfloat getTeclaMHacha() { return teclaMHacha;  }
     void setTeclaMHacha(bool estado) { teclaMHacha = estado;  }
+    
+    //Boliche tecla F
+    bool getBolaLnazada() const { return bolaLanzada; }
+    void desactivarBolaLanzada() { bolaLanzada = false; }
+
     ~Window();
 
 private:
@@ -63,6 +68,7 @@ private:
     bool dardoLanzado;
     bool mazoGolpeando; 
     bool teclaMHacha;
+    bool bolaLanzada;
 
     bool keys[1024];
     GLint bufferWidth, bufferHeight;

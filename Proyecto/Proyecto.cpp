@@ -101,11 +101,13 @@ glm::vec3 posicionesGlobos[12] = {
 float velocidadDardo = 10.0f;
 glm::vec3 direccionDardo = glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)); // Dirección hacia adelante (ajusta según tu orientación)
 float tiempoDardo = 0.0f;
+double tiempoDesaparicionGlobo[12] = { 0.0 };
+const double TIEMPO_REAPARICION_GLOBO = 10.0;
 //*********************** Variables para animación del juego del topo ***********************
 float tiempoDesaparicionTopo = 0.0f;
 bool mazoGolpeando = false;
 float anguloMazo = 0.0f;
-float velocidadGolpe = 180.0f;
+float velocidadGolpe = 10.0f;
 float tiempoEsperaReaparicion = 5.0f;
 float tiempoAnimacionMazo = 0.0f;
 bool mazoBajando = true;
@@ -121,11 +123,20 @@ float tiempoTopo3Oculto = 0.0f;
 bool topo1Golpeado = false;
 bool topo2Golpeado = false;
 bool topo3Golpeado = false;
+int mazoAparece = 0;
 //*********************** Variables para animación del juego de las hachas ***********************
 GLfloat desplazamientoHacha = 0.0f;
 bool hachaVolando = false;
 float velocidadHacha = 5.0f;
 float anguloRotacionHacha = 0.0f;
+//*********************** Variables para animación del boliche ***********************
+float bolaBoliche = 0.0f;
+float velocidadBola = 0.2f;
+bool pinoCaido = false;
+float rotacionPino = 0.0f;
+float tiempoInicioCaida = 0.0f;
+float tiempoPinoCaido = 0.0f;
+bool restaurarPino = false;
 //*****************************************Parámetros generales*****************************************
 Window mainWindow;
 std::vector<Mesh*> meshList;
@@ -286,11 +297,6 @@ Material Piel;
 Material Oro;
 Material Fantasma;
 Material Peluche;
-
-
-
-
-
 
 //Sphere cabeza = Sphere(0.5, 20, 20);
 GLfloat deltaTime = 0.0f;
@@ -1074,17 +1080,18 @@ int main()
 		}
 
 		//Animacion globos y dardos
-		// Lanzamiento de dardo (tecla G)
+// Lanzamiento de dardo (tecla G)
 		if (mainWindow.getDardoLanzado()) {
 			posicionDardo.z += velocidadDardo * deltaTime;
 
 			for (int i = 0; i < 12; ++i) {
 				if (globoVisible[i]) {
 					float distancia = glm::distance(posicionDardo, posicionesGlobos[i]);
-					if (distancia < 5.0f) { // Umbral de colisión
+					if (distancia < 5.0f) {
 						globoVisible[i] = false;
+						tiempoDesaparicionGlobo[i] = glfwGetTime();  // Guarda el tiempo de desaparición
 						mainWindow.desactivarDardoLanzado();
-						posicionDardo = glm::vec3(-90.0f, 4.0f, 83.0f); // Reset
+						posicionDardo = glm::vec3(-90.0f, 4.0f, 83.0f);
 						break;
 					}
 				}
@@ -1096,24 +1103,37 @@ int main()
 			}
 		}
 
+		// Reaparición de globos (fuera del if de dardos)
+		for (int i = 0; i < 12; ++i) {
+			if (!globoVisible[i]) {
+				double tiempoActual = glfwGetTime();
+				if (tiempoActual - tiempoDesaparicionGlobo[i] >= TIEMPO_REAPARICION_GLOBO) {
+					globoVisible[i] = true;
+				}
+			}
+		}
+					
 		// Animación mazo y topo
 		if (mainWindow.getMazoGolpeando()) {
 			anguloMazo += velocidadGolpe * deltaTime;
 
-			if (anguloMazo >= 90.0f) {
-				anguloMazo = 90.0f;
+			if (anguloMazo >= 45.0f) {
+				anguloMazo = 45.0f;
 
 				if (topo1Visible) {
 					topo1Visible = false;
 					topo1Golpeado = true;
+					mazoAparece = 1;		//	Solo aparece el primer mazo
 				}
 				else if (topo2Visible) {
 					topo2Visible = false;
 					topo2Golpeado = true;
+					mazoAparece = 2;		//	Solo aparece el segundo mazo
 				}
 				else if (topo3Visible) {
 					topo3Visible = false;
 					topo3Golpeado = true;
+					mazoAparece = 0;		//	Solo aparece el tercer mazo
 				}
 
 				// Todos cuentan su tiempo si fueron golpeados
@@ -1166,6 +1186,37 @@ int main()
 				desplazamientoHacha = 0.0f;
 		}
 
+		//Animación boliche
+		if (mainWindow.getBolaLnazada()) {
+			bolaBoliche += velocidadBola * deltaTime;
+
+			if (bolaBoliche >= 7.0f) {
+				bolaBoliche = 0.0f;
+				mainWindow.desactivarBolaLanzada();
+			}
+		}
+
+		// Verificar colisión con el pino principal (coordenadas aproximadas)
+		if (!pinoCaido && bolaBoliche >= 4.8f) {
+			pinoCaido = true;
+			tiempoPinoCaido = 0.0f;  // Reinicia el contador
+		}
+
+		// Si fue golpeado, animar caída
+		if (pinoCaido && rotacionPino < 90.0f) {
+			rotacionPino += 60.0f * deltaTime; // velocidad de caída
+			if (rotacionPino > 90.0f) rotacionPino = 90.0f;
+		}
+		if (pinoCaido) {
+			tiempoPinoCaido += deltaTime;
+
+			if (tiempoPinoCaido >= 10.0f) {
+				pinoCaido = false;
+				rotacionPino = 0.0f;
+				tiempoPinoCaido = 0.0f;
+			}
+		}
+
 		cycleTime = dayDuration + nightDuration + 2 * fadeDuration;
 
 		t = fmod(glfwGetTime(), cycleTime);
@@ -1202,6 +1253,31 @@ int main()
 		}
 		if (keys[GLFW_KEY_A]) {
 			furiaYaw += velocidadGiroFuria * deltaTime;
+		}
+
+		// Coordenadas de las atracciones 
+		glm::vec3 posDados(80.0f, 3.0f, 100.0f);
+		glm::vec3 posJaula(0.0f, 3.0f, -110.0f); // Coordenada corregida de la jaula
+		glm::vec3 posTopos(-70.0f, 3.0f, -90.0f);
+		glm::vec3 posHachas(70.0f, 3.0f, -90.0f);
+		glm::vec3 posDardos(-80.0f, 3.0f, 105.0f);
+		glm::vec3 posBoliche(0.0f, 3.0f, 235.0f); // Coordenadas nuevas del boliche (ajusta si es necesario)
+
+		float distanciaCambioCamara = 20.0f;
+
+		bool cercaDeAlguna =
+			glm::distance(furiaPos, posDados) < distanciaCambioCamara ||
+			glm::distance(furiaPos, posJaula) < distanciaCambioCamara ||
+			glm::distance(furiaPos, posTopos) < distanciaCambioCamara ||
+			glm::distance(furiaPos, posHachas) < distanciaCambioCamara ||
+			glm::distance(furiaPos, posDardos) < distanciaCambioCamara ||
+			glm::distance(furiaPos, posBoliche) < distanciaCambioCamara;
+
+		if (cercaDeAlguna && currentCameraMode != FIRST_PERSON) {
+			currentCameraMode = FIRST_PERSON;
+		}
+		else if (!cercaDeAlguna && currentCameraMode == FIRST_PERSON) {
+			currentCameraMode = THIRD_PERSON;
 		}
 
 		lastSwitchTime = 0.0f;
@@ -1459,6 +1535,10 @@ int main()
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-7.0f, 1.5f, 0.0f));
+		if (pinoCaido) {
+			model = glm::rotate(model, glm::radians(rotacionPino), glm::vec3(0.0f, 0.0f, 1.0f));
+			model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f)); // opcional: ajuste visual
+		}
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Madera.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Pino.RenderModel();
@@ -1518,7 +1598,7 @@ int main()
 		Pino.RenderModel();
 
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(-2.0f, 1.5f, 0.0f));
+		model = glm::translate(model, glm::vec3(-2.0f - bolaBoliche, 1.5f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Bolaboliche.RenderModel();
@@ -1581,7 +1661,7 @@ int main()
 
 		//Moneda - Utilizar en los casos necesarios 
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.0f, 0.1f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, alturaMoneda, 0.0f));
 		model = glm::scale(model, glm::vec3(0.03f, 0.03f, 0.03f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Oro.UseMaterial(uniformSpecularIntensity, uniformShininess);
@@ -2013,6 +2093,7 @@ int main()
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(-80.0f, 3.0f, 105.0f));
 		modelaux = model;
+		modelaux2 = model;
 		model = glm::scale(model, glm::vec3(6.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -2123,6 +2204,16 @@ int main()
 			model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 			Monito_TOPO.RenderModel();
+
+			model = modelaux;
+			model = glm::translate(model, glm::vec3(14.0f, 15.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(-anguloMazo), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			Mazo.RenderModel();
+
 		}
 
 		// Topo 2
@@ -2133,6 +2224,17 @@ int main()
 			model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 			Monito_TOPO.RenderModel();
+			if (mazoAparece == 1) {
+				model = modelaux;
+				model = glm::translate(model, glm::vec3(14.0f, 15.0f, 4.5f));
+				model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+				model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+				model = glm::rotate(model, glm::radians(-anguloMazo), glm::vec3(0.0f, 1.0f, 0.0f));
+				model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+				Mazo.RenderModel();
+			}
+
 		}
 
 		// Topo 3
@@ -2143,14 +2245,19 @@ int main()
 			model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 			Monito_TOPO.RenderModel();
+			if (mazoAparece == 2) {
+				model = modelaux;
+				model = glm::translate(model, glm::vec3(14.0f, 15.0f, -2.5f));
+				model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+				model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+				model = glm::rotate(model, glm::radians(-anguloMazo), glm::vec3(0.0f, 1.0f, 0.0f));
+				model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+				Mazo.RenderModel();
+			}
+
 		}
 
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(25.0f, 0.0f, -10.0f));
-		model = glm::rotate(model, glm::radians(anguloMazo), glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Mazo.RenderModel();
 
 		//******************************* EMBER *****************************************************
 		model = modelaux;
@@ -2429,7 +2536,7 @@ int main()
 			}
 
 			if (stepDir != 0) {
-				walkCycle += stepDir * walkCycleStep * deltaTime * 0.2f;
+				walkCycle += stepDir * walkCycleStep * deltaTime * 0.5f;
 			}
 
 			float legAngle = sin(walkCycle) * legSwing;
