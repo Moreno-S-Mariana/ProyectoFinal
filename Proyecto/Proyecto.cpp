@@ -52,6 +52,7 @@ bool direccionDerecha = true;
 float limiteAngulo = 90.0f;				// Máximo a cada lado: 90 grados
 //***************************************** Variable para juego carrusel*****************************************
 float angulovaria = 0.0f;
+//******************************************************************************************************************
 //***************************************** Variable animación de Danny Phantom*****************************************
 GLfloat vueloDP = 0.0f;
 //***************************************** Variable animación de Furia*****************************************
@@ -77,13 +78,29 @@ GLfloat mueveCuerpoPanico = 0.0f;
 //***************************************** Variable animación juego dados*****************************************
 bool dadosGirando = false;
 float anguloDados = 0.0f;
-float alturaDados = 0.0f;
+float alturaDados = 0.8f;
 float rotacionFinalDado1 = 0.0f;
 float rotacionFinalDado2 = 0.0f;
 bool cayoDado = false;
 //***************************************** Variable animación de Hercules*****************************************
 GLfloat anguloBrazoEspada = 0.0f;
-
+//***************************************** Variable animación monedas*****************************************
+bool animarMoneda = false;
+bool monedaMostrada = false;
+float alturaMoneda = 0.8f;
+float velocidadMoneda = 0.5f;
+//***************************************** JUEGO DARDOS VS GLOBOS *****************************************
+bool dardoLanzado = false;
+bool globoVisible[12] = { true, true, true, true, true, true, true, true, true, true, true, true };
+glm::vec3 posicionDardo = glm::vec3(-90.0f, 4.0f, 83.0f);
+glm::vec3 posicionesGlobos[12] = {
+	{-80.0f, 26.0f, 99.0f}, {-80.0f, 20.0f, 99.0f}, {-80.0f, 14.0f, 99.0f}, {-80.0f, 8.0f, 99.0f},
+	{-88.0f, 26.0f, 91.0f}, {-88.0f, 20.0f, 91.0f}, {-88.0f, 14.0f, 91.0f}, {-88.0f, 8.0f, 91.0f},
+	{-72.0f, 26.0f, 107.0f}, {-72.0f, 20.0f, 107.0f}, {-72.0f, 14.0f, 107.0f}, {-72.0f, 8.0f, 107.0f}
+};
+float velocidadDardo = 10.0f;
+glm::vec3 direccionDardo = glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)); // Dirección hacia adelante (ajusta según tu orientación)
+float tiempoDardo = 0.0f;
 //*****************************************Parámetros generales*****************************************
 Window mainWindow;
 std::vector<Mesh*> meshList;
@@ -249,9 +266,10 @@ DirectionalLight mainLight;
 //PointLight pointLights[MAX_POINT_LIGHTS];
 PointLight pointLights1[MAX_POINT_LIGHTS];	//PointLight Lámparas
 PointLight pointLights2[MAX_POINT_LIGHTS];	//PointLigth Quiosko
-SpotLight spotLights[MAX_SPOT_LIGHTS];
-SpotLight spotLights2[MAX_SPOT_LIGHTS];
-SpotLight spotLights3[MAX_SPOT_LIGHTS];
+SpotLight spotLights[MAX_SPOT_LIGHTS];		// Luces Varias parque
+SpotLight spotLights2[MAX_SPOT_LIGHTS];		// Luces Atracciones
+SpotLight spotLights3[MAX_SPOT_LIGHTS];		// Luces Boliche
+SpotLight spotLights4[MAX_SPOT_LIGHTS];		//Luces por teclado edificios
 // Arreglo temporal para luces activas
 SpotLight lucesActivas[MAX_SPOT_LIGHTS];
 int totalLucesActivas = 0;
@@ -884,6 +902,37 @@ int main()
 		70.0f
 	);
 	spotLightCount3++;
+
+	unsigned int spotLightCount4 = 0;				//Edificio izquierda
+	spotLights4[0] = SpotLight(1.0f, 0.0f, 0.0f,
+		10.0f, 80.0f,
+		-200.0f, 65.0f, 20.0f,
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.09f, 0.032f,
+		70.0f
+	);
+	spotLightCount4++;
+
+	spotLights4[1] = SpotLight(0.0f, 1.0f, 0.0f,	//Edificio derecha
+		10.0f, 80.0f,
+		200.0f, 65.0f, 20.0f,
+		-1.0f, 0.0f, 0.0f,
+		1.0f, 0.09f, 0.032f,
+		70.0f
+	);
+	spotLightCount4++;
+
+	spotLights4[2] = SpotLight(0.0f, 0.0f, 1.0f,	//Edificio de frente
+		10.0f, 80.0f,
+		0.0f, 35.0f, 190.0f,
+		0.0f, 0.0f, 1.0f,
+		1.0f, 0.09f, 0.032f,
+		70.0f
+	);
+	spotLightCount4++;
+
+
+
 	// Variables para la luz
 	float intensidad = 0.0f;
 	const float dayDuration = 20.0f;
@@ -902,6 +951,10 @@ int main()
 	double currentTime = 0.0f;
 	bool camaraCercaDeLuces3 = false;
 	static float tiempoAcumulado = 0.0f;
+	int indiceActivo = 0;
+
+
+
 	//se crean mas luces puntuales y spotlight 
 
 	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformEyePosition = 0,
@@ -917,6 +970,87 @@ int main()
 		lastTime = now;
 
 		angulovaria += 0.3f * deltaTime;
+
+		// Movimiento alternante del martillo
+		if (direccionDerecha) {
+			anguloMartillo += velocidadOscilacion * deltaTime;
+			if (anguloMartillo >= 135.0f) {
+				anguloMartillo = 135.0f;
+				direccionDerecha = false;
+			}
+		}
+		else {
+			anguloMartillo -= velocidadOscilacion * deltaTime;
+			if (anguloMartillo <= -45.0f) {
+				anguloMartillo = -45.0;
+				direccionDerecha = true;
+			}
+		}
+
+		//***************************************************************
+		//Animación de dados
+		if (mainWindow.getDadosGirando()) {
+			anguloDados += 10.0f * deltaTime;
+			if (alturaDados < 5.0f)
+				alturaDados += 5.0f * deltaTime;
+			cayoDado = false; // se está girando, aún no ha caído
+		}
+		else {
+			if (!cayoDado) {
+				// Generar una rotación aleatoria para cada dado cuando caen
+				rotacionFinalDado1 = (rand() % 4) * 90.0f; // Múltiplos de 90 grados
+				rotacionFinalDado2 = (rand() % 4) * 90.0f;
+				cayoDado = true;
+			}
+			if (alturaDados > 0.0f)
+				alturaDados -= 5.0f * deltaTime;
+			if (alturaDados < 0.0f)
+				alturaDados = 0.0f;
+			anguloDados = 0.0f;
+		}
+
+		// Animación de moneda
+		if (mainWindow.getMonedaEnElAire()) {
+			animarMoneda = true;
+			monedaMostrada = true;
+
+			if (alturaMoneda < 2.0f)
+				alturaMoneda += velocidadMoneda * deltaTime;
+		}
+		else {
+			if (animarMoneda) {
+				if (alturaMoneda > 2.0f)
+					alturaMoneda -= velocidadMoneda * deltaTime;
+				else {
+					alturaMoneda = 0.8f;
+					animarMoneda = false;
+					monedaMostrada = false;
+				}
+			}
+		}
+
+		//Animacion globos y dardos
+		// Lanzamiento de dardo (tecla G)
+		if (mainWindow.getDardoLanzado()) {
+			posicionDardo.z += velocidadDardo * deltaTime;
+
+			for (int i = 0; i < 12; ++i) {
+				if (globoVisible[i]) {
+					float distancia = glm::distance(posicionDardo, posicionesGlobos[i]);
+					if (distancia < 5.0f) { // Umbral de colisión
+						globoVisible[i] = false;
+						mainWindow.desactivarDardoLanzado();
+						posicionDardo = glm::vec3(-90.0f, 4.0f, 83.0f); // Reset
+						break;
+					}
+				}
+			}
+
+			if (posicionDardo.z > 130.0f) {
+				mainWindow.desactivarDardoLanzado();
+				posicionDardo = glm::vec3(-90.0f, 4.0f, 83.0f);
+			}
+		}
 
 		cycleTime = dayDuration + nightDuration + 2 * fadeDuration;
 
@@ -939,44 +1073,7 @@ int main()
 
 		bool* keys = mainWindow.getsKeys();
 
-		// Movimiento alternante del martillo
-		if (direccionDerecha) {
-			anguloMartillo += velocidadOscilacion * deltaTime;
-			if (anguloMartillo >= 135.0f) {
-				anguloMartillo = 135.0f;
-				direccionDerecha = false;
-			}
-		}
-		else {
-			anguloMartillo -= velocidadOscilacion * deltaTime;
-			if (anguloMartillo <= -45.0f) {
-				anguloMartillo = -45.0;
-				direccionDerecha = true;
-			}
-		}
 
-		//Animación de dados
-		if (mainWindow.getDadosGirando()) {
-			anguloDados += 10.0f * deltaTime;
-			if (alturaDados < 5.0f)
-				alturaDados += 5.0f * deltaTime;
-			cayoDado = false; // se está girando, aún no ha caído
-		}
-		else {
-			if (!cayoDado) {
-				// Generar una rotación aleatoria para cada dado cuando caen
-				rotacionFinalDado1 = (rand() % 4) * 90.0f; // Múltiplos de 90 grados
-				rotacionFinalDado2 = (rand() % 4) * 90.0f;
-				cayoDado = true;
-			}
-			if (alturaDados > 0.0f)
-				alturaDados -= 5.0f * deltaTime;
-			if (alturaDados < 0.0f)
-				alturaDados = 0.0f;
-			anguloDados = 0.0f;
-		}
-
-		//Camara
 		if (keys[GLFW_KEY_1]) currentCameraMode = FIRST_PERSON;
 		if (keys[GLFW_KEY_2]) currentCameraMode = THIRD_PERSON;
 		if (keys[GLFW_KEY_3]) currentCameraMode = TOP_VIEW;
@@ -986,10 +1083,10 @@ int main()
 		}
 
 		// Control de giro de Furia con las flechas izquierda/derecha
-		if (keys[GLFW_KEY_LEFT]) {
+		if (keys[GLFW_KEY_D]) {
 			furiaYaw -= velocidadGiroFuria * deltaTime;
 		}
-		if (keys[GLFW_KEY_RIGHT]) {
+		if (keys[GLFW_KEY_A]) {
 			furiaYaw += velocidadGiroFuria * deltaTime;
 		}
 
@@ -1151,21 +1248,30 @@ int main()
 		}
 
 		// ---------- Arreglo 3: spotLights3[] (una luz encendida a la vez cíclicamente)
-		camaraCercaDeLuces3 = false;
+		/*camaraCercaDeLuces3 = false;
 		for (int i = 0; i < spotLightCount3; ++i) {
 			if (estaCerca(camPos, spotLights3[i].GetPosition(), 90.0f)) {
 				camaraCercaDeLuces3 = true;
 				break;
 			}
-		}
+		}*/
 
-		tiempoAcumulado = 0.0f;
+		//tiempoAcumulado = 0.0f;
 		tiempoAcumulado += deltaTime;
 
-		if (camaraCercaDeLuces3) {
+		if (mainWindow.getIluminacionTeclado()) {
+			totalLucesActivas = 0;
+			for (int i = 0; i < spotLightCount4; ++i) {
+				lucesActivas[i] = spotLights4[i];
+				totalLucesActivas++;
+			}
+		}/*
+		else if (camaraCercaDeLuces3) {
+			totalLucesActivas = 0;
 			int indiceActivo = static_cast<int>(tiempoAcumulado / 10.0f) % spotLightCount3;
 			lucesActivas[totalLucesActivas++] = spotLights3[indiceActivo];
-		}
+		}*/
+
 
 		// ---------- Activar luces finales
 		shaderList[0].SetSpotLights(lucesActivas, totalLucesActivas);
@@ -1673,7 +1779,7 @@ int main()
 
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(80.0f, 3.0f, 100.0f));  // Posición base de la mesa
-		modelaux = model; 
+		modelaux = model;
 		modelaux2 = model;
 		model = glm::scale(model, glm::vec3(0.15f, 0.15f, 0.15f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -1716,116 +1822,37 @@ int main()
 
 		//Moneda - Utilizar en los casos necesarios 
 		model = modelaux2;
-		model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, alturaMoneda, 0.0f));
 		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Coin.RenderModel();
 
 		//***************************************** GLOBOS *****************************************
 
-		model = glm::mat4(1.0);
+		// Globos principales
+		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(-80.0f, 3.0f, 105.0f));
 		modelaux = model;
-		modelaux2 = model;
-		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
+		model = glm::scale(model, glm::vec3(6.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		GlobosP.RenderModel();
 
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.0f, 23.0f, -6.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
+		// Globos individuales con visibilidad
+		for (int i = 0; i < 12; ++i) {
+			if (!globoVisible[i]) continue;
 
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.0f, 17.0f, -6.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.0f, 11.0f, -6.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.0f, 5.0f, -6.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(-8.0f, 23.0f, -14.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(-8.0f, 17.0f, -14.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(-8.0f, 11.0f, -14.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(-8.0f, 5.0f, -14.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(8.0f, 23.0f, 2.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(8.0f, 17.0f, 2.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(8.0f, 11.0f, 2.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
-
-		model = modelaux;
-		model = glm::translate(model, glm::vec3(8.0f, 5.0f, 2.0f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Globos.RenderModel();
-
-		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(-90.0f, 4.0f, 83.0f));
-		model = glm::scale(model, glm::vec3(7.0f, 7.0f, 7.0f));
-		model = glm::rotate(model, glm::radians(135.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Dardos.RenderModel();
-
-		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(-90.0f, 4.0f, 83.0f));
-		model = glm::scale(model, glm::vec3(7.0f, 7.0f, 7.0f));
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, posicionesGlobos[i]);
+			model = glm::scale(model, glm::vec3(2.0f));
+			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+			Globos.RenderModel();
+		}
+		
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, posicionDardo);
+		model = glm::scale(model, glm::vec3(7.0f));
 		model = glm::rotate(model, glm::radians(-135.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Dardos.RenderModel();
@@ -2142,10 +2169,10 @@ int main()
 		PanicoBizq.RenderModel();
 		/********************************************Furia****************************************************/
 		{
-			bool up = keys[GLFW_KEY_UP];
-			bool down = keys[GLFW_KEY_DOWN];
-			bool left = keys[GLFW_KEY_LEFT];
-			bool right = keys[GLFW_KEY_RIGHT];
+			bool up = keys[GLFW_KEY_W];
+			bool down = keys[GLFW_KEY_S];
+			bool left = keys[GLFW_KEY_D];
+			bool right = keys[GLFW_KEY_A];
 
 			glm::vec3 forward = glm::vec3(sin(furiaYaw), 0.0f, cos(furiaYaw));
 
