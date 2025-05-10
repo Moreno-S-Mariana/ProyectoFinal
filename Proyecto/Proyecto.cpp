@@ -121,7 +121,11 @@ float tiempoTopo3Oculto = 0.0f;
 bool topo1Golpeado = false;
 bool topo2Golpeado = false;
 bool topo3Golpeado = false;
-
+//*********************** Variables para animación del juego de las hachas ***********************
+GLfloat desplazamientoHacha = 0.0f;
+bool hachaVolando = false;
+float velocidadHacha = 5.0f;
+float anguloRotacionHacha = 0.0f;
 //*****************************************Parámetros generales*****************************************
 Window mainWindow;
 std::vector<Mesh*> meshList;
@@ -1145,6 +1149,23 @@ int main()
 			anguloRotacionTopo -= 360.0f;
 		}
 
+		//Animación hachas
+		if (mainWindow.getTeclaMHacha()) {
+			if (desplazamientoHacha < 3.0f) {
+				desplazamientoHacha += velocidadHacha * deltaTime;
+				hachaVolando = true;
+				anguloRotacionHacha += 360.0f * deltaTime; // 1 vuelta por segundo
+			}
+		}
+		else {
+			if (desplazamientoHacha > 0.0f) {
+				desplazamientoHacha -= velocidadHacha * deltaTime;
+				hachaVolando = false;
+				anguloRotacionHacha += 360.0f * deltaTime; // sigue rotando mientras regresa
+			}
+			if (desplazamientoHacha < 0.0f)
+				desplazamientoHacha = 0.0f;
+		}
 
 		cycleTime = dayDuration + nightDuration + 2 * fadeDuration;
 
@@ -2230,7 +2251,7 @@ int main()
 		Centro.RenderModel();
 
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(7.9f, 3.3f, 12.0f));
+		model = glm::translate(model, glm::vec3(7.9f + desplazamientoHacha, 3.3f, 12.0f + desplazamientoHacha));
 		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 0.0f, 1.0f));

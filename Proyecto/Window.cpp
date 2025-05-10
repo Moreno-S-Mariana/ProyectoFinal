@@ -19,12 +19,13 @@ Window::Window(GLint windowWidth, GLint windowHeight)
 	banderaAnimacion1_DP = false;
 	banderaAnimacion1_P = false;
 	animacionTopos = false;
-	furiaTieneMazo = false;			// NUEVO
-	dardoLanzado = false;			// NUEVO
-	mazoGolpeando = false;     // NUEVO
-	banderaLuces = false;			//Apagado por defecto
+	furiaTieneMazo = false;			
+	dardoLanzado = false;			
+	mazoGolpeando = false;     
+	banderaLuces = false;			
 	dadosGirando = false;
 	monedaEnElAire = false;
+	teclaMHacha = false;
 
 	for (size_t i = 0; i < 1024; i++)
 		keys[i] = 0;
@@ -155,6 +156,12 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
 		theWindow->mazoGolpeando = true;
 	if (key == GLFW_KEY_SPACE && action == GLFW_RELEASE)
 		theWindow->mazoGolpeando = false;
+
+	//Hacha con tecla M
+	if (key == GLFW_KEY_M && action == GLFW_PRESS)
+		theWindow->teclaMHacha = true;
+	if (key == GLFW_KEY_M && action == GLFW_RELEASE)
+		theWindow->teclaMHacha = false;
 
 	if (key >= 0 && key < 1024)
 	{

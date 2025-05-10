@@ -46,6 +46,11 @@ public:
     void activarMazoGolpeando() { mazoGolpeando = true; }
     void desactivarMazoGolpeando() { mazoGolpeando = false; }
 
+    //Hacha (tecla M)
+    GLfloat getTeclaMHacha() { return teclaMHacha; }
+    void setTeclaMHacha(bool estado) { teclaMHacha = estado; }
+    ~Window();
+
     ~Window();
 
 private:
@@ -60,6 +65,7 @@ private:
     bool monedaEnElAire;
     bool dardoLanzado;
     bool mazoGolpeando;
+    bool teclaMHacha;
 
     bool keys[1024];
     GLint bufferWidth, bufferHeight;
