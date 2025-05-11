@@ -26,6 +26,8 @@ Window::Window(GLint windowWidth, GLint windowHeight)
     dardoLanzado = false;
     mazoGolpeando = false;
     teclaMHacha = false;
+    bolaBaseGolpeada = false;
+
 
     for (size_t i = 0; i < 1024; i++)
         keys[i] = 0;
@@ -162,6 +164,11 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
     if (key == GLFW_KEY_F) {
         theWindow->bolaLanzada = true;
     }
+
+    // Bola de béisbol (tecla N)
+    if (key == GLFW_KEY_N && action == GLFW_PRESS)
+        theWindow->bolaBaseGolpeada = true;
+
 
     if (key >= 0 && key < 1024)
     {

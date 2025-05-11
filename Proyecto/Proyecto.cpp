@@ -137,6 +137,15 @@ float rotacionPino = 0.0f;
 float tiempoInicioCaida = 0.0f;
 float tiempoPinoCaido = 0.0f;
 bool restaurarPino = false;
+//*********************** Variables para animación del juego baseball ***********************
+bool bolaGolpeada = false;
+float bolaY = 3.0f;
+float bolaZ = -75.0f;
+float velocidadBolaBase = 1.0f;  // ajusta según necesidad
+float rotacionBolaBase = 0.0f;
+float anguloBate = 0.0f;
+bool bateAnimando = false;
+glm::vec3 posicionBate = glm::vec3(-15.0f, 4.0f, -70.0f);  // posición actual del bate
 //*********************** Variables para animación de Alegría ***********************
 float alegriaSaltoY = 0.0f;
 float alegriaAnguloBrazo = 0.0f;
@@ -1102,7 +1111,7 @@ int main()
 		}
 
 		//Animacion globos y dardos
-// Lanzamiento de dardo (tecla G)
+		// Lanzamiento de dardo (tecla G)
 		if (mainWindow.getDardoLanzado()) {
 			posicionDardo.z += velocidadDardo * deltaTime;
 
@@ -1238,6 +1247,49 @@ int main()
 				tiempoPinoCaido = 0.0f;
 			}
 		}
+
+		// Animación bola béisbol
+		if (mainWindow.getBolaBaseGolpeada()) {
+			// Movimiento hacia atrás (Z) y subida (Y)
+			bolaZ -= velocidadBolaBase * deltaTime;
+
+			// Interpolación para subir Y desde 3 hasta 15
+			if (bolaY < 15.0f) {
+				bolaY += 20.0f * deltaTime;  // ajusta velocidad vertical si quieres
+				if (bolaY > 15.0f) bolaY = 15.0f;
+			}
+
+			// Rotación continua
+			rotacionBolaBase += 20.0f * deltaTime;  // 180 grados por segundo
+			if (rotacionBolaBase >= 360.0f) rotacionBolaBase -= 360.0f;
+
+			// Activar animación de bate
+			bateAnimando = true;
+			if (bateAnimando) {
+				if (anguloBate < 45.0f) {
+					anguloBate += 5.0f * deltaTime; // velocidad de swing
+					if (anguloBate > 45.0f) anguloBate = 45.0f;
+				}
+				// cambiar posición del bate al momento del swing
+				posicionBate = glm::vec3(-15.0f, 15.0f, -70.0f);
+			}
+
+			// Fin de animación
+			if (bolaZ <= -110.0f) {
+				bolaZ = -75.0f;
+				bolaY = 3.0f;
+				rotacionBolaBase = 0.0f;
+
+				// Reiniciar bate
+				anguloBate = 0.0f;
+				posicionBate = glm::vec3(-15.0f, 4.0f, -70.0f);
+				bateAnimando = false;
+
+				mainWindow.desactivarBolaBaseGolpeada();
+			}
+		}
+
+		
 
 		//Animación alegría
 		alegriaTiempo += deltaTime;
@@ -2471,14 +2523,16 @@ int main()
 		Jaula.RenderModel();
 
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(0.0f, 3.0f, -100.0f));
-		model = glm::scale(model, glm::vec3(5.0f, 6.0f, 5.0f));
+		model = glm::translate(model, glm::vec3(0.0f, bolaY, bolaZ));
+		model = glm::rotate(model, glm::radians(rotacionBolaBase), glm::vec3(0.0f, 1.0f, 0.0f)); // rotación sobre eje Y
+		model = glm::scale(model, glm::vec3(5.0f, 6.0f, 5.0f));  // asegúrate de conservar esto si ya lo tenías
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Plastico_mate.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Bola.RenderModel();
 
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(0.0f, 3.0f, -90.0f));
+		model = glm::translate(model,posicionBate);
+		model = glm::rotate(model, glm::radians(anguloBate), glm::vec3(0.0f, 1.0f, 0.0f)); // gira en eje X como si lo bajaras
 		model = glm::scale(model, glm::vec3(5.0f, 6.0f, 5.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
@@ -2510,7 +2564,7 @@ int main()
 		Coin.RenderModel();
 
 		//***************************************** PERSONAJES *****************************************
-		/********************************************Panico****************************************************/
+		/******************************************* Panico ***************************************************/
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(93.0f, 10.0f, 100.0f));
 		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));

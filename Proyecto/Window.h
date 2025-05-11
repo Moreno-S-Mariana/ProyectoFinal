@@ -54,6 +54,12 @@ public:
     bool getBolaLnazada() const { return bolaLanzada; }
     void desactivarBolaLanzada() { bolaLanzada = false; }
 
+    // Béisbol (tecla N)
+    bool getBolaBaseGolpeada() const { return bolaBaseGolpeada; }
+    void desactivarBolaBaseGolpeada() { bolaBaseGolpeada = false; }
+
+
+
     ~Window();
 
 private:
@@ -69,6 +75,7 @@ private:
     bool mazoGolpeando;
     bool teclaMHacha;
     bool bolaLanzada;
+    bool bolaBaseGolpeada;
 
     bool keys[1024];
     GLint bufferWidth, bufferHeight;
