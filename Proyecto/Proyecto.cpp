@@ -137,6 +137,28 @@ float rotacionPino = 0.0f;
 float tiempoInicioCaida = 0.0f;
 float tiempoPinoCaido = 0.0f;
 bool restaurarPino = false;
+//*********************** Variables para animación de Alegría ***********************
+float alegriaSaltoY = 0.0f;
+float alegriaAnguloBrazo = 0.0f;
+float alegriaTiempo = 0.0f;
+//*********************** Variables para animación de Tristeza ***********************
+float tristezaBalanceo = 0.0f;
+float tiempoTristeza = 0.0f;
+float tristezaBrazoAngulo = 0.0f;
+//*********************** Variables para animación de Ember ***********************
+float emberTiempo = 0.0f;
+float emberAlturaY = 0.0f;
+float emberBrazoAngulo = 0.0f;
+float emberPiernaAngulo = 0.0f;
+//*********************** Variables para animación de Sam ***********************
+float samTiempo = 0.0f;
+float samBrazoAngulo = 0.0f;
+float samPiernaAngulo = 0.0f;
+//*********************** Variables para animación de Pena ***********************
+float penaTiempo = 0.0f;
+float penaAnguloBalanceo = 0.0f;
+float penaBrazoAngulo = 0.0f;
+float penaCabezaOffset = 0.0f;
 //*****************************************Parámetros generales*****************************************
 Window mainWindow;
 std::vector<Mesh*> meshList;
@@ -1217,6 +1239,32 @@ int main()
 			}
 		}
 
+		//Animación alegría
+		alegriaTiempo += deltaTime;
+		alegriaSaltoY = abs(sin(alegriaTiempo * 3.0f)) * 0.5f; // Subidas y bajadas suaves
+		alegriaAnguloBrazo = sin(alegriaTiempo * 5.0f) * 30.0f; // Oscila entre -30° y 30°
+
+		//Animación tristeza
+		tiempoTristeza += deltaTime;
+		tristezaBalanceo = sin(tiempoTristeza * 0.2f) * 2.0f;  // Oscilación suave
+		tristezaBrazoAngulo = sin(tiempoTristeza * 0.5f) * 1.0f;
+
+		//Animación ember
+		emberTiempo += deltaTime;
+		emberAlturaY = abs(sin(emberTiempo * 0.2f)) * 0.3f;  // pequeño salto suave
+		emberBrazoAngulo = sin(emberTiempo * 0.2f) * 25.0f;
+		emberPiernaAngulo = sin(emberTiempo * 0.2f + glm::radians(90.0f)) * 15.0f;
+
+		//Animación sam
+		samTiempo += deltaTime;
+		samBrazoAngulo = sin(samTiempo * 0.2f) * 20.0f;
+		samPiernaAngulo = sin(samTiempo * 0.2f + glm::radians(180.0f)) * 10.0f;
+
+		//Animación Pena
+		penaTiempo += deltaTime;
+		penaAnguloBalanceo = sin(penaTiempo * 0.5f) * 5.0f;     // Movimiento sutil de balanceo
+		penaBrazoAngulo = sin(penaTiempo * 0.4f) * 10.0f;        // Brazos que se abrazan suavemente
+		penaCabezaOffset = abs(sin(penaTiempo * 0.3f)) * 0.05f;  // Ligero descenso y subida de cabeza
 		cycleTime = dayDuration + nightDuration + 2 * fadeDuration;
 
 		t = fmod(glfwGetTime(), cycleTime);
@@ -1612,6 +1660,7 @@ int main()
 		//************************* NPC Pena ***************************************************************
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.2f, 1.75f, -3.0f));
+		model = glm::rotate(model, glm::radians(penaAnguloBalanceo), glm::vec3(0.0f, 1.0f, 0.0f)); // balanceo
 		modelaux2 = model;
 		//model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -1632,12 +1681,14 @@ int main()
 
 		model = modelaux2;
 		model = glm::translate(model, glm::vec3(-0.25f, 0.11f, -0.04f));
+		model = glm::rotate(model, glm::radians(penaBrazoAngulo), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoDer_Pena.RenderModel();
 
 		model = modelaux2;
 		model = glm::translate(model, glm::vec3(0.25f, 0.1f, -0.04f));
+		model = glm::rotate(model, glm::radians(-penaBrazoAngulo), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoIzq_Pena.RenderModel();
@@ -2259,9 +2310,9 @@ int main()
 		}
 
 
-		//******************************* EMBER *****************************************************
+		//******************************* NPC EMBER *****************************************************
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(15.0f, 11.8f, -18.0f));
+		model = glm::translate(model, glm::vec3(15.0f, 11.8f + emberAlturaY, -18.0f));
 		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
 		modelaux = model;
@@ -2271,24 +2322,28 @@ int main()
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.05f, -0.13f, 0.0f));
+		model = glm::rotate(model, glm::radians(emberPiernaAngulo), glm::vec3(1, 0, 0));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Fantasma.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PiernaIzq_Ember.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-0.05f, -0.13f, 0.0f));
+		model = glm::rotate(model, glm::radians(-emberPiernaAngulo), glm::vec3(1, 0, 0));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Fantasma.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PiernaDer_Ember.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.085f, 0.227f, 0.0f));
+		model = glm::rotate(model, glm::radians(emberBrazoAngulo), glm::vec3(1, 0, 0));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Fantasma.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoIzq_Ember.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-0.09f, 0.225f, 0.0f));
+		model = glm::rotate(model, glm::radians(-emberBrazoAngulo), glm::vec3(1, 0, 0));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Fantasma.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoDer_Ember.RenderModel();
@@ -2662,36 +2717,47 @@ int main()
 		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PuestoElotes.RenderModel();
 
-		//******************************** NPC Alegría *************************************************************
+		//******************************** NPC Alegría con animación *************************************************************
+
+		float bounce = sin(currentTime * 4.0f) * 0.5f;  // Salto suave (amplitud 0.5 en Y)
+		float armSwing = sin(currentTime * 6.0f) * glm::radians(30.0f); // Oscilación de brazos +/-30 grados
+
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.0f, 11.0f, 10.0f));
+		model = glm::translate(model, glm::vec3(0.0f, 11.0f + bounce, 10.0f));
 		model = glm::scale(model, glm::vec3(0.6f, 0.6f, 0.6f));
 		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		modelaux = model;
+
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Alegria.RenderModel();
 
+		// Pierna izquierda
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(2.5f, -6.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PiernaIzq_A.RenderModel();
 
+		// Pierna derecha
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-2.2f, -6.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PiernaIzq_A.RenderModel();
 
+		// Brazo izquierdo (swing hacia adelante)
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(4.0f, 6.8f, 0.0f));
+		model = glm::rotate(model, armSwing, glm::vec3(1.0f, 0.0f, 0.0f)); // Oscila hacia adelante y atrás
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoIzq_A.RenderModel();
 
+		// Brazo derecho (swing opuesto)
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-3.8f, 6.8f, 0.0f));
+		model = glm::rotate(model, -armSwing, glm::vec3(1.0f, 0.0f, 0.0f)); // Movimiento opuesto para balance
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoDer_A.RenderModel();
@@ -2725,24 +2791,28 @@ int main()
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.4f, -1.5f, 0.0f));
+		model = glm::rotate(model, glm::radians(samPiernaAngulo), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PiernaIzq_Sam.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-0.4f, -1.5f, 0.0f));
+		model = glm::rotate(model, glm::radians(-samPiernaAngulo), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PiernaDer_Sam.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(1.2f, 2.72f, 0.0f));
+		model = glm::rotate(model, glm::radians(samBrazoAngulo), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoIzq_Sam.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-1.2f, 2.72f, 0.0f));
+		model = glm::rotate(model, glm::radians(-samBrazoAngulo), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoDer_Sam.RenderModel();
@@ -2761,7 +2831,7 @@ int main()
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-10.0f, -5.5f, 10.0f));
 		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
-		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(tristezaBalanceo), glm::vec3(0.0f, 1.0f, 0.0f));
 		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
@@ -2781,12 +2851,14 @@ int main()
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-7.0f, 4.9f, 0.0f));
+		model = glm::rotate(model, glm::radians(tristezaBrazoAngulo), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoDer_T.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(5.7f, 4.9f, 0.0f));
+		model = glm::rotate(model, glm::radians(tristezaBrazoAngulo), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoIzq_T.RenderModel();
