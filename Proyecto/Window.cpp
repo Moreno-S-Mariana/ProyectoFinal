@@ -158,6 +158,11 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
     if (key == GLFW_KEY_M && action == GLFW_RELEASE)
         theWindow->teclaMHacha = false;
 
+    //Boliche con tecla F
+    if (key == GLFW_KEY_F) {
+        theWindow->bolaLanzada = true;
+    }
+
     if (key >= 0 && key < 1024)
     {
         if (action == GLFW_PRESS)
@@ -165,7 +170,6 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
         else if (action == GLFW_RELEASE)
             theWindow->keys[key] = false;
     }
-
 
 }
 void Window::ManejaMouse(GLFWwindow* window, double xPos, double yPos)

@@ -1,4 +1,4 @@
-# Blender 4.4.0 MTL File: 'None'
+# Blender 4.3.2 MTL File: 'None'
 # www.blender.org
 
 newmtl 1
@@ -20,3 +20,23 @@ Ni 1.000000
 d 1.000000
 illum 1
 map_Kd Texture_D.tga
+
+newmtl Texture1
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Ember.png
+
+newmtl Texture2
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Hades.png
