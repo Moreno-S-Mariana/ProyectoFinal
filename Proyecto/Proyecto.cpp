@@ -1,7 +1,7 @@
-/*PROYECTO COMPUTACI”N GR¡FICA*/
+Ôªø/*PROYECTO COMPUTACI√ìN GR√ÅFICA*/
 //*****************************************FERIA PULQUE**********************************************
-/*GARCÕA SOTO JEAN CARLO
-  MINO GUZM¡N YARA AMAIRANI
+/*GARC√çA SOTO JEAN CARLO
+  MINO GUZM√ÅN YARA AMAIRANI
   MORENO SANTOYO MARIANA
   */
 #define STB_IMAGE_IMPLEMENTATION
@@ -34,7 +34,7 @@
 #include"Model.h"
 #include "Skybox.h"
 
-//para iluminaciÛn
+//para iluminaci√≥n
 #include "CommonValues.h"
 #include "DirectionalLight.h"
 #include "PointLight.h"
@@ -53,13 +53,13 @@ bool esDeDia = true;
 float anguloMartillo = 0.0f;
 float velocidadOscilacion = 2.0f;		// Puedes ajustar la velocidad
 bool direccionDerecha = true;
-float limiteAngulo = 90.0f;				// M·ximo a cada lado: 90 grados
+float limiteAngulo = 90.0f;				// M√°ximo a cada lado: 90 grados
 //***************************************** Variable para juego carrusel*****************************************
 float angulovaria = 0.0f;
 //******************************************************************************************************************
-//***************************************** Variable animaciÛn de Danny Phantom*****************************************
+//***************************************** Variable animaci√≥n de Danny Phantom*****************************************
 GLfloat vueloDP = 0.0f;
-//***************************************** Variable animaciÛn de Furia*****************************************
+//***************************************** Variable animaci√≥n de Furia*****************************************
 GLfloat saltoFuria = 0.0f;
 GLfloat desplazamientoY_F = 0.0f;
 GLfloat anguloBrazoF = 0.0f;
@@ -76,23 +76,23 @@ float furiaGolpe = 0.0f;
 bool animandoGolpe = false;
 bool golpeBajando = false;
 bool teclaGolpePresionada = false;
-//***************************************** Variable animaciÛn de Panico*****************************************
+//***************************************** Variable animaci√≥n de Panico*****************************************
 GLfloat anguloBrazoP = 0.0f;
 GLfloat mueveCuerpoPanico = 0.0f;
-//***************************************** Variable animaciÛn juego dados*****************************************
+//***************************************** Variable animaci√≥n juego dados*****************************************
 bool dadosGirando = false;
 float anguloDados = 0.0f;
 float alturaDados = 0.8f;
 float rotacionFinalDado1 = 0.0f;
 float rotacionFinalDado2 = 0.0f;
 bool cayoDado = false;
-//***************************************** Variable animaciÛn de Hercules*****************************************
+//***************************************** Variable animaci√≥n de Hercules*****************************************
 GLfloat anguloBrazoEspada = 0.0f;
-//***************************************** Variable animaciÛn monedas*****************************************
+//***************************************** Variable animaci√≥n monedas*****************************************
 bool animarMoneda = false;
 bool monedaMostrada = false;
 float alturaMoneda = 0.8f;
-float velocidadMoneda = 0.5f;
+float velocidadMoneda = 0.05f;
 //***************************************** JUEGO DARDOS VS GLOBOS *****************************************
 bool dardoLanzado = false;
 bool globoVisible[12] = { true, true, true, true, true, true, true, true, true, true, true, true };
@@ -102,12 +102,12 @@ glm::vec3 posicionesGlobos[12] = {
 	{-88.0f, 26.0f, 91.0f}, {-88.0f, 20.0f, 91.0f}, {-88.0f, 14.0f, 91.0f}, {-88.0f, 8.0f, 91.0f},
 	{-72.0f, 26.0f, 107.0f}, {-72.0f, 20.0f, 107.0f}, {-72.0f, 14.0f, 107.0f}, {-72.0f, 8.0f, 107.0f}
 };
-float velocidadDardo = 10.0f;
-glm::vec3 direccionDardo = glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)); // DirecciÛn hacia adelante (ajusta seg˙n tu orientaciÛn)
+//float velocidadDardo =0.1f;
+//glm::vec3 direccionDardo = glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)); // Direcci√≥n hacia adelante (ajusta seg√∫n tu orientaci√≥n)
 float tiempoDardo = 0.0f;
 double tiempoDesaparicionGlobo[12] = { 0.0 };
 const double TIEMPO_REAPARICION_GLOBO = 10.0;
-//*********************** Variables para animaciÛn del juego del topo ***********************
+//*********************** Variables para animaci√≥n del juego del topo ***********************
 float tiempoDesaparicionTopo = 0.0f;
 bool mazoGolpeando = false;
 float anguloMazo = 0.0f;
@@ -115,7 +115,7 @@ float velocidadGolpe = 10.0f;
 float tiempoEsperaReaparicion = 5.0f;
 float tiempoAnimacionMazo = 0.0f;
 bool mazoBajando = true;
-float tiempoTopoOculto = 0.0f;         // Tiempo que el topo est· oculto
+float tiempoTopoOculto = 0.0f;         // Tiempo que el topo est√° oculto
 float tiempoParaMostrarTopo = 2.0f;    // Tiempo que tarda en reaparecer el topo
 float anguloRotacionTopo = 0.0f;
 bool topo1Visible = true;
@@ -128,21 +128,21 @@ bool topo1Golpeado = false;
 bool topo2Golpeado = false;
 bool topo3Golpeado = false;
 int mazoAparece = 0;
-//*********************** Variables para animaciÛn del juego de las hachas ***********************
+//*********************** Variables para animaci√≥n del juego de las hachas ***********************
 GLfloat desplazamientoHacha = 0.0f;
 bool hachaVolando = false;
 float velocidadHacha = 5.0f;
 float anguloRotacionHacha = 0.0f;
-//*********************** Variables para animaciÛn del boliche ***********************
+//*********************** Variables para animaci√≥n del boliche ***********************
 float bolaBoliche = 0.0f;
 float velocidadBola = 0.2f;
 
-// Estados de rotaciÛn individuales
+// Estados de rotaci√≥n individuales
 float rotacionPino0 = 0.0f, rotacionPino1 = 0.0f, rotacionPino2 = 0.0f;
 float rotacionPino3 = 0.0f, rotacionPino4 = 0.0f, rotacionPino5 = 0.0f;
 float rotacionPino6 = 0.0f, rotacionPino7 = 0.0f, rotacionPino8 = 0.0f, rotacionPino9 = 0.0f;
 
-// Estados de caÌda
+// Estados de ca√≠da
 bool pinoCaido0 = false, pinoCaido1 = false, pinoCaido2 = false;
 bool pinoCaido3 = false, pinoCaido4 = false, pinoCaido5 = false;
 bool pinoCaido6 = false, pinoCaido7 = false, pinoCaido8 = false, pinoCaido9 = false;
@@ -168,38 +168,53 @@ float rotacionPino = 0.0f;
 float tiempoInicioCaida = 0.0f;
 float tiempoPinoCaido = 0.0f;
 bool restaurarPino = false;
-//*********************** Variables para animaciÛn del juego baseball ***********************
+
+bool bolichePendiente = false;
+//*********************** Variables para animaci√≥n del juego baseball ***********************
 bool bolaGolpeada = false;
 float bolaY = 3.0f;
 float bolaZ = -75.0f;
-float velocidadBolaBase = 1.0f;  // ajusta seg˙n necesidad
+float velocidadBolaBase = 1.0f;  // ajusta seg√∫n necesidad
 float rotacionBolaBase = 0.0f;
 float anguloBate = 0.0f;
 bool bateAnimando = false;
-glm::vec3 posicionBate = glm::vec3(-15.0f, 4.0f, -70.0f);  // posiciÛn actual del bate
-//*********************** Variables para animaciÛn de AlegrÌa ***********************
+glm::vec3 posicionBate = glm::vec3(-15.0f, 4.0f, -70.0f);  // posici√≥n actual del bate
+//*********************** Variables para animaci√≥n de Alegr√≠a ***********************
 float alegriaSaltoY = 0.0f;
 float alegriaAnguloBrazo = 0.0f;
 float alegriaTiempo = 0.0f;
-//*********************** Variables para animaciÛn de Tristeza ***********************
+//*********************** Variables para animaci√≥n de Tristeza ***********************
 float tristezaBalanceo = 0.0f;
 float tiempoTristeza = 0.0f;
 float tristezaBrazoAngulo = 0.0f;
-//*********************** Variables para animaciÛn de Ember ***********************
+//*********************** Variables para animaci√≥n de Ember ***********************
 float emberTiempo = 0.0f;
 float emberAlturaY = 0.0f;
 float emberBrazoAngulo = 0.0f;
 float emberPiernaAngulo = 0.0f;
-//*********************** Variables para animaciÛn de Sam ***********************
+//*********************** Variables para animaci√≥n de Sam ***********************
 float samTiempo = 0.0f;
 float samBrazoAngulo = 0.0f;
 float samPiernaAngulo = 0.0f;
-//*********************** Variables para animaciÛn de Pena ***********************
+//*********************** Variables para animaci√≥n de Pena ***********************
 float penaTiempo = 0.0f;
 float penaAnguloBalanceo = 0.0f;
 float penaBrazoAngulo = 0.0f;
 float penaCabezaOffset = 0.0f;
-//*****************************************Par·metros generales*****************************************
+
+
+
+
+bool animarPena = false;
+float tiempoAnimacionPena = 0.0f;
+bool sonidoPenaReproducido = false;
+int canalPena = -1;
+
+bool animarPanico = false;
+float tiempoPanico = 0.0f;
+float panicoTemblor = 0.0f;
+
+//*****************************************Par√°metros generales*****************************************
 Window mainWindow;
 std::vector<Mesh*> meshList;
 std::vector<Shader> shaderList;
@@ -302,14 +317,14 @@ Model DannyP_BrazoIzq;
 Model DannyP_BrazoDer;
 Model DannyP_PiernaIzq;
 Model DannyP_PiernaDer;
-//***************************************** NPC¥S  *****************************************
+//***************************************** NPC¬¥S  *****************************************
 //***************************************** Tristeza*****************************************
 Model Tristeza;
 Model BrazoIzq_T;
 Model BrazoDer_T;
 Model PiernaIzq_T;
 Model PiernaDer_T;
-//***************************************** AlegrÌa*****************************************
+//***************************************** Alegr√≠a*****************************************
 Model Alegria;
 Model BrazoIzq_A;
 Model BrazoDer_A;
@@ -369,7 +384,7 @@ static double limitFPS = 1.0 / 60.0;
 DirectionalLight mainLight;
 //para declarar varias luces de tipo pointlight
 //PointLight pointLights[MAX_POINT_LIGHTS];
-PointLight pointLights1[MAX_POINT_LIGHTS];	//PointLight L·mparas
+PointLight pointLights1[MAX_POINT_LIGHTS];	//PointLight L√°mparas
 PointLight pointLights2[MAX_POINT_LIGHTS];	//PointLigth Quiosko
 SpotLight spotLights[MAX_SPOT_LIGHTS];		// Luces Varias parque
 SpotLight spotLights2[MAX_SPOT_LIGHTS];		// Luces Atracciones
@@ -389,7 +404,7 @@ CameraMode currentCameraMode = THIRD_PERSON;
 int attractionIndex = 0;
 bool attractionInitialized = false;
 
-//funciÛn de calculo de normales por promedio de vÈrtices 
+//funci√≥n de calculo de normales por promedio de v√©rtices 
 void calcAverageNormals(unsigned int* indices, unsigned int indiceCount, GLfloat* vertices, unsigned int verticeCount,
 	unsigned int vLength, unsigned int normalOffset)
 {
@@ -804,7 +819,7 @@ int main()
 
 	// puestos
 
-	//skybox DÌa
+	//skybox D√≠a
 	std::vector<std::string> skyboxFacesDay = {
 
 
@@ -841,7 +856,7 @@ int main()
 	Peluche = Material(0.1f, 4);				//Furia, Alegria y Tristeza
 
 
-	//luz direccional, sÛlo 1 y siempre debe de existir
+	//luz direccional, s√≥lo 1 y siempre debe de existir
 	mainLight = DirectionalLight(1.0f, 1.0f, 1.0f,
 		0.03f, 0.03f,
 		0.0f, 0.0f, -1.0f);
@@ -894,7 +909,7 @@ int main()
 	//*************************************************************************************************************************************************
 
 	unsigned int spotLightCount = 0;
-	// L·mpara izquierda
+	// L√°mpara izquierda
 	spotLights[0] = SpotLight(1.0f, 0.843f, 0.6f,
 		10.0f, 80.0f,
 		-28.0f, 9.0f, 93.0f,
@@ -904,7 +919,7 @@ int main()
 	);
 	spotLightCount++;
 
-	// L·mpara derecha
+	// L√°mpara derecha
 	spotLights[1] = SpotLight(1.0f, 0.843f, 0.6f,
 		10.0f, 80.0f,
 		28.0f, 9.0f, 90.0f,
@@ -1057,7 +1072,7 @@ int main()
 	float t = 0.0f;
 	float blendFactor = 0.0f;
 
-	// 2) ¡ngulo del sol [?90∞, 270∞): empieza en el horizonte este, sube al cenit, cae al horizonte oeste
+	// 2) √Ångulo del sol [?90¬∞, 270¬∞): empieza en el horizonte este, sube al cenit, cae al horizonte oeste
 	float sunAngleDeg = 0.0f;
 	float sunRad = 0.0f;
 
@@ -1099,7 +1114,8 @@ int main()
 	Mix_Chunk* sonidoMartillo = Mix_LoadWAV("Sounds/coaster-01_optimized.wav");
 	Mix_Chunk* sonidoBoliche = Mix_LoadWAV("Sounds/boliche.wav");
 	Mix_Chunk* sonidoPena = Mix_LoadWAV("Sounds/PAIN.wav");
-
+	Mix_Chunk* sonidoMoneda = Mix_LoadWAV("Sounds/moneda.wav");
+	Mix_Chunk* sonidoGlobo = Mix_LoadWAV("Sounds/GLOBO.wav");
 
 
 
@@ -1113,11 +1129,14 @@ int main()
 	bool carrouselActivo = false;
 	bool martilloActivo = false;
 	bool penaActiva = false;
+	bool monedaActiva = false;
+	bool globoActivo = false;
+	int canalMineda = -1;
 	int canalPena = -1;
 	int canalMartillo = -1;
 	int canalCarrousel = -1;
 	int canalAmbiente = -1;
-
+	int canalGlobo = -1;
 
 	if (!musicaFondo) printf("Error cargando musica fondo: %s\n", Mix_GetError());
 	if (!musicaBoliche) printf("Error cargando musica boliche: %s\n", Mix_GetError());
@@ -1131,6 +1150,8 @@ int main()
 	if (!sonidoMartillo) printf("Error cargando martillo: %s\n", Mix_GetError());
 	if (!sonidoBoliche) printf("Error cargando boliche: %s\n", Mix_GetError());
 	if (!sonidoPena) printf("Error cargando sonido pena: %s\n", Mix_GetError());
+	if (!sonidoGlobo) printf("Error cargando sonido globo: %s\n", Mix_GetError());
+	if (!sonidoMoneda) printf("Error cargando sonido moneda: %s\n", Mix_GetError());
 
 	////Loop mientras no se cierra la ventana
 	while (!mainWindow.getShouldClose())
@@ -1142,6 +1163,50 @@ int main()
 		lastTime = now;
 
 		angulovaria += 0.3f * deltaTime;
+
+//*********************************************************************************************************************************************************************************************************7
+// *****************************************************************************ANIMACIONES DE PANICO + SONIDO   *******************************************************************************************
+// *********************************************************************************************************************************************************************************************************
+
+
+		const float DURACION_ANIMACION_PENA = 80.0f;
+
+		if (animarPena) {
+			tiempoAnimacionPena += deltaTime;
+
+			// Reproducir sonido solo una vez
+			if (!sonidoPenaReproducido) {
+				Mix_HaltChannel(-1);  // Silencia otros sonidos
+				canalPena = Mix_PlayChannel(-1, sonidoPena, 0);
+				if (canalPena != -1)
+					Mix_Volume(canalPena, MIX_MAX_VOLUME);
+				sonidoPenaReproducido = true;
+			}
+
+			// Movimiento sincronizado con tiempo
+			float progreso = tiempoAnimacionPena / DURACION_ANIMACION_PENA;
+			progreso = glm::clamp(progreso, 0.0f, 1.0f);
+
+			anguloBrazoP = 130.0f * progreso; // sube hasta 130¬∞ en 5s
+			panicoTemblor = sin(tiempoAnimacionPena * 20.0f) * 0.1f;
+
+			if (tiempoAnimacionPena >= DURACION_ANIMACION_PENA) {
+				animarPena = false;
+			}
+		}
+		else {
+			// Regreso suave a estado base
+			if (anguloBrazoP > 0.0f) {
+				anguloBrazoP -= 100.0f * deltaTime;
+				if (anguloBrazoP < 0.0f) anguloBrazoP = 0.0f;
+			}
+			panicoTemblor = 0.0f;
+		}
+
+// *********************************************************************************************************************************************************************************************************
+
+
+
 
 		// Movimiento alternante del martillo
 		if (direccionDerecha) {
@@ -1160,17 +1225,17 @@ int main()
 		}
 
 		//***************************************************************
-		//AnimaciÛn de dados
+		//Animaci√≥n de dados
 		if (mainWindow.getDadosGirando()) {
 			anguloDados += 10.0f * deltaTime;
 			if (alturaDados < 5.0f)
 				alturaDados += 5.0f * deltaTime;
-			cayoDado = false; // se est· girando, a˙n no ha caÌdo
+			cayoDado = false; // se est√° girando, a√∫n no ha ca√≠do
 		}
 		else {
 			if (!cayoDado) {
-				// Generar una rotaciÛn aleatoria para cada dado cuando caen
-				rotacionFinalDado1 = (rand() % 4) * 90.0f; // M˙ltiplos de 90 grados
+				// Generar una rotaci√≥n aleatoria para cada dado cuando caen
+				rotacionFinalDado1 = (rand() % 4) * 90.0f; // M√∫ltiplos de 90 grados
 				rotacionFinalDado2 = (rand() % 4) * 90.0f;
 				cayoDado = true;
 			}
@@ -1181,7 +1246,7 @@ int main()
 			anguloDados = 0.0f;
 		}
 
-		//AnimaciÛn moneda
+		//Animaci√≥n moneda
 		if (mainWindow.getMonedaEnElAire()) {
 			animarMoneda = true;
 			monedaMostrada = true;
@@ -1200,32 +1265,118 @@ int main()
 				}
 			}
 		}
+		
+		
+		//**********************************************************************************************************************************************************************************************************
+		// *****************************************************************************ANIMACIONES DE BOLICHE AJUSTADAS *******************************************************************************************
+		// *********************************************************************************************************************************************************************************************************
+		enum EstadoDardo { D_ESPERANDO, D_ANIMANDO_MONEDA, D_LANZANDO_DARDO };
+		static EstadoDardo estadoDardo = D_ESPERANDO;
 
-		//Animacion globos y dardos
-		// Lanzamiento de dardo (tecla G)
-		if (mainWindow.getDardoLanzado()) {
-			posicionDardo.z += velocidadDardo * deltaTime;
+		static bool monedaSubiendoDardo = false;
+		static float alturaMoneda = 1.2f;
+		static bool monedaMostrada = false;
+		static bool animarMonedaDardo = false;
+
+		static glm::vec3 posicionInicialDardo = glm::vec3(-70.0f, 14.0f, 83.0f);
+		static glm::vec3 posicionDardo = posicionInicialDardo;
+		static glm::vec3 direccionDardo = glm::vec3(0.0f);
+		static float velocidadDardo = 0.5f;
+		static bool direccionCalculada = false;
+
+		static float rotacionDardo = 0.0f;
+
+		const float TIEMPO_REAPARICION_GLOBO = 1.5f; // Regeneraci√≥n m√°s r√°pida
+		const float velocidadMoneda2 = 0.3f; // Velocidad alternativa de animaci√≥n de moneda
+
+		// Si se lanza el dardo, primero se anima la moneda
+		if (estadoDardo == D_ESPERANDO && mainWindow.getDardoLanzado()) {
+			estadoDardo = D_ANIMANDO_MONEDA;
+			animarMonedaDardo = true;
+			monedaMostrada = true;
+			monedaSubiendoDardo = true;
+			direccionCalculada = false;
+			rotacionDardo = 45.0f; // aplicar rotaci√≥n inicial
+		}
+
+		// Animaci√≥n de la moneda (sube y baja)
+		if (estadoDardo == D_ANIMANDO_MONEDA) {
+			if (monedaSubiendoDardo) {
+				alturaMoneda += velocidadMoneda2 * deltaTime;
+				if (alturaMoneda >= 2.0f) {
+					monedaSubiendoDardo = false;
+				}
+			}
+			else {
+				alturaMoneda -= velocidadMoneda2 * deltaTime;
+				if (alturaMoneda <= 0.8f) {
+					alturaMoneda = 0.8f;
+					animarMoneda = false;
+					monedaMostrada = false;
+
+					if (sonidoMoneda) {
+						Mix_PlayChannel(-1, sonidoMoneda, 0);
+					}
+
+					estadoDardo = D_LANZANDO_DARDO;
+				}
+			}
+		}
+
+		// Movimiento del dardo (trayectoria en plano XZ fija en Y)
+		if (estadoDardo == D_LANZANDO_DARDO) {
+			if (!direccionCalculada) {
+				glm::vec3 objetivo = glm::vec3(0.0f);
+				int encontrados = 0;
+				for (int i = 0; i < 12; ++i) {
+					if (globoVisible[i]) {
+						objetivo += posicionesGlobos[i];
+						encontrados++;
+					}
+				}
+				if (encontrados > 0) {
+					objetivo /= float(encontrados);
+					glm::vec3 destinoXZ = glm::vec3(objetivo.x, posicionDardo.y, objetivo.z);
+					direccionDardo = glm::normalize(destinoXZ - posicionDardo);
+				}
+				else {
+					direccionDardo = glm::vec3(0.0f, 0.0f, 1.0f);
+				}
+				direccionCalculada = true;
+			}
+
+			posicionDardo += direccionDardo * velocidadDardo * deltaTime;
+			rotacionDardo = 45.0f; // mantener rotaci√≥n durante el vuelo
 
 			for (int i = 0; i < 12; ++i) {
 				if (globoVisible[i]) {
 					float distancia = glm::distance(posicionDardo, posicionesGlobos[i]);
-					if (distancia < 5.0f) {
+					if (distancia < 2.5f) {
 						globoVisible[i] = false;
-						tiempoDesaparicionGlobo[i] = glfwGetTime();  // Guarda el tiempo de desapariciÛn
+						tiempoDesaparicionGlobo[i] = glfwGetTime();
+
+						if (sonidoGlobo) {
+							Mix_PlayChannel(-1, sonidoGlobo, 0);
+						}
+
 						mainWindow.desactivarDardoLanzado();
-						posicionDardo = glm::vec3(-90.0f, 4.0f, 83.0f);
+						posicionDardo = posicionInicialDardo;
+						estadoDardo = D_ESPERANDO;
+						rotacionDardo = 0.0f; // resetear rotaci√≥n al reiniciar
 						break;
 					}
 				}
 			}
 
-			if (posicionDardo.z > 130.0f) {
+			if (glm::distance(posicionDardo, posicionInicialDardo) > 100.0f) {
 				mainWindow.desactivarDardoLanzado();
-				posicionDardo = glm::vec3(-90.0f, 4.0f, 83.0f);
+				posicionDardo = posicionInicialDardo;
+				estadoDardo = D_ESPERANDO;
+				rotacionDardo = 0.0f;
 			}
 		}
 
-		// ReapariciÛn de globos (fuera del if de dardos)
+		// Reaparici√≥n de globos
 		for (int i = 0; i < 12; ++i) {
 			if (!globoVisible[i]) {
 				double tiempoActual = glfwGetTime();
@@ -1235,7 +1386,9 @@ int main()
 			}
 		}
 
-		// AnimaciÛn mazo y topo
+		// *********************************************************************************************************************************************************************************************************
+
+		// Animaci√≥n mazo y topo
 		if (mainWindow.getMazoGolpeando()) {
 			anguloMazo += velocidadGolpe * deltaTime;
 
@@ -1285,12 +1438,12 @@ int main()
 			}
 		}
 
-		anguloRotacionTopo += 10.0f * deltaTime;  // Velocidad de rotaciÛn
+		anguloRotacionTopo += 10.0f * deltaTime;  // Velocidad de rotaci√≥n
 		if (anguloRotacionTopo >= 360.0f) {
 			anguloRotacionTopo -= 360.0f;
 		}
 
-		//AnimaciÛn hachas
+		//Animaci√≥n hachas
 		if (mainWindow.getTeclaMHacha()) {
 			if (desplazamientoHacha < 3.0f) {
 				desplazamientoHacha += velocidadHacha * deltaTime;
@@ -1308,46 +1461,96 @@ int main()
 				desplazamientoHacha = 0.0f;
 		}
 
-		//AnimaciÛn boliche
-		bool sonidoStrikeReproducido = false;
+		//**********************************************************************************************************************************************************************************************************
+		// *****************************************************************************ANIMACIONES DE BOLICHE AJUSTADAS *******************************************************************************************
+		// *********************************************************************************************************************************************************************************************************
 
-		if (mainWindow.getBolaLnazada()) {
+		static enum EstadoJuego { ESPERANDO, ANIMANDO_MONEDA, ANIMANDO_BOLICHE } estado = ESPERANDO;
+		// Controla en qu√© etapa est√° el juego del boliche.
 
-			if (!sonidoStrikeReproducido && sonidoBoliche) {
-				Mix_PlayChannel(-1, sonidoBoliche, 0);  // 0: no loop
-				sonidoStrikeReproducido = true;
+		static bool monedaSubiendo = false;
+		// Nos dice si la moneda est√° subiendo durante la animaci√≥n.
+
+		static bool sonidoStrikeReproducido = false;
+		// Asegura que el sonido del boliche solo se reproduzca una vez por turno.
+
+		// Cuando presionas la tecla para lanzar la bola (por ejemplo F), se activa la animaci√≥n.
+		if (estado == ESPERANDO && mainWindow.getBolaLnazada()) {
+			estado = ANIMANDO_MONEDA;          // Iniciamos animaci√≥n de moneda.
+			animarMoneda = true;               // Activamos la bandera para animar.
+			monedaMostrada = true;            // Indicamos que la moneda debe renderizarse.
+			monedaSubiendo = true;            // Iniciamos el movimiento de subida.
+		}
+
+		// Animaci√≥n de la moneda que sube y luego cae.
+		if (estado == ANIMANDO_MONEDA) {
+			if (monedaSubiendo) {
+				alturaMoneda += velocidadMoneda * deltaTime; // Aumenta la altura gradualmente.
+				if (alturaMoneda >= 2.0f) {
+					monedaSubiendo = false; // Una vez que alcanza el punto m√°ximo, empieza a bajar.
+				}
 			}
+			else {
+				alturaMoneda -= velocidadMoneda * deltaTime; // Baja gradualmente.
 
-			bolaBoliche += velocidadBola * deltaTime;
+				if (alturaMoneda <= 0.8f) {
+					// Cuando termina de caer...
+					alturaMoneda = 0.8f;         // Fijamos la posici√≥n.
+					animarMoneda = false;        // Se detiene la animaci√≥n.
+					monedaMostrada = false;      // Ya no se muestra la moneda.
 
-			if (bolaBoliche >= 7.0f) {
-				bolaBoliche = 0.0f;
-				sonidoStrikeReproducido = false;
-				mainWindow.desactivarBolaLanzada();
+					if (sonidoMoneda) {
+						Mix_PlayChannel(-1, sonidoMoneda, 0); // üîä Reproducimos el sonido de ca√≠da.
+					}
+
+					estado = ANIMANDO_BOLICHE;   // Pasamos a la siguiente etapa: lanzar la bola.
+					bolaBoliche = 0.0f;          // Reiniciamos la posici√≥n de la bola.
+					sonidoStrikeReproducido = false; // Permitimos que el sonido del strike se vuelva a reproducir.
+				}
 			}
 		}
 
-		// Activar caÌda solo una vez
-		if (!animarCaidaPinos && bolaBoliche >= 4.8f) {
-			animarCaidaPinos = true;
-			tiempoCaidaPinos = 0.0f;
+		// Movimiento de la bola de boliche despu√©s de que cae la moneda.
+		if (estado == ANIMANDO_BOLICHE) {
+			bolaBoliche += velocidadBola * deltaTime; // La bola avanza hacia adelante.
 
-			// Activar todos los pinos
+			if (!sonidoStrikeReproducido && sonidoBoliche) {
+				Mix_PlayChannel(-1, sonidoBoliche, 0); // üîä Sonido del golpe en los pinos.
+				sonidoStrikeReproducido = true;
+			}
+
+			if (bolaBoliche >= 7.0f) {
+				// Cuando llega al final de la pista...
+				bolaBoliche = 0.0f;               // Se reinicia su posici√≥n.
+				sonidoStrikeReproducido = false;  // Se resetea la bandera de sonido.
+				mainWindow.desactivarBolaLanzada(); // Se desactiva la entrada del usuario.
+				estado = ESPERANDO;               // Regresamos al estado inicial.
+			}
+		}
+
+		// Activamos la ca√≠da de los pinos justo cuando la bola pasa por su posici√≥n.
+		if (!animarCaidaPinos && bolaBoliche >= 4.8f) {
+			animarCaidaPinos = true; // Se inicia la animaci√≥n de ca√≠da.
+			tiempoCaidaPinos = 0.0f; // Reiniciamos el tiempo.
+
+			// Marcamos todos los pinos como que deben caer.
 			pinoCaido0 = pinoCaido1 = pinoCaido2 = pinoCaido3 = pinoCaido4 =
 				pinoCaido5 = pinoCaido6 = pinoCaido7 = pinoCaido8 = pinoCaido9 = true;
 		}
 
-		// Si animar est· activo, hacer rotar todos
+		// Si los pinos est√°n cayendo...
 		if (animarCaidaPinos) {
-			tiempoCaidaPinos += deltaTime;
+			tiempoCaidaPinos += deltaTime; // Seguimos sumando tiempo.
 
+			// Lambda que simula la rotaci√≥n de un pino cuando cae.
 			auto caer = [](bool& caido, float& rotacion) {
 				if (caido && rotacion < 90.0f) {
-					rotacion += 60.0f * deltaTime;
-					if (rotacion > 90.0f) rotacion = 90.0f;
+					rotacion += 60.0f * deltaTime; // Rota el pino.
+					if (rotacion > 90.0f) rotacion = 90.0f; // Limita el giro.
 				}
 				};
 
+			// Aplicamos la ca√≠da a todos los pinos.
 			caer(pinoCaido0, rotacionPino0); caer(pinoCaido1, rotacionPino1);
 			caer(pinoCaido2, rotacionPino2); caer(pinoCaido3, rotacionPino3);
 			caer(pinoCaido4, rotacionPino4); caer(pinoCaido5, rotacionPino5);
@@ -1355,44 +1558,47 @@ int main()
 			caer(pinoCaido8, rotacionPino8); caer(pinoCaido9, rotacionPino9);
 
 			if (tiempoCaidaPinos >= 10.0f) {
-				// Restaurar todos
+				// Despu√©s de 10 segundos, todo vuelve a su estado original.
 				pinoCaido0 = pinoCaido1 = pinoCaido2 = pinoCaido3 = pinoCaido4 =
 					pinoCaido5 = pinoCaido6 = pinoCaido7 = pinoCaido8 = pinoCaido9 = false;
 
 				rotacionPino0 = rotacionPino1 = rotacionPino2 = rotacionPino3 = rotacionPino4 =
 					rotacionPino5 = rotacionPino6 = rotacionPino7 = rotacionPino8 = rotacionPino9 = 0.0f;
 
-				animarCaidaPinos = false;
+				animarCaidaPinos = false; // Finaliza toda la secuencia.
 			}
 		}
 
-		// AnimaciÛn bola bÈisbol
+		//**********************************************************************************************************************************************************************************************************
+		// *********************************************************************************************************************************************************************************************************
+
+		// Animaci√≥n bola b√©isbol
 		if (mainWindow.getBolaBaseGolpeada()) {
-			// Movimiento hacia atr·s (Z) y subida (Y)
+			// Movimiento hacia atr√°s (Z) y subida (Y)
 			bolaZ -= velocidadBolaBase * deltaTime;
 
-			// InterpolaciÛn para subir Y desde 3 hasta 15
+			// Interpolaci√≥n para subir Y desde 3 hasta 15
 			if (bolaY < 15.0f) {
 				bolaY += 20.0f * deltaTime;  // ajusta velocidad vertical si quieres
 				if (bolaY > 15.0f) bolaY = 15.0f;
 			}
 
-			// RotaciÛn continua
+			// Rotaci√≥n continua
 			rotacionBolaBase += 20.0f * deltaTime;  // 180 grados por segundo
 			if (rotacionBolaBase >= 360.0f) rotacionBolaBase -= 360.0f;
 
-			// Activar animaciÛn de bate
+			// Activar animaci√≥n de bate
 			bateAnimando = true;
 			if (bateAnimando) {
 				if (anguloBate < 45.0f) {
 					anguloBate += 5.0f * deltaTime; // velocidad de swing
 					if (anguloBate > 45.0f) anguloBate = 45.0f;
 				}
-				// cambiar posiciÛn del bate al momento del swing
+				// cambiar posici√≥n del bate al momento del swing
 				posicionBate = glm::vec3(-15.0f, 15.0f, -70.0f);
 			}
 
-			// Fin de animaciÛn
+			// Fin de animaci√≥n
 			if (bolaZ <= -110.0f) {
 				bolaZ = -75.0f;
 				bolaY = 3.0f;
@@ -1409,28 +1615,28 @@ int main()
 
 
 
-		//AnimaciÛn alegrÌa
+		//Animaci√≥n alegr√≠a
 		alegriaTiempo += deltaTime;
 		alegriaSaltoY = abs(sin(alegriaTiempo * 3.0f)) * 0.5f; // Subidas y bajadas suaves
-		alegriaAnguloBrazo = sin(alegriaTiempo * 5.0f) * 30.0f; // Oscila entre -30∞ y 30∞
+		alegriaAnguloBrazo = sin(alegriaTiempo * 5.0f) * 30.0f; // Oscila entre -30¬∞ y 30¬∞
 
-		//AnimaciÛn tristeza
+		//Animaci√≥n tristeza
 		tiempoTristeza += deltaTime;
-		tristezaBalanceo = sin(tiempoTristeza * 0.2f) * 2.0f;  // OscilaciÛn suave
+		tristezaBalanceo = sin(tiempoTristeza * 0.2f) * 2.0f;  // Oscilaci√≥n suave
 		tristezaBrazoAngulo = sin(tiempoTristeza * 0.5f) * 1.0f;
 
-		//AnimaciÛn ember
+		//Animaci√≥n ember
 		emberTiempo += deltaTime;
-		emberAlturaY = abs(sin(emberTiempo * 0.2f)) * 0.3f;  // pequeÒo salto suave
+		emberAlturaY = abs(sin(emberTiempo * 0.2f)) * 0.3f;  // peque√±o salto suave
 		emberBrazoAngulo = sin(emberTiempo * 0.2f) * 25.0f;
 		emberPiernaAngulo = sin(emberTiempo * 0.2f + glm::radians(90.0f)) * 15.0f;
 
-		//AnimaciÛn sam
+		//Animaci√≥n sam
 		samTiempo += deltaTime;
 		samBrazoAngulo = sin(samTiempo * 0.2f) * 20.0f;
 		samPiernaAngulo = sin(samTiempo * 0.2f + glm::radians(180.0f)) * 10.0f;
 
-		//AnimaciÛn Pena
+		//Animaci√≥n Pena
 		penaTiempo += deltaTime;
 		penaAnguloBalanceo = sin(penaTiempo * 0.5f) * 5.0f;     // Movimiento sutil de balanceo
 		penaBrazoAngulo = sin(penaTiempo * 0.4f) * 10.0f;        // Brazos que se abrazan suavemente
@@ -1449,6 +1655,8 @@ int main()
 		glfwPollEvents();
 
 
+
+
 		if (currentCameraMode != ATTRACTIONS) {
 			camera.keyControl(mainWindow.getsKeys(), deltaTime, currentCameraMode);
 		}
@@ -1457,12 +1665,24 @@ int main()
 		bool* keys = mainWindow.getsKeys();
 
 
+		static bool pPresionadoAntes = false;
+		if (keys[GLFW_KEY_P] && !pPresionadoAntes) {
+			animarPena = true;
+			tiempoAnimacionPena = 0.0f;
+			sonidoPenaReproducido = false;
+			pPresionadoAntes = true;
+		}
+		if (!keys[GLFW_KEY_P]) pPresionadoAntes = false;
+
+
+
+
 		if (keys[GLFW_KEY_1]) currentCameraMode = FIRST_PERSON;
 		if (keys[GLFW_KEY_2]) currentCameraMode = THIRD_PERSON;
 		if (keys[GLFW_KEY_3]) currentCameraMode = TOP_VIEW;
 		if (keys[GLFW_KEY_4]) {
 			currentCameraMode = ATTRACTIONS;
-			attractionInitialized = false;  // Reinicia bandera de inicializaciÛn
+			attractionInitialized = false;  // Reinicia bandera de inicializaci√≥n
 		}
 
 		// Control de giro de Furia con las flechas izquierda/derecha
@@ -1525,7 +1745,7 @@ int main()
 		// Clear the window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-		//informaciÛn en el shader de intensidad especular y brillo
+		//informaci√≥n en el shader de intensidad especular y brillo
 		uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
 		uniformShininess = shaderList[0].GetShininessLocation();
 
@@ -1535,11 +1755,11 @@ int main()
 		switch (currentCameraMode) {
 		case FIRST_PERSON:
 			camera.setPosition(furiaPos + glm::vec3(0.0f, 8.0f, 0.0f));
-			view = camera.calculateViewMatrix();  // °NO ajustar el yaw manualmente!
+			view = camera.calculateViewMatrix();  // ¬°NO ajustar el yaw manualmente!
 			break;
 		case THIRD_PERSON:
 		{
-			glm::vec3 offset = glm::vec3(0.0f, 10.0f, 20.0f); // distancia detr·s de Furia
+			glm::vec3 offset = glm::vec3(0.0f, 10.0f, 20.0f); // distancia detr√°s de Furia
 			glm::vec3 thirdPersonPos = furiaPos - glm::normalize(camera.getCameraDirection()) * 20.0f + glm::vec3(0.0f, 10.0f, 0.0f);
 			camera.setPosition(thirdPersonPos);
 			view = camera.calculateViewMatrix();
@@ -1553,7 +1773,7 @@ int main()
 				primeraVez = false;
 			}
 
-			// Fijar la direcciÛn de la c·mara hacia abajo
+			// Fijar la direcci√≥n de la c√°mara hacia abajo
 			glm::vec3 pos = camera.getCameraPosition();
 			glm::vec3 target = pos + glm::vec3(0.0f, -1.0f, 0.0f); // mira hacia abajo
 			glm::vec3 up = glm::vec3(0.0f, 0.0f, -1.0f); // mantener eje horizontal como 'arriba'
@@ -1566,7 +1786,7 @@ int main()
 				glm::vec3 attractionPos = spotLights2[attractionIndex].GetPosition();
 				camera.setPosition(attractionPos + glm::vec3(0.0f, 5.0f, 30.0f));  // Vista desde enfrente
 				camera.setDirection(glm::normalize(attractionPos - camera.getCameraPosition()));
-				camera.setYaw(glm::radians(180.0f));  // Opcional: ajusta orientaciÛn
+				camera.setYaw(glm::radians(180.0f));  // Opcional: ajusta orientaci√≥n
 				attractionInitialized = true;
 			}
 			view = camera.calculateViewMatrix();
@@ -1651,9 +1871,9 @@ int main()
 			dadosActivos = false;
 			toposActivos = false;
 		}
-	
-		else if (distancia >= 40.0f && distanciaHacha >= 30.0f && distanciaGlobos >= 30.0f && distanciaDados >= 30.0f && distanciaTopos >= 30.0f && distanciaJaula >=30.0f
-			&& (bolicheActivo || hachaActiva || globosActivos || dadosActivos || toposActivos|| bateoActivo)) {
+
+		else if (distancia >= 40.0f && distanciaHacha >= 30.0f && distanciaGlobos >= 30.0f && distanciaDados >= 30.0f && distanciaTopos >= 30.0f && distanciaJaula >= 30.0f
+			&& (bolicheActivo || hachaActiva || globosActivos || dadosActivos || toposActivos || bateoActivo)) {
 			Mix_HaltMusic();
 			Mix_PlayMusic(musicaFondo, -1);
 			bolicheActivo = false;
@@ -1685,28 +1905,17 @@ int main()
 			Mix_HaltChannel(canalMartillo);
 			martilloActivo = false;
 		}
-
-		glm::vec3 penaPos = glm::vec3(0.0f, -6.0f, 235.0f)+ (0.2f, 1.75f, -3.0f);
-		bool sonidoPenaReproducido = false;
-		float distanciaPena = glm::distance(furiaPos, penaPos);
-
-		if (distanciaPena < 20.0f && !sonidoPenaReproducido) {
-			Mix_PlayChannel(-1, sonidoPena, 0);
-			sonidoPenaReproducido = true;
-		}
-		if (distanciaPena > 20.0f) {
-			sonidoPenaReproducido = false;
-		}
+	
 
 		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
 
 		glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
 
-		// dÌa completo
+		// d√≠a completo
 		if (t < dayDuration) {
 			blendFactor = 0.0f;
 		}
-		// fundido dÌa ? noche
+		// fundido d√≠a ? noche
 		else if (t < dayDuration + fadeDuration) {
 			blendFactor = (t - dayDuration) / fadeDuration;
 		}
@@ -1714,30 +1923,30 @@ int main()
 		else if (t < dayDuration + fadeDuration + nightDuration) {
 			blendFactor = 1.0f;
 		}
-		// fundido noche ? dÌa
+		// fundido noche ? d√≠a
 		else {
 			blendFactor = 1.0f - (t - dayDuration - fadeDuration - nightDuration) / fadeDuration;
 		}
 
 
-		// 2) ¡ngulo del sol [?90∞, 270∞): empieza en el horizonte este, sube al cenit, cae al horizonte oeste
+		// 2) √Ångulo del sol [?90¬∞, 270¬∞): empieza en el horizonte este, sube al cenit, cae al horizonte oeste
 		sunAngleDeg = (t / cycleTime) * 360.0f - 90.0f;
 
 
-		// 3) Vector direcciÛn del sol: barrido en el plano XñY (Z fijo o pequeÒo para inclinar)
+		// 3) Vector direcci√≥n del sol: barrido en el plano X‚ÄìY (Z fijo o peque√±o para inclinar)
 		glm::vec3 sunDir = glm::normalize(glm::vec3(
 			cosf(sunRad),      // componente X: este/oeste
 			sinf(sunRad),      // componente Y: horizonte?cenit?horizonte
 			0.2f               // un poco de Z para que la luz no venga exactamente del foco
 		));
 
-		// 4) Actualiza la direcciÛn de mainLight
+		// 4) Actualiza la direcci√≥n de mainLight
 		mainLight.SetDirection(sunDir);
 		// luego dibujas:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Matrices para el skybox
-		glm::mat4 viewMatrix = glm::mat4(glm::mat3(camera.calculateViewMatrix())); // sin traslaciÛn
+		glm::mat4 viewMatrix = glm::mat4(glm::mat3(camera.calculateViewMatrix())); // sin traslaci√≥n
 		glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f),
 			(GLfloat)mainWindow.getBufferWidth() / (GLfloat)mainWindow.getBufferHeight(),
 			0.1f, 100.0f);
@@ -1751,7 +1960,7 @@ int main()
 		uniformEyePosition = shaderList[0].GetEyePositionLocation();
 		uniformColor = shaderList[0].getColorLocation();
 
-		//informaciÛn en el shader de intensidad especular y brillo
+		//informaci√≥n en el shader de intensidad especular y brillo
 		uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
 		uniformShininess = shaderList[0].GetShininessLocation();
 
@@ -1762,26 +1971,26 @@ int main()
 		shaderList[0].SetDirectionalLight(&mainLight);							//Habilita luz principal
 
 		//Arreglo para los arreglos de luces
-		// Obtenemos posiciÛn de la c·mara
+		// Obtenemos posici√≥n de la c√°mara
 		glm::vec3 camPos(camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
 
 		totalLucesActivas = 0;
 
-		// ---------- Arreglo 1: spotLights[] (enciende solo si est·n cerca)
+		// ---------- Arreglo 1: spotLights[] (enciende solo si est√°n cerca)
 		for (int i = 0; i < spotLightCount; ++i) {
 			if (estaCerca(camPos, spotLights[i].GetPosition(), 90.0f)) {
 				lucesActivas[totalLucesActivas++] = spotLights[i];
 			}
 		}
 
-		// ---------- Arreglo 2: spotLights2[] (una por atracciÛn, solo si cerca)
+		// ---------- Arreglo 2: spotLights2[] (una por atracci√≥n, solo si cerca)
 		for (int i = 0; i < spotLightCount2; ++i) {
 			if (estaCerca(camPos, spotLights2[i].GetPosition(), 60.0f)) {
 				lucesActivas[totalLucesActivas++] = spotLights2[i];
 			}
 		}
 
-		// ---------- Arreglo 3: spotLights3[] (una luz encendida a la vez cÌclicamente)
+		// ---------- Arreglo 3: spotLights3[] (una luz encendida a la vez c√≠clicamente)
 		camaraCercaDeLuces3 = false;
 		for (int i = 0; i < spotLightCount3; ++i) {
 			if (estaCerca(camPos, spotLights3[i].GetPosition(), 90.0f)) {
@@ -1875,7 +2084,7 @@ int main()
 		modelaux2 = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Boliche.RenderModel();
-		// Ejes de caÌda individuales
+		// Ejes de ca√≠da individuales
 		glm::vec3 ejeCaidaPino0 = glm::vec3(0.0f, 0.0f, 1.0f);
 		glm::vec3 ejeCaidaPino1 = glm::vec3(0.0f, 0.0f, -1.0f);
 		glm::vec3 ejeCaidaPino2 = glm::vec3(1.0f, 0.0f, 0.0f);
@@ -1985,40 +2194,46 @@ int main()
 		Bolaboliche.RenderModel();
 
 		//************************* NPC Pena ***************************************************************
+		// =================== PENA (animaci√≥n de miedo) ===================
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.2f, 1.75f, -3.0f));
+		model = glm::translate(model, glm::vec3(4.5f + panicoTemblor, 2.0f, -3.0f)); // posici√≥n con temblor
+		model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
 		model = glm::rotate(model, glm::radians(penaAnguloBalanceo), glm::vec3(0.0f, 1.0f, 0.0f)); // balanceo
 		modelaux2 = model;
-		//model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
-		Pena.RenderModel();
+		Pena.RenderModel();  // cuerpo
 
+		// Pierna derecha
 		model = modelaux2;
-		model = glm::translate(model, glm::vec3(0.18f, -0.21f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
-		PiernaIzq_Pena.RenderModel();
-
-		model = modelaux2;
-		model = glm::translate(model, glm::vec3(-0.16f, -0.21f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.15f, -0.22f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PiernaDer_Pena.RenderModel();
 
+		// Pierna izquierda
 		model = modelaux2;
-		model = glm::translate(model, glm::vec3(-0.25f, 0.11f, -0.04f));
-		model = glm::rotate(model, glm::radians(penaBrazoAngulo), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(-0.15f, -0.22f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
+		PiernaIzq_Pena.RenderModel();
+
+		// Brazo derecho (sube con miedo)
+		model = modelaux2;
+		model = glm::translate(model, glm::vec3(-0.18f, 0.1f, -0.04f));
+		model = glm::rotate(model, glm::radians(anguloBrazoP), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoDer_Pena.RenderModel();
 
+		// Brazo izquierdo (sube con miedo)
 		model = modelaux2;
-		model = glm::translate(model, glm::vec3(0.25f, 0.1f, -0.04f));
-		model = glm::rotate(model, glm::radians(-penaBrazoAngulo), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.18f, 0.1f, -0.04f));
+		model = glm::rotate(model, glm::radians(anguloBrazoP), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoIzq_Pena.RenderModel();
+			
 
 		//************************Mesa cobro moneda boliche************************************************ 
 		model = modelaux;
@@ -2039,7 +2254,7 @@ int main()
 
 		//Moneda - Utilizar en los casos necesarios 
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.0f, alturaMoneda, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, alturaMoneda-0.72, 0.0f));
 		model = glm::scale(model, glm::vec3(0.03f, 0.03f, 0.03f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Oro.UseMaterial(uniformSpecularIntensity, uniformShininess);
@@ -2388,7 +2603,7 @@ int main()
 		Acero.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Martillo.RenderModel();
 
-		// Parte Frontal: rota en direcciÛn opuesta a la trasera
+		// Parte Frontal: rota en direcci√≥n opuesta a la trasera
 		// Martillo frontal - rota hacia un lado
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-0.6f, 7.1f, 0.0f));
@@ -2397,7 +2612,7 @@ int main()
 		Acero.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		MartilloFrontal.RenderModel();
 
-		// Parte Trasera: rota en direcciÛn contraria
+		// Parte Trasera: rota en direcci√≥n contraria
 		// Martillo trasero - rota al lado opuesto
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.9f, 7.1f, 0.0f));
@@ -2410,7 +2625,7 @@ int main()
 		//***************************************** DADOS  *****************************************
 
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(80.0f, 3.0f, 100.0f));  // PosiciÛn base de la mesa
+		model = glm::translate(model, glm::vec3(80.0f, 3.0f, 100.0f));  // Posici√≥n base de la mesa
 		modelaux = model;
 		modelaux2 = model;
 		model = glm::scale(model, glm::vec3(0.15f, 0.15f, 0.15f));
@@ -2494,7 +2709,7 @@ int main()
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, posicionDardo);
 		model = glm::scale(model, glm::vec3(7.0f));
-		model = glm::rotate(model, glm::radians(-135.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(rotacionDardo), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Dardos.RenderModel();
@@ -2529,7 +2744,7 @@ int main()
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-1.03f, 0.97f, 0.0f));
-		//AnimaciÛn de espadazos
+		//Animaci√≥n de espadazos
 		anguloBrazoEspada += 0.5 * deltaTime;
 		model = glm::rotate(model, glm::radians(-130.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(50 * sin(glm::radians(10 * anguloBrazoEspada))), glm::vec3(1.0f, -1.0f, 0.0f));
@@ -2799,8 +3014,8 @@ int main()
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(0.0f, bolaY, bolaZ));
-		model = glm::rotate(model, glm::radians(rotacionBolaBase), glm::vec3(0.0f, 1.0f, 0.0f)); // rotaciÛn sobre eje Y
-		model = glm::scale(model, glm::vec3(5.0f, 6.0f, 5.0f));  // aseg˙rate de conservar esto si ya lo tenÌas
+		model = glm::rotate(model, glm::radians(rotacionBolaBase), glm::vec3(0.0f, 1.0f, 0.0f)); // rotaci√≥n sobre eje Y
+		model = glm::scale(model, glm::vec3(5.0f, 6.0f, 5.0f));  // aseg√∫rate de conservar esto si ya lo ten√≠as
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Plastico_mate.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Bola.RenderModel();
@@ -2844,14 +3059,14 @@ int main()
 		model = glm::translate(model, glm::vec3(93.0f, 10.0f, 100.0f));
 		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
 		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		if (mainWindow.getAnimacion_Simp1_P()) {	//Activa animaciÛn
+		if (mainWindow.getAnimacion_Simp1_P()) {	//Activa animaci√≥n
 			mueveCuerpoPanico += 0.3f * deltaTime;
 			model = glm::translate(model, glm::vec3(0.0f + 2 * sin(glm::radians(3 * mueveCuerpoPanico)),
 				0.0f,
 				0.0f));
 		}
 		else if (mainWindow.getAnimacion_Simp1_DP() == false) {
-			mueveCuerpoPanico = 0.0f;		//Reinicia el recorrido de la animaciÛn
+			mueveCuerpoPanico = 0.0f;		//Reinicia el recorrido de la animaci√≥n
 		}
 
 		modelaux = model;
@@ -2873,14 +3088,14 @@ int main()
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-0.835f, 2.15f, 0.1f));
-		if (mainWindow.getAnimacion_Simp1_P()) {	//Activa animaciÛn
+		if (mainWindow.getAnimacion_Simp1_P()) {	//Activa animaci√≥n
 			anguloBrazoP += 0.3f * deltaTime;
 			model = glm::rotate(model, glm::radians(-140.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 			model = glm::rotate(model, glm::radians(25 * sin(glm::radians(10 * anguloBrazoP))), glm::vec3(1.0f, 0.0f, 0.0f));
 		}
 		else if (mainWindow.getAnimacion_Simp1_DP() == false) {
-			anguloBrazoP = 0.0f;		//Reinicia el recorrido de la animaciÛn
+			anguloBrazoP = 0.0f;		//Reinicia el recorrido de la animaci√≥n
 		}
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
@@ -2983,7 +3198,7 @@ int main()
 		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-		if (mainWindow.getAnimacion_Simp1_DP()) {	//Activa animaciÛn
+		if (mainWindow.getAnimacion_Simp1_DP()) {	//Activa animaci√≥n
 			vueloDP += 0.3f * deltaTime;
 			model = glm::rotate(model, glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 			model = glm::translate(model, glm::vec3(0.0f + 2 * sin(glm::radians(3 * vueloDP + 90.0f)),
@@ -2991,7 +3206,7 @@ int main()
 				0.0f));
 		}
 		else if (mainWindow.getAnimacion_Simp1_DP() == false) {
-			vueloDP = 0.0f;		//Reinicia el recorrido de la animaciÛn
+			vueloDP = 0.0f;		//Reinicia el recorrido de la animaci√≥n
 		}
 		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -3046,10 +3261,10 @@ int main()
 		Aluminio.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PuestoElotes.RenderModel();
 
-		//******************************** NPC AlegrÌa con animaciÛn *************************************************************
+		//******************************** NPC Alegr√≠a con animaci√≥n *************************************************************
 
 		float bounce = sin(currentTime * 4.0f) * 0.5f;  // Salto suave (amplitud 0.5 en Y)
-		float armSwing = sin(currentTime * 6.0f) * glm::radians(30.0f); // OscilaciÛn de brazos +/-30 grados
+		float armSwing = sin(currentTime * 6.0f) * glm::radians(30.0f); // Oscilaci√≥n de brazos +/-30 grados
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.0f, 11.0f + bounce, 10.0f));
@@ -3078,7 +3293,7 @@ int main()
 		// Brazo izquierdo (swing hacia adelante)
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(4.0f, 6.8f, 0.0f));
-		model = glm::rotate(model, armSwing, glm::vec3(1.0f, 0.0f, 0.0f)); // Oscila hacia adelante y atr·s
+		model = glm::rotate(model, armSwing, glm::vec3(1.0f, 0.0f, 0.0f)); // Oscila hacia adelante y atr√°s
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoIzq_A.RenderModel();
@@ -3214,6 +3429,7 @@ int main()
 	if (sonidoAmbiente) Mix_FreeChunk(sonidoAmbiente);
 	if (sonnidoCarrusel) Mix_FreeChunk(sonnidoCarrusel);
 	if (sonidoMartillo) Mix_FreeChunk(sonidoMartillo);
+	if (sonidoMoneda) Mix_FreeChunk(sonidoMoneda);
 
 	Mix_CloseAudio();
 	SDL_Quit();
