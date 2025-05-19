@@ -1115,6 +1115,7 @@ int main()
 	Mix_Chunk* sonidoGlobo = Mix_LoadWAV("Sounds/GLOBO.wav");
 	Mix_Chunk* sonidoDados = Mix_LoadWAV("Sounds/DADOSSE.wav");
 	Mix_Chunk* sonidoPanico = Mix_LoadWAV("Sounds/panico.wav");
+	Mix_Chunk* sonidoHercules = Mix_LoadWAV("Sounds/hercules.wav");
 
 
 
@@ -1132,6 +1133,7 @@ int main()
 	bool globoActivo = false;
 	bool dadosGirando = false;
 	bool panicoActiva = false;
+	bool herculesActivado = false;
 	int canalPanico = -1;
 	int canalDados = -1;
 	int canalMineda = -1;
@@ -1140,6 +1142,7 @@ int main()
 	int canalCarrousel = -1;
 	int canalAmbiente = -1;
 	int canalGlobo = -1;
+	int canalHERCULES = -1;
 
 	if (!musicaFondo) printf("Error cargando musica fondo: %s\n", Mix_GetError());
 	if (!musicaBoliche) printf("Error cargando musica boliche: %s\n", Mix_GetError());
@@ -1157,6 +1160,7 @@ int main()
 	if (!sonidoMoneda) printf("Error cargando sonido moneda: %s\n", Mix_GetError());
 	if (!sonidoDados) printf("Error cargando sonido dados: %s\n", Mix_GetError()); 
 	if (!sonidoPanico) printf("Error cargando sonido panico: %s\n", Mix_GetError());
+	if (!sonidoHercules) printf("Error cargando sonido hercules: %s\n", Mix_GetError());
 
 
 	////Loop mientras no se cierra la ventana
@@ -1421,7 +1425,7 @@ int main()
 
 //*********************************************************************************************************************************************************************************************************7
 
-		// ---------------------------- BOLICHE + NPC PENA ----------------------------
+// ---------------------------- DARDOS + HÉRCULES ----------------------------
 
 		enum EstadoDardo { D_ESPERANDO, D_ANIMANDO_MONEDA, D_LANZANDO_DARDO };
 		static EstadoDardo estadoDardo = D_ESPERANDO;
@@ -1439,33 +1443,33 @@ int main()
 
 		static float rotacionDardo = 0.0f;
 
-		const float TIEMPO_REAPARICION_GLOBO = 1.5f; // Regeneración más rápida
-		const float velocidadMoneda2 = 0.1f; // Velocidad alternativa de animación de moneda
+		const float TIEMPO_REAPARICION_GLOBO = 1.5f;
+		const float velocidadMoneda2 = 0.1f;
 
-		bool animarPatadaHercules = false;
-		float tiempoAnimacionPatada = 0.0f;
-		const float DURACION_PATADA = 1.5f;
-		float anguloPiernaDer_Hercules = 0.0f;
-		float anguloPiernaIzq_Hercules = 0.0f;
-		float desplazamientoHerculesY = 0.0f;
+		// -------------------- VARIABLES ANIMACIÓN HÉRCULES --------------------
+		static bool animarPatadaHercules = false;
+		static float tiempoAnimacionPatada = 0.0f;
+		const float DURACION_PATADA_TOTAL = 39.846f; // duración del sonido
+		static float anguloPiernaDer_Hercules = 0.0f;
+		static float anguloPiernaIzq_Hercules = 0.0f;
+		static float desplazamientoHerculesY = 0.0f;
+		static bool sonidoPatadaReproducido = false;
 
-		// Si se lanza el dardo, primero se anima la moneda
+		// -------------------- MONEDA --------------------
 		if (estadoDardo == D_ESPERANDO && mainWindow.getDardoLanzado()) {
 			estadoDardo = D_ANIMANDO_MONEDA;
 			animarMonedaDardo = true;
 			monedaMostrada = true;
 			monedaSubiendoDardo = true;
 			direccionCalculada = false;
-			rotacionDardo = 45.0f; // aplicar rotación inicial
+			rotacionDardo = 45.0f;
 		}
 
-		// Animación de la moneda (sube y baja)
 		if (estadoDardo == D_ANIMANDO_MONEDA) {
 			if (monedaSubiendoDardo) {
 				alturaMonedaDardo += velocidadMoneda2 * deltaTime;
-				if (alturaMonedaDardo >= 2.0f) {
+				if (alturaMonedaDardo >= 2.0f)
 					monedaSubiendoDardo = false;
-				}
 			}
 			else {
 				alturaMonedaDardo -= velocidadMoneda2 * deltaTime;
@@ -1474,16 +1478,15 @@ int main()
 					animarMonedaDardo = false;
 					monedaMostrada = false;
 
-					if (sonidoMoneda) {
+					if (sonidoMoneda)
 						Mix_PlayChannel(-1, sonidoMoneda, 0);
-					}
 
 					estadoDardo = D_LANZANDO_DARDO;
 				}
 			}
 		}
 
-		// Movimiento del dardo (trayectoria en plano XZ fija en Y)
+		// -------------------- LANZAMIENTO DARDOS --------------------
 		if (estadoDardo == D_LANZANDO_DARDO) {
 			if (!direccionCalculada) {
 				glm::vec3 objetivo = glm::vec3(0.0f);
@@ -1506,27 +1509,25 @@ int main()
 			}
 
 			posicionDardo += direccionDardo * velocidadDardo * deltaTime;
-			rotacionDardo = 45.0f; // mantener rotación durante el vuelo
+			rotacionDardo = 45.0f;
 
 			for (int i = 0; i < 12; ++i) {
 				if (globoVisible[i]) {
 					float distancia = glm::distance(posicionDardo, posicionesGlobos[i]);
 					if (distancia < 2.5f) {
-						// Activar animación de Hércules
 						animarPatadaHercules = true;
 						tiempoAnimacionPatada = 0.0f;
-
+						sonidoPatadaReproducido = false;
 						globoVisible[i] = false;
 						tiempoDesaparicionGlobo[i] = glfwGetTime();
 
-						if (sonidoGlobo) {
+						if (sonidoGlobo)
 							Mix_PlayChannel(-1, sonidoGlobo, 0);
-						}
 
 						mainWindow.desactivarDardoLanzado();
 						posicionDardo = posicionInicialDardo;
 						estadoDardo = D_ESPERANDO;
-						rotacionDardo = 0.0f; // resetear rotación al reiniciar
+						rotacionDardo = 0.0f;
 						break;
 					}
 				}
@@ -1540,28 +1541,35 @@ int main()
 			}
 		}
 
-		// Reaparición de globos
+		// -------------------- REAPARICIÓN GLOBOS --------------------
 		for (int i = 0; i < 12; ++i) {
 			if (!globoVisible[i]) {
 				double tiempoActual = glfwGetTime();
-				if (tiempoActual - tiempoDesaparicionGlobo[i] >= TIEMPO_REAPARICION_GLOBO) {
+				if (tiempoActual - tiempoDesaparicionGlobo[i] >= TIEMPO_REAPARICION_GLOBO)
 					globoVisible[i] = true;
-				}
 			}
 		}
 
-		// Animación de patada de Hércules
 		if (animarPatadaHercules) {
 			tiempoAnimacionPatada += deltaTime;
 
-			float progreso = tiempoAnimacionPatada / DURACION_PATADA;
+			float progreso = tiempoAnimacionPatada / DURACION_PATADA_TOTAL;
 			progreso = glm::clamp(progreso, 0.0f, 1.0f);
 
-			anguloPiernaDer_Hercules = 45.0f * sin(progreso * glm::pi<float>());
-			anguloPiernaIzq_Hercules = -30.0f * sin(progreso * glm::pi<float>());
-			desplazamientoHerculesY = 2.0f * sin(progreso * glm::pi<float>());
+			// Dos patadas (1 ciclo completo = 0–0.5, 0.5–1.0)
+			float fase = fmod(progreso * 2.0f, 1.0f); // 0 a 1 dos veces
 
-			if (tiempoAnimacionPatada >= DURACION_PATADA) {
+			anguloPiernaDer_Hercules = 65.0f * sin(fase * glm::pi<float>());
+			anguloPiernaIzq_Hercules = -45.0f * sin(fase * glm::pi<float>());
+			desplazamientoHerculesY = 1.2f * sin(fase * glm::pi<float>());
+
+			// Reproducir solo una vez el sonido al inicio
+			if (!sonidoPatadaReproducido && sonidoHercules) {
+				Mix_PlayChannel(-1, sonidoHercules, 0);
+				sonidoPatadaReproducido = true;
+			}
+
+			if (tiempoAnimacionPatada >= DURACION_PATADA_TOTAL) {
 				animarPatadaHercules = false;
 				anguloPiernaDer_Hercules = 0.0f;
 				anguloPiernaIzq_Hercules = 0.0f;
@@ -1569,6 +1577,9 @@ int main()
 			}
 		}
 
+
+
+		//*********************************************************************************************************************************************************************************************************7
 
 		// Movimiento alternante del martillo
 		if (direccionDerecha) {
@@ -2842,8 +2853,9 @@ int main()
 		Dardos.RenderModel();
 
 		//******************************** NPC Hercules *************************************************************
+		// === Cuerpo de Hércules ===
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(-15.0f, 12.8f, -30.0f));
+		model = glm::translate(model, glm::vec3(-15.0f, 12.8f + desplazamientoHerculesY, -30.0f)); // aplica salto
 		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 		model = glm::rotate(model, glm::radians(135.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		modelaux = model;
@@ -2851,35 +2863,40 @@ int main()
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Hercules.RenderModel();
 
+		// === Pierna izquierda ===
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.21f, -0.5f, 0.0f));
+		model = glm::rotate(model, glm::radians(anguloPiernaIzq_Hercules), glm::vec3(1.0f, 0.0f, 0.0f)); // aplica animación
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PiernaIzq_Hercules.RenderModel();
 
+		// === Pierna derecha ===
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-0.21f, -0.5f, 0.0f));
+		model = glm::rotate(model, glm::radians(anguloPiernaDer_Hercules), glm::vec3(1.0f, 0.0f, 0.0f)); // aplica animación
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PiernaDer_Hercules.RenderModel();
 
+		// === Brazo izquierdo ===
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(1.0f, 0.98f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoIzq_Hercules.RenderModel();
 
+		// === Brazo derecho (espada) ===
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-1.03f, 0.97f, 0.0f));
-		//Animación de espadazos
 		anguloBrazoEspada += 0.5 * deltaTime;
 		model = glm::rotate(model, glm::radians(-130.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(50 * sin(glm::radians(10 * anguloBrazoEspada))), glm::vec3(1.0f, -1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoDer_Hercules.RenderModel();
+
 
 		//************************ Mesa cobro moneda Dardos ********************************************** 
 		model = modelaux2;
@@ -3584,6 +3601,7 @@ int main()
 	if (sonidoMoneda) Mix_FreeChunk(sonidoMoneda);
 	if (sonidoDados)Mix_FreeChunk(sonidoDados);
 	if (sonidoPanico)Mix_FreeChunk(sonidoPanico);
+	if (sonidoHercules)Mix_FreeChunk(sonidoHercules);
 
 	//************************************************* SALE DE LAS LIBRERIAS DE SONIDO ***************************************************
 
