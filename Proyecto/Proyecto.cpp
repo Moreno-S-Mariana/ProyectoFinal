@@ -80,12 +80,12 @@ bool teclaGolpePresionada = false;
 GLfloat anguloBrazoP = 0.0f;
 GLfloat mueveCuerpoPanico = 0.0f;
 //***************************************** Variable animación juego dados*****************************************
-bool dadosGirando = false;
+/*bool dadosGirando = false;
 float anguloDados = 0.0f;
 float alturaDados = 0.8f;
 float rotacionFinalDado1 = 0.0f;
 float rotacionFinalDado2 = 0.0f;
-bool cayoDado = false;
+bool cayoDado = false;*/
 //***************************************** Variable animación de Hercules*****************************************
 GLfloat anguloBrazoEspada = 0.0f;
 //***************************************** Variable animación monedas*****************************************
@@ -202,17 +202,14 @@ float penaAnguloBalanceo = 0.0f;
 float penaBrazoAngulo = 0.0f;
 float penaCabezaOffset = 0.0f;
 
-
-
-
 bool animarPena = false;
 float tiempoAnimacionPena = 0.0f;
 bool sonidoPenaReproducido = false;
 int canalPena = -1;
 
-bool animarPanico = false;
-float tiempoPanico = 0.0f;
-float panicoTemblor = 0.0f;
+//bool animarPena = false;
+float tiempoPena = 0.0f;
+float penaTemblor = 0.0f;
 
 //*****************************************Parámetros generales*****************************************
 Window mainWindow;
@@ -1116,6 +1113,8 @@ int main()
 	Mix_Chunk* sonidoPena = Mix_LoadWAV("Sounds/PAIN.wav");
 	Mix_Chunk* sonidoMoneda = Mix_LoadWAV("Sounds/moneda.wav");
 	Mix_Chunk* sonidoGlobo = Mix_LoadWAV("Sounds/GLOBO.wav");
+	Mix_Chunk* sonidoDados = Mix_LoadWAV("Sounds/DADOSSE.wav");
+	Mix_Chunk* sonidoPanico = Mix_LoadWAV("Sounds/panico.wav");
 
 
 
@@ -1131,6 +1130,10 @@ int main()
 	bool penaActiva = false;
 	bool monedaActiva = false;
 	bool globoActivo = false;
+	bool dadosGirando = false;
+	bool panicoActiva = false;
+	int canalPanico = -1;
+	int canalDados = -1;
 	int canalMineda = -1;
 	int canalPena = -1;
 	int canalMartillo = -1;
@@ -1152,6 +1155,9 @@ int main()
 	if (!sonidoPena) printf("Error cargando sonido pena: %s\n", Mix_GetError());
 	if (!sonidoGlobo) printf("Error cargando sonido globo: %s\n", Mix_GetError());
 	if (!sonidoMoneda) printf("Error cargando sonido moneda: %s\n", Mix_GetError());
+	if (!sonidoDados) printf("Error cargando sonido dados: %s\n", Mix_GetError()); 
+	if (!sonidoPanico) printf("Error cargando sonido panico: %s\n", Mix_GetError());
+
 
 	////Loop mientras no se cierra la ventana
 	while (!mainWindow.getShouldClose())
@@ -1164,11 +1170,221 @@ int main()
 
 		angulovaria += 0.3f * deltaTime;
 
+/*
+ *
+ *						AQUI INICIAN LAS ANIMACIONES CORREGIDAS 
+ * 
+*/
+
+// ---------------------------- DADOS + NPC PANICO ----------------------------
+
+		// ---------------------------- ESTADOS PARA DADOS ----------------------------
+		static enum EstadoDados { DADOS_ESPERANDO, DADOS_ANIMANDO_MONEDA, DADOS_GIRANDO_SUBIENDO, DADOS_GIRANDO_BAJANDO } estadoDados = DADOS_ESPERANDO;
+		static bool monedaSubiendoDados = false;
+		static bool sonidoDadosReproducido = false;
+		static float alturaMonedaDados = 0.8f;
+		static float alturaDados = 0.8f;
+		static float anguloDados = 0.0f;
+		static float rotacionFinalDado1 = 0.0f;
+		static float rotacionFinalDado2 = 0.0f;
+		static bool dadosYaCayeron = false;
+
+		static float velocidadSubidaMoneda = 0.5f; // menor = mas lento
+		static float velocidadSubidaDados = 50.5f;  // menor = mas lento
+
+		static bool animacionSustoActiva = false;
+		static float anguloBrazoSusto = 0.0f;
+		static float retrocesoCuerpo = 0.0f;
+
+		// ---------------------------- ANIMACION SUSTO AUTOMATICA ----------------------------
+		static bool activarSusto = false;
+		static float temporizadorSusto = 0.0f;
+		const float duracionSusto = 100.0f; // segundos
+		static bool sonidoPanicoReproducido = false;
+
+		if (activarSusto && !animacionSustoActiva) {
+			animacionSustoActiva = true;
+			temporizadorSusto = 0.0f;
+			sonidoPanicoReproducido = false;
+		}
+
+		if (animacionSustoActiva) {
+			temporizadorSusto += deltaTime;
+			anguloBrazoSusto += 180.0f * deltaTime;
+			retrocesoCuerpo = 0.3f * sin(2.0f * anguloBrazoSusto);
+
+			if (!sonidoPanicoReproducido && sonidoPanico) {
+				Mix_PlayChannel(-1, sonidoPanico, 0);
+				sonidoPanicoReproducido = true;
+			}
+
+			if (temporizadorSusto >= duracionSusto) {
+				activarSusto = false;
+				animacionSustoActiva = false;
+				anguloBrazoSusto = 0.0f;
+				retrocesoCuerpo = 0.0f;
+			}
+		}
+
+		// ---------------------------- ANIMACION DADOS ----------------------------
+		if (estadoDados == DADOS_ESPERANDO && mainWindow.getDadosGirando()) {
+			estadoDados = DADOS_ANIMANDO_MONEDA;
+			animarMoneda = true;
+			monedaMostrada = true;
+			monedaSubiendoDados = true;
+			alturaMonedaDados = 0.8f;
+			alturaDados = 0.8f;
+			anguloDados = 0.0f;
+		}
+
+		if (estadoDados == DADOS_ANIMANDO_MONEDA) {
+			if (monedaSubiendoDados) {
+				alturaMonedaDados += velocidadMoneda / velocidadSubidaMoneda * deltaTime;
+				if (alturaMonedaDados >= 2.0f) {
+					monedaSubiendoDados = false;
+				}
+			}
+			else {
+				alturaMonedaDados -= velocidadMoneda / velocidadSubidaMoneda * deltaTime;
+				if (alturaMonedaDados <= 0.8f) {
+					alturaMonedaDados = 0.8f;
+					animarMoneda = false;
+					monedaMostrada = false;
+					if (sonidoMoneda) Mix_PlayChannel(-1, sonidoMoneda, 0);
+					estadoDados = DADOS_GIRANDO_SUBIENDO;
+					sonidoDadosReproducido = false;
+					dadosYaCayeron = false;
+					alturaDados = 0.8f;
+					anguloDados = 0.0f;
+				}
+			}
+		}
+
+		if (estadoDados == DADOS_GIRANDO_SUBIENDO) {
+			if (!sonidoDadosReproducido && sonidoDados) {
+				Mix_PlayChannel(-1, sonidoDados, 0);
+				sonidoDadosReproducido = true;
+			}
+
+			alturaDados += 5.0f / velocidadSubidaDados * deltaTime;
+			anguloDados += 10.0f * deltaTime;
+
+			if (alturaDados >= 5.0f) {
+				alturaDados = 5.0f;
+				estadoDados = DADOS_GIRANDO_BAJANDO;
+				dadosYaCayeron = true;
+				rotacionFinalDado1 = (rand() % 4) * 90.0f;
+				rotacionFinalDado2 = (rand() % 4) * 90.0f;
+			}
+		}
+
+		if (estadoDados == DADOS_GIRANDO_BAJANDO) {
+			alturaDados -= 5.0f / velocidadSubidaDados * deltaTime;
+			anguloDados += 10.0f * deltaTime;
+
+			if (alturaDados <= 0.8f) {
+				alturaDados = 0.8f;
+				anguloDados = 0.0f;
+				estadoDados = DADOS_ESPERANDO;
+				activarSusto = true;
+			}
+		}
+
 //*********************************************************************************************************************************************************************************************************7
-// *****************************************************************************ANIMACIONES DE PANICO + SONIDO   *******************************************************************************************
-// *********************************************************************************************************************************************************************************************************
 
+	// ---------------------------- BOLICHE + NPC PENA ----------------------------
+				
+		static float alturaMonedaBoliche = 0.8f;
+		static float velocidadMonedaBoliche = 0.1f;
+		static float bolaBoliche = 0.0f;
+		static float velocidadBola = 0.1f;
+		static float tiempoCaidaPinos = 0.0f;
+		static bool animarCaidaPinos = false;
+		static bool animarMonedaBoliche = false;
+		static bool monedaMostradaBoliche = false;
+		static enum EstadoJuego { ESPERANDO, ANIMANDO_MONEDABOLICHE, ANIMANDO_BOLICHE } estado = ESPERANDO;
+		static bool monedaSubiendoBoliche = false;
+		static bool sonidoStrikeReproducido = false;
 
+		if (estado == ESPERANDO && mainWindow.getBolaLnazada()) {
+			estado = ANIMANDO_MONEDABOLICHE;
+			animarMonedaBoliche = true;
+			monedaMostradaBoliche = true;
+			monedaSubiendoBoliche = true;
+		}
+
+		if (estado == ANIMANDO_MONEDABOLICHE) {
+			if (monedaSubiendoBoliche) {
+				alturaMonedaBoliche += velocidadMonedaBoliche * deltaTime;
+				if (alturaMonedaBoliche >= 2.0f) {
+					monedaSubiendoBoliche = false;
+				}
+			} else {
+				alturaMonedaBoliche -= velocidadMonedaBoliche * deltaTime;
+				if (alturaMonedaBoliche <= 0.8f) {
+					alturaMonedaBoliche = 0.8f;
+					animarMonedaBoliche = false;
+					monedaMostradaBoliche = false;
+					if (sonidoMoneda)
+					{
+						Mix_PlayChannel(-1, sonidoMoneda, 0);
+					}
+					estado = ANIMANDO_BOLICHE;
+					bolaBoliche = 0.0f;
+					sonidoStrikeReproducido = false;
+				}
+			}
+		}
+
+		if (estado == ANIMANDO_BOLICHE) {
+			bolaBoliche += velocidadBola * deltaTime;
+
+			if (!sonidoStrikeReproducido && sonidoBoliche) {
+				Mix_PlayChannel(-1, sonidoBoliche, 0);
+				sonidoStrikeReproducido = true;
+			}
+
+			if (bolaBoliche >= 7.0f) {
+				bolaBoliche = 0.0f;
+				sonidoStrikeReproducido = false;
+				mainWindow.desactivarBolaLanzada();
+				estado = ESPERANDO;
+			}
+		}
+
+		if (!animarCaidaPinos && bolaBoliche >= 4.8f) {
+			animarCaidaPinos = true;
+			tiempoCaidaPinos = 0.0f;
+			pinoCaido0 = pinoCaido1 = pinoCaido2 = pinoCaido3 = pinoCaido4 =
+			pinoCaido5 = pinoCaido6 = pinoCaido7 = pinoCaido8 = pinoCaido9 = true;
+		}
+
+		if (animarCaidaPinos) {
+			tiempoCaidaPinos += deltaTime;
+
+			auto caer = [](bool& caido, float& rotacion) {
+				if (caido && rotacion < 90.0f) {
+					rotacion += 60.0f * deltaTime;
+					if (rotacion > 90.0f) rotacion = 90.0f;
+				}
+			};
+
+			caer(pinoCaido0, rotacionPino0); caer(pinoCaido1, rotacionPino1);
+			caer(pinoCaido2, rotacionPino2); caer(pinoCaido3, rotacionPino3);
+			caer(pinoCaido4, rotacionPino4); caer(pinoCaido5, rotacionPino5);
+			caer(pinoCaido6, rotacionPino6); caer(pinoCaido7, rotacionPino7);
+			caer(pinoCaido8, rotacionPino8); caer(pinoCaido9, rotacionPino9);
+
+			if (tiempoCaidaPinos >= 10.0f) {
+				pinoCaido0 = pinoCaido1 = pinoCaido2 = pinoCaido3 = pinoCaido4 =
+				pinoCaido5 = pinoCaido6 = pinoCaido7 = pinoCaido8 = pinoCaido9 = false;
+
+				rotacionPino0 = rotacionPino1 = rotacionPino2 = rotacionPino3 = rotacionPino4 =
+				rotacionPino5 = rotacionPino6 = rotacionPino7 = rotacionPino8 = rotacionPino9 = 0.0f;
+
+				animarCaidaPinos = false;
+			}
+		}
 		const float DURACION_ANIMACION_PENA = 80.0f;
 
 		if (animarPena) {
@@ -1188,7 +1404,7 @@ int main()
 			progreso = glm::clamp(progreso, 0.0f, 1.0f);
 
 			anguloBrazoP = 130.0f * progreso; // sube hasta 130° en 5s
-			panicoTemblor = sin(tiempoAnimacionPena * 20.0f) * 0.1f;
+			penaTemblor = sin(tiempoAnimacionPena * 20.0f) * 0.1f;
 
 			if (tiempoAnimacionPena >= DURACION_ANIMACION_PENA) {
 				animarPena = false;
@@ -1200,81 +1416,18 @@ int main()
 				anguloBrazoP -= 100.0f * deltaTime;
 				if (anguloBrazoP < 0.0f) anguloBrazoP = 0.0f;
 			}
-			panicoTemblor = 0.0f;
+			penaTemblor = 0.0f;
 		}
 
-// *********************************************************************************************************************************************************************************************************
+//*********************************************************************************************************************************************************************************************************7
 
+		// ---------------------------- BOLICHE + NPC PENA ----------------------------
 
-
-
-		// Movimiento alternante del martillo
-		if (direccionDerecha) {
-			anguloMartillo += velocidadOscilacion * deltaTime;
-			if (anguloMartillo >= 135.0f) {
-				anguloMartillo = 135.0f;
-				direccionDerecha = false;
-			}
-		}
-		else {
-			anguloMartillo -= velocidadOscilacion * deltaTime;
-			if (anguloMartillo <= -45.0f) {
-				anguloMartillo = -45.0;
-				direccionDerecha = true;
-			}
-		}
-
-		//***************************************************************
-		//Animación de dados
-		if (mainWindow.getDadosGirando()) {
-			anguloDados += 10.0f * deltaTime;
-			if (alturaDados < 5.0f)
-				alturaDados += 5.0f * deltaTime;
-			cayoDado = false; // se está girando, aún no ha caído
-		}
-		else {
-			if (!cayoDado) {
-				// Generar una rotación aleatoria para cada dado cuando caen
-				rotacionFinalDado1 = (rand() % 4) * 90.0f; // Múltiplos de 90 grados
-				rotacionFinalDado2 = (rand() % 4) * 90.0f;
-				cayoDado = true;
-			}
-			if (alturaDados > 0.0f)
-				alturaDados -= 5.0f * deltaTime;
-			if (alturaDados < 0.0f)
-				alturaDados = 0.0f;
-			anguloDados = 0.0f;
-		}
-
-		//Animación moneda
-		if (mainWindow.getMonedaEnElAire()) {
-			animarMoneda = true;
-			monedaMostrada = true;
-
-			if (alturaMoneda < 2.0f)
-				alturaMoneda += velocidadMoneda * deltaTime;
-		}
-		else {
-			if (animarMoneda) {
-				if (alturaMoneda > 2.0f)
-					alturaMoneda -= velocidadMoneda * deltaTime;
-				else {
-					alturaMoneda = 0.8f;
-					animarMoneda = false;
-					monedaMostrada = false;
-				}
-			}
-		}
-		
-		
-		//**********************************************************************************************************************************************************************************************************
-		// *****************************************************************************ANIMACIONES DE BOLICHE AJUSTADAS *******************************************************************************************
-		// *********************************************************************************************************************************************************************************************************
 		enum EstadoDardo { D_ESPERANDO, D_ANIMANDO_MONEDA, D_LANZANDO_DARDO };
 		static EstadoDardo estadoDardo = D_ESPERANDO;
 
 		static bool monedaSubiendoDardo = false;
-		static float alturaMoneda = 1.2f;
+		static float alturaMonedaDardo = 1.8f;
 		static bool monedaMostrada = false;
 		static bool animarMonedaDardo = false;
 
@@ -1287,7 +1440,14 @@ int main()
 		static float rotacionDardo = 0.0f;
 
 		const float TIEMPO_REAPARICION_GLOBO = 1.5f; // Regeneración más rápida
-		const float velocidadMoneda2 = 0.3f; // Velocidad alternativa de animación de moneda
+		const float velocidadMoneda2 = 0.1f; // Velocidad alternativa de animación de moneda
+
+		bool animarPatadaHercules = false;
+		float tiempoAnimacionPatada = 0.0f;
+		const float DURACION_PATADA = 1.5f;
+		float anguloPiernaDer_Hercules = 0.0f;
+		float anguloPiernaIzq_Hercules = 0.0f;
+		float desplazamientoHerculesY = 0.0f;
 
 		// Si se lanza el dardo, primero se anima la moneda
 		if (estadoDardo == D_ESPERANDO && mainWindow.getDardoLanzado()) {
@@ -1302,16 +1462,16 @@ int main()
 		// Animación de la moneda (sube y baja)
 		if (estadoDardo == D_ANIMANDO_MONEDA) {
 			if (monedaSubiendoDardo) {
-				alturaMoneda += velocidadMoneda2 * deltaTime;
-				if (alturaMoneda >= 2.0f) {
+				alturaMonedaDardo += velocidadMoneda2 * deltaTime;
+				if (alturaMonedaDardo >= 2.0f) {
 					monedaSubiendoDardo = false;
 				}
 			}
 			else {
-				alturaMoneda -= velocidadMoneda2 * deltaTime;
-				if (alturaMoneda <= 0.8f) {
-					alturaMoneda = 0.8f;
-					animarMoneda = false;
+				alturaMonedaDardo -= velocidadMoneda2 * deltaTime;
+				if (alturaMonedaDardo <= 0.8f) {
+					alturaMonedaDardo = 0.8f;
+					animarMonedaDardo = false;
 					monedaMostrada = false;
 
 					if (sonidoMoneda) {
@@ -1352,6 +1512,10 @@ int main()
 				if (globoVisible[i]) {
 					float distancia = glm::distance(posicionDardo, posicionesGlobos[i]);
 					if (distancia < 2.5f) {
+						// Activar animación de Hércules
+						animarPatadaHercules = true;
+						tiempoAnimacionPatada = 0.0f;
+
 						globoVisible[i] = false;
 						tiempoDesaparicionGlobo[i] = glfwGetTime();
 
@@ -1385,6 +1549,71 @@ int main()
 				}
 			}
 		}
+
+		// Animación de patada de Hércules
+		if (animarPatadaHercules) {
+			tiempoAnimacionPatada += deltaTime;
+
+			float progreso = tiempoAnimacionPatada / DURACION_PATADA;
+			progreso = glm::clamp(progreso, 0.0f, 1.0f);
+
+			anguloPiernaDer_Hercules = 45.0f * sin(progreso * glm::pi<float>());
+			anguloPiernaIzq_Hercules = -30.0f * sin(progreso * glm::pi<float>());
+			desplazamientoHerculesY = 2.0f * sin(progreso * glm::pi<float>());
+
+			if (tiempoAnimacionPatada >= DURACION_PATADA) {
+				animarPatadaHercules = false;
+				anguloPiernaDer_Hercules = 0.0f;
+				anguloPiernaIzq_Hercules = 0.0f;
+				desplazamientoHerculesY = 0.0f;
+			}
+		}
+
+
+		// Movimiento alternante del martillo
+		if (direccionDerecha) {
+			anguloMartillo += velocidadOscilacion * deltaTime;
+			if (anguloMartillo >= 135.0f) {
+				anguloMartillo = 135.0f;
+				direccionDerecha = false;
+			}
+		}
+		else {
+			anguloMartillo -= velocidadOscilacion * deltaTime;
+			if (anguloMartillo <= -45.0f) {
+				anguloMartillo = -45.0;
+				direccionDerecha = true;
+			}
+		}
+
+		
+
+
+		//Animación moneda
+		if (mainWindow.getMonedaEnElAire()) {
+			animarMoneda = true;
+			monedaMostrada = true;
+
+			if (alturaMoneda < 2.0f)
+				alturaMoneda += velocidadMoneda * deltaTime;
+		}
+		else {
+			if (animarMoneda) {
+				if (alturaMoneda > 2.0f)
+					alturaMoneda -= velocidadMoneda * deltaTime;
+				else {
+					alturaMoneda = 0.8f;
+					animarMoneda = false;
+					monedaMostrada = false;
+				}
+			}
+		}
+		
+		
+		//**********************************************************************************************************************************************************************************************************
+		// *****************************************************************************ANIMACIONES DE DARDOS *******************************************************************************************
+		// *********************************************************************************************************************************************************************************************************
+		
 
 		// *********************************************************************************************************************************************************************************************************
 
@@ -1465,109 +1694,7 @@ int main()
 		// *****************************************************************************ANIMACIONES DE BOLICHE AJUSTADAS *******************************************************************************************
 		// *********************************************************************************************************************************************************************************************************
 
-		static enum EstadoJuego { ESPERANDO, ANIMANDO_MONEDA, ANIMANDO_BOLICHE } estado = ESPERANDO;
-		// Controla en qué etapa está el juego del boliche.
-
-		static bool monedaSubiendo = false;
-		// Nos dice si la moneda está subiendo durante la animación.
-
-		static bool sonidoStrikeReproducido = false;
-		// Asegura que el sonido del boliche solo se reproduzca una vez por turno.
-
-		// Cuando presionas la tecla para lanzar la bola (por ejemplo F), se activa la animación.
-		if (estado == ESPERANDO && mainWindow.getBolaLnazada()) {
-			estado = ANIMANDO_MONEDA;          // Iniciamos animación de moneda.
-			animarMoneda = true;               // Activamos la bandera para animar.
-			monedaMostrada = true;            // Indicamos que la moneda debe renderizarse.
-			monedaSubiendo = true;            // Iniciamos el movimiento de subida.
-		}
-
-		// Animación de la moneda que sube y luego cae.
-		if (estado == ANIMANDO_MONEDA) {
-			if (monedaSubiendo) {
-				alturaMoneda += velocidadMoneda * deltaTime; // Aumenta la altura gradualmente.
-				if (alturaMoneda >= 2.0f) {
-					monedaSubiendo = false; // Una vez que alcanza el punto máximo, empieza a bajar.
-				}
-			}
-			else {
-				alturaMoneda -= velocidadMoneda * deltaTime; // Baja gradualmente.
-
-				if (alturaMoneda <= 0.8f) {
-					// Cuando termina de caer...
-					alturaMoneda = 0.8f;         // Fijamos la posición.
-					animarMoneda = false;        // Se detiene la animación.
-					monedaMostrada = false;      // Ya no se muestra la moneda.
-
-					if (sonidoMoneda) {
-						Mix_PlayChannel(-1, sonidoMoneda, 0); // 🔊 Reproducimos el sonido de caída.
-					}
-
-					estado = ANIMANDO_BOLICHE;   // Pasamos a la siguiente etapa: lanzar la bola.
-					bolaBoliche = 0.0f;          // Reiniciamos la posición de la bola.
-					sonidoStrikeReproducido = false; // Permitimos que el sonido del strike se vuelva a reproducir.
-				}
-			}
-		}
-
-		// Movimiento de la bola de boliche después de que cae la moneda.
-		if (estado == ANIMANDO_BOLICHE) {
-			bolaBoliche += velocidadBola * deltaTime; // La bola avanza hacia adelante.
-
-			if (!sonidoStrikeReproducido && sonidoBoliche) {
-				Mix_PlayChannel(-1, sonidoBoliche, 0); // 🔊 Sonido del golpe en los pinos.
-				sonidoStrikeReproducido = true;
-			}
-
-			if (bolaBoliche >= 7.0f) {
-				// Cuando llega al final de la pista...
-				bolaBoliche = 0.0f;               // Se reinicia su posición.
-				sonidoStrikeReproducido = false;  // Se resetea la bandera de sonido.
-				mainWindow.desactivarBolaLanzada(); // Se desactiva la entrada del usuario.
-				estado = ESPERANDO;               // Regresamos al estado inicial.
-			}
-		}
-
-		// Activamos la caída de los pinos justo cuando la bola pasa por su posición.
-		if (!animarCaidaPinos && bolaBoliche >= 4.8f) {
-			animarCaidaPinos = true; // Se inicia la animación de caída.
-			tiempoCaidaPinos = 0.0f; // Reiniciamos el tiempo.
-
-			// Marcamos todos los pinos como que deben caer.
-			pinoCaido0 = pinoCaido1 = pinoCaido2 = pinoCaido3 = pinoCaido4 =
-				pinoCaido5 = pinoCaido6 = pinoCaido7 = pinoCaido8 = pinoCaido9 = true;
-		}
-
-		// Si los pinos están cayendo...
-		if (animarCaidaPinos) {
-			tiempoCaidaPinos += deltaTime; // Seguimos sumando tiempo.
-
-			// Lambda que simula la rotación de un pino cuando cae.
-			auto caer = [](bool& caido, float& rotacion) {
-				if (caido && rotacion < 90.0f) {
-					rotacion += 60.0f * deltaTime; // Rota el pino.
-					if (rotacion > 90.0f) rotacion = 90.0f; // Limita el giro.
-				}
-				};
-
-			// Aplicamos la caída a todos los pinos.
-			caer(pinoCaido0, rotacionPino0); caer(pinoCaido1, rotacionPino1);
-			caer(pinoCaido2, rotacionPino2); caer(pinoCaido3, rotacionPino3);
-			caer(pinoCaido4, rotacionPino4); caer(pinoCaido5, rotacionPino5);
-			caer(pinoCaido6, rotacionPino6); caer(pinoCaido7, rotacionPino7);
-			caer(pinoCaido8, rotacionPino8); caer(pinoCaido9, rotacionPino9);
-
-			if (tiempoCaidaPinos >= 10.0f) {
-				// Después de 10 segundos, todo vuelve a su estado original.
-				pinoCaido0 = pinoCaido1 = pinoCaido2 = pinoCaido3 = pinoCaido4 =
-					pinoCaido5 = pinoCaido6 = pinoCaido7 = pinoCaido8 = pinoCaido9 = false;
-
-				rotacionPino0 = rotacionPino1 = rotacionPino2 = rotacionPino3 = rotacionPino4 =
-					rotacionPino5 = rotacionPino6 = rotacionPino7 = rotacionPino8 = rotacionPino9 = 0.0f;
-
-				animarCaidaPinos = false; // Finaliza toda la secuencia.
-			}
-		}
+		
 
 		//**********************************************************************************************************************************************************************************************************
 		// *********************************************************************************************************************************************************************************************************
@@ -1810,7 +1937,7 @@ int main()
 		float distanciaTopos = glm::distance(furiaPos, posTopos);
 		float distanciaJaula = glm::distance(furiaPos, posJaula);
 
-		if (distancia < 40.0f && !bolicheActivo && musicaBoliche) {
+		if (distancia < 60.0f && !bolicheActivo && musicaBoliche) {
 			Mix_HaltMusic();
 			Mix_PlayMusic(musicaBoliche, -1);
 			bolicheActivo = true;
@@ -2196,7 +2323,7 @@ int main()
 		//************************* NPC Pena ***************************************************************
 		// =================== PENA (animación de miedo) ===================
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(4.5f + panicoTemblor, 2.0f, -3.0f)); // posición con temblor
+		model = glm::translate(model, glm::vec3(4.5f + penaTemblor, 2.0f, -3.0f)); // posición con temblor
 		model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
 		model = glm::rotate(model, glm::radians(penaAnguloBalanceo), glm::vec3(0.0f, 1.0f, 0.0f)); // balanceo
 		modelaux2 = model;
@@ -2254,7 +2381,7 @@ int main()
 
 		//Moneda - Utilizar en los casos necesarios 
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.0f, alturaMoneda-0.72, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, alturaMonedaBoliche-0.72, 0.0f));
 		model = glm::scale(model, glm::vec3(0.03f, 0.03f, 0.03f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Oro.UseMaterial(uniformSpecularIntensity, uniformShininess);
@@ -2644,7 +2771,7 @@ int main()
 		// Primer dado
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(1.0f, 1.3f + alturaDados, 0.0f));
-		if (mainWindow.getDadosGirando())
+		if (estadoDados == DADOS_GIRANDO_SUBIENDO || estadoDados == DADOS_GIRANDO_BAJANDO)
 			model = glm::rotate(model, glm::radians(anguloDados), glm::vec3(1.0f, 1.0f, 0.0f));
 		else
 			model = glm::rotate(model, glm::radians(rotacionFinalDado1), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -2655,10 +2782,10 @@ int main()
 		// Segundo dado
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-1.0f, 1.3f + alturaDados, 0.0f));
-		if (mainWindow.getDadosGirando())
-			model = glm::rotate(model, glm::radians(-anguloDados), glm::vec3(0.0f, 1.0f, 1.0f));
+		if (estadoDados == DADOS_GIRANDO_SUBIENDO || estadoDados == DADOS_GIRANDO_BAJANDO)
+			model = glm::rotate(model, glm::radians(anguloDados), glm::vec3(1.0f, 1.0f, 0.0f));
 		else
-			model = glm::rotate(model, glm::radians(rotacionFinalDado2), glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(rotacionFinalDado1), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Plastico_mate.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Dados.RenderModel();
@@ -2674,7 +2801,7 @@ int main()
 
 		//Moneda - Utilizar en los casos necesarios 
 		model = modelaux2;
-		model = glm::translate(model, glm::vec3(0.0f, alturaMoneda, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, alturaMonedaDados, 0.0f));
 		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Oro.UseMaterial(uniformSpecularIntensity, uniformShininess);
@@ -2716,8 +2843,8 @@ int main()
 
 		//******************************** NPC Hercules *************************************************************
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(-15.0f, 10.8f, -30.0f));
-		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		model = glm::translate(model, glm::vec3(-15.0f, 12.8f, -30.0f));
+		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 		model = glm::rotate(model, glm::radians(135.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -2773,7 +2900,7 @@ int main()
 
 		//Moneda - Utilizar en los casos necesarios 
 		model = modelaux2;
-		model = glm::translate(model, glm::vec3(0.0f, alturaMoneda, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, alturaMonedaDardo, 0.0f));
 		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Oro.UseMaterial(uniformSpecularIntensity, uniformShininess);
@@ -3059,14 +3186,14 @@ int main()
 		model = glm::translate(model, glm::vec3(93.0f, 10.0f, 100.0f));
 		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
 		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		if (mainWindow.getAnimacion_Simp1_P()) {	//Activa animación
+
+		if (mainWindow.getAnimacion_Simp1_P()) {
 			mueveCuerpoPanico += 0.3f * deltaTime;
-			model = glm::translate(model, glm::vec3(0.0f + 2 * sin(glm::radians(3 * mueveCuerpoPanico)),
-				0.0f,
-				0.0f));
+			model = glm::translate(model, glm::vec3(5.0f * sin(glm::radians(3 * mueveCuerpoPanico)), 0.0f, 0.0f));
 		}
-		else if (mainWindow.getAnimacion_Simp1_DP() == false) {
-			mueveCuerpoPanico = 0.0f;		//Reinicia el recorrido de la animación
+
+		if (animacionSustoActiva) {
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, -retrocesoCuerpo));
 		}
 
 		modelaux = model;
@@ -3074,38 +3201,61 @@ int main()
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Panico_Mar.RenderModel();
 
+		// Pierna derecha
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-0.6f, -1.3f, -0.15f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PanicoPDer.RenderModel();
 
+		// Pierna izquierda
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.5f, -1.3f, -0.15f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PanicoPIzq.RenderModel();
 
+		// Brazo derecho
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-0.835f, 2.15f, 0.1f));
-		if (mainWindow.getAnimacion_Simp1_P()) {	//Activa animación
+
+		if (mainWindow.getAnimacion_Simp1_P()) {
 			anguloBrazoP += 0.3f * deltaTime;
+		}
+
+		if (mainWindow.getAnimacion_Simp1_P() || animacionSustoActiva) {
 			model = glm::rotate(model, glm::radians(-140.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(25 * sin(glm::radians(10 * anguloBrazoP))), glm::vec3(1.0f, 0.0f, 0.0f));
+
+			if (animacionSustoActiva)
+				model = glm::rotate(model, glm::radians(70.0f * sin(anguloBrazoSusto)), glm::vec3(1.0f, 0.0f, 0.0f));
+			else
+				model = glm::rotate(model, glm::radians(25.0f * sin(glm::radians(10 * anguloBrazoP))), glm::vec3(1.0f, 0.0f, 0.0f));
 		}
 		else if (mainWindow.getAnimacion_Simp1_DP() == false) {
-			anguloBrazoP = 0.0f;		//Reinicia el recorrido de la animación
+			anguloBrazoP = 0.0f;
 		}
+
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PanicoBDer.RenderModel();
 
+		// Brazo izquierdo (puedes duplicar el comportamiento o dejar estático)
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.5f, 1.85f, -0.15f));
+
+		if (animacionSustoActiva) {
+			model = glm::rotate(model, glm::radians(-140.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(70.0f * sin(anguloBrazoSusto)), glm::vec3(1.0f, 0.0f, 0.0f));
+		}
+
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PanicoBizq.RenderModel();
+
+
+
 		/********************************************Furia****************************************************/
 		{
 			bool up = keys[GLFW_KEY_W];
@@ -3420,6 +3570,8 @@ int main()
 
 	}
 
+	//************************************************** SE LIBERA  LA MEMORIA DE LOS SONIDOS *******************************************
+
 	if (musicaFondo) Mix_FreeMusic(musicaFondo);
 	if (musicaBoliche) Mix_FreeMusic(musicaBoliche);
 	if (musicaHacha) Mix_FreeMusic(musicaHacha);
@@ -3430,6 +3582,10 @@ int main()
 	if (sonnidoCarrusel) Mix_FreeChunk(sonnidoCarrusel);
 	if (sonidoMartillo) Mix_FreeChunk(sonidoMartillo);
 	if (sonidoMoneda) Mix_FreeChunk(sonidoMoneda);
+	if (sonidoDados)Mix_FreeChunk(sonidoDados);
+	if (sonidoPanico)Mix_FreeChunk(sonidoPanico);
+
+	//************************************************* SALE DE LAS LIBRERIAS DE SONIDO ***************************************************
 
 	Mix_CloseAudio();
 	SDL_Quit();
