@@ -1116,10 +1116,13 @@ int main()
 	Mix_Chunk* sonidoDados = Mix_LoadWAV("Sounds/DADOSSE.wav");
 	Mix_Chunk* sonidoPanico = Mix_LoadWAV("Sounds/panico.wav");
 	Mix_Chunk* sonidoHercules = Mix_LoadWAV("Sounds/hercules.wav");
+	Mix_Chunk* sonidoHacha = Mix_LoadWAV("Sounds/hacha.wav");
+	Mix_Chunk* sonidoDanny = Mix_LoadWAV("Sounds/DANNY.wav");
+	Mix_Chunk* sonidoBateo = Mix_LoadWAV("Sounds/BEISBOL.wav");
 
 
 
-
+	bool DannyActivo = false;
 	bool bolicheActivo = false;
 	bool hachaActiva = false;
 	bool globosActivos = false;
@@ -1134,6 +1137,11 @@ int main()
 	bool dadosGirando = false;
 	bool panicoActiva = false;
 	bool herculesActivado = false;
+	bool hachaActivado = false;
+	bool beisbolActivo = false;
+	int CanalBeisbol = -1;
+	int CanalDanny = -1;
+	int canalHachas = -1;
 	int canalPanico = -1;
 	int canalDados = -1;
 	int canalMineda = -1;
@@ -1161,6 +1169,9 @@ int main()
 	if (!sonidoDados) printf("Error cargando sonido dados: %s\n", Mix_GetError()); 
 	if (!sonidoPanico) printf("Error cargando sonido panico: %s\n", Mix_GetError());
 	if (!sonidoHercules) printf("Error cargando sonido hercules: %s\n", Mix_GetError());
+	if (!sonidoHacha) printf("Error cargando sonido hacha: %s\n", Mix_GetError());
+	if (!sonidoDanny) printf("Error cargando sonido danny: %s\n", Mix_GetError());
+	if (!sonidoBateo) printf("Error cargando sonido beisbol: %s\n", Mix_GetError());
 
 
 	////Loop mientras no se cierra la ventana
@@ -1550,6 +1561,8 @@ int main()
 			}
 		}
 
+		// -------------------- ANIMACIÓN HÉRCULES --------------------
+
 		if (animarPatadaHercules) {
 			tiempoAnimacionPatada += deltaTime;
 
@@ -1577,9 +1590,226 @@ int main()
 			}
 		}
 
+//*********************************************************************************************************************************************************************************************************7
+
+// ---------------------------- ANIMACION DE HACHA + DANNY ----------------------------
+
+		static enum EstadoHacha { HACHA_ESPERANDO, HACHA_MONEDA, HACHA_VOLANDO, HACHA_CLAVADA, HACHA_VOLVIENDO } estadoHacha = HACHA_ESPERANDO;
+		static float alturaMonedaHacha = 0.8f;
+		static bool monedaSubiendoHacha = false;
+		static bool monedaMostradaHacha = false;
+
+		static float desplazamientoHacha = 0.0f;
+		static float rotacionHacha = 0.0f;
+
+		static float velocidadHachaAnim = 1.5f;
+
+		static float tiempoHachaVuelo = 0.0f;
+		static const float TIEMPO_TOTAL_VUELO = 5.0f;
+		static float tiempoClavado = 0.0f;
+		static const float TIEMPO_ESPERA_CLAVADO = 50.0f;
+
+		static bool animacionDisparoDP = false;
+		static float tiempoDisparoDP = 0.0f;
+		static const float TIEMPO_DISPARO_DP = 100.0f;
+
+		static float desplazamientoDP_X = 0.0f;
+		static float desplazamientoDP_Y = 0.0f;
+		static float desplazamientoDP_Z = 0.0f;
+
+		static float vueloDP = 0.0f;
+
+		if (estadoHacha == HACHA_ESPERANDO && mainWindow.getTeclaMHacha()) {
+			estadoHacha = HACHA_MONEDA;
+			monedaSubiendoHacha = true;
+			monedaMostradaHacha = true;
+			alturaMonedaHacha = 0.8f;
+			desplazamientoHacha = 0.0f;
+			rotacionHacha = 0.0f;
+			tiempoHachaVuelo = 0.0f;
+			tiempoClavado = 0.0f;
+			animacionDisparoDP = false;
+			tiempoDisparoDP = 0.0f;
+			desplazamientoDP_X = 0.0f;
+			desplazamientoDP_Y = 0.0f;
+			desplazamientoDP_Z = 0.0f;
+		}
+
+		if (estadoHacha == HACHA_MONEDA) {
+			if (monedaSubiendoHacha) {
+				alturaMonedaHacha += velocidadMoneda * deltaTime;
+				if (alturaMonedaHacha >= 2.0f) {
+					monedaSubiendoHacha = false;
+				}
+			}
+			else {
+				alturaMonedaHacha -= velocidadMoneda * deltaTime;
+				if (alturaMonedaHacha <= 0.8f) {
+					alturaMonedaHacha = 0.8f;
+					monedaMostradaHacha = false;
+					estadoHacha = HACHA_VOLANDO;
+					if (sonidoMoneda) Mix_PlayChannel(-1, sonidoMoneda, 0);
+					tiempoHachaVuelo = 0.0f;
+				}
+			}
+		}
+
+		if (estadoHacha == HACHA_VOLANDO) {
+			tiempoHachaVuelo += deltaTime;
+			desplazamientoHacha -= velocidadHachaAnim * deltaTime;
+			rotacionHacha += 90.0f * deltaTime;
+
+			if (desplazamientoHacha <= -20.0f) {
+				desplazamientoHacha = -20.0f;
+				rotacionHacha = 0.0f;
+				estadoHacha = HACHA_CLAVADA;
+				tiempoClavado = 0.0f;
+				animacionDisparoDP = true;
+				tiempoDisparoDP = 0.0f;
+				if (sonidoHacha) Mix_PlayChannel(-1, sonidoHacha, 0);
+			}
+		}
+
+		if (estadoHacha == HACHA_CLAVADA) {
+			tiempoClavado += deltaTime;
+			if (animacionDisparoDP) {
+				tiempoDisparoDP += deltaTime;
+				desplazamientoDP_X = -1.0f * sin(tiempoDisparoDP * 1.0f);
+				desplazamientoDP_Y = 0.5f * sin(tiempoDisparoDP * 1.0f);
+				if (sonidoDanny) Mix_PlayChannel(-1, sonidoDanny, 0);
+			}
+			if (tiempoClavado >= TIEMPO_ESPERA_CLAVADO) {
+				desplazamientoHacha = 0.0f;
+				rotacionHacha = 0.0f;
+				tiempoHachaVuelo = 0.0f;
+				estadoHacha = HACHA_ESPERANDO;
+				mainWindow.setTeclaMHacha(false);
+				animacionDisparoDP = false;
+				tiempoDisparoDP = 0.0f;
+				desplazamientoDP_X = 0.0f;
+				desplazamientoDP_Y = 0.0f;
+			}
+		}
+
+		if (estadoHacha == HACHA_VOLVIENDO) {
+			estadoHacha = HACHA_ESPERANDO;
+			desplazamientoHacha = 0.0f;
+			rotacionHacha = 0.0f;
+			tiempoHachaVuelo = 0.0f;
+			mainWindow.setTeclaMHacha(false);
+		}
+
+		if (mainWindow.getAnimacion_Simp1_DP()) {
+			vueloDP += 0.3f * deltaTime;
+			desplazamientoDP_X = 2 * sin(glm::radians(3 * vueloDP + 90.0f));
+			desplazamientoDP_Y = 3 * sin(glm::radians(3 * vueloDP));
+		}
+		else if (animacionDisparoDP) {
+
+		}
+		else {
+			vueloDP = 0.0f;
+			desplazamientoDP_X = 0.0f;
+			desplazamientoDP_Y = 0.0f;
+		}
+
+//*********************************************************************************************************************************************************************************************************7
+
+		// ---------------------------- ANIMACION DE BATE ----------------------------
 
 
-		//*********************************************************************************************************************************************************************************************************7
+		static enum EstadoBeisbol { BEISBOL_ESPERANDO, BEISBOL_MONEDA, BEISBOL_BATEADO } estadoBeisbol = BEISBOL_ESPERANDO;
+
+		static float alturaMonedaBeisbol = 0.0f;
+		static bool monedaSubiendoBeisbol = false;
+		static bool monedaMostradaBeisbol = false;
+
+		static float bolaY = 3.0f;
+		static float bolaZ = -75.0f;
+		static float rotacionBolaBase = 0.0f;
+		static float velocidadBolaBase = 1.0f;
+
+		static float anguloBate = 0.0f;
+		static glm::vec3 posicionBate = glm::vec3(-15.0f, 4.0f, -70.0f);
+
+		static bool beisbolActivo = false;
+
+		if (estadoBeisbol == BEISBOL_ESPERANDO && mainWindow.getBolaBaseGolpeada()) {
+			estadoBeisbol = BEISBOL_MONEDA;
+			monedaSubiendoBeisbol = true;
+			monedaMostradaBeisbol = true;
+			alturaMonedaBeisbol = 0.0f;
+			bolaZ = -75.0f;
+			bolaY = 3.0f;
+			rotacionBolaBase = 0.0f;
+			anguloBate = 0.0f;
+			posicionBate = glm::vec3(-15.0f, 4.0f, -70.0f);
+		}
+
+		if (estadoBeisbol == BEISBOL_MONEDA) {
+			if (monedaSubiendoBeisbol) {
+				alturaMonedaBeisbol += 0.5f * deltaTime;
+				if (alturaMonedaBeisbol >= 5.5f) {
+					monedaSubiendoBeisbol = false;
+				}
+			}
+			else {
+				alturaMonedaBeisbol -= 0.5f * deltaTime;
+				if (alturaMonedaBeisbol <= 3.0f) {
+					monedaMostradaBeisbol = false;
+					estadoBeisbol = BEISBOL_BATEADO;
+					if (sonidoMoneda) Mix_PlayChannel(-1, sonidoMoneda, 0);
+				}
+			}
+		}
+
+		if (estadoBeisbol == BEISBOL_BATEADO) {
+			if (!beisbolActivo) {
+				CanalBeisbol = Mix_PlayChannel(-1, sonidoBateo, 0);
+				beisbolActivo = true;
+			}
+
+			bolaZ -= velocidadBolaBase * deltaTime;
+
+			if (bolaY < 15.0f) {
+				bolaY += 20.0f * deltaTime;
+				if (bolaY > 15.0f) bolaY = 15.0f;
+			}
+
+			rotacionBolaBase += 20.0f * deltaTime;
+			if (rotacionBolaBase >= 360.0f) rotacionBolaBase -= 360.0f;
+
+			if (anguloBate < 45.0f) {
+				anguloBate += 5.0f * deltaTime;
+				if (anguloBate > 45.0f) anguloBate = 45.0f;
+			}
+			posicionBate = glm::vec3(-15.0f, 15.0f, -70.0f);
+
+			if (bolaZ <= -110.0f) {
+				bolaZ = -75.0f;
+				bolaY = 3.0f;
+				rotacionBolaBase = 0.0f;
+				anguloBate = 0.0f;
+				posicionBate = glm::vec3(-15.0f, 4.0f, -70.0f);
+				beisbolActivo = false;
+				estadoBeisbol = BEISBOL_ESPERANDO;
+				mainWindow.desactivarBolaBaseGolpeada();
+			}
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 		// Movimiento alternante del martillo
 		if (direccionDerecha) {
@@ -1621,12 +1851,6 @@ int main()
 		}
 		
 		
-		//**********************************************************************************************************************************************************************************************************
-		// *****************************************************************************ANIMACIONES DE DARDOS *******************************************************************************************
-		// *********************************************************************************************************************************************************************************************************
-		
-
-		// *********************************************************************************************************************************************************************************************************
 
 		// Animación mazo y topo
 		if (mainWindow.getMazoGolpeando()) {
@@ -1683,74 +1907,9 @@ int main()
 			anguloRotacionTopo -= 360.0f;
 		}
 
-		//Animación hachas
-		if (mainWindow.getTeclaMHacha()) {
-			if (desplazamientoHacha < 3.0f) {
-				desplazamientoHacha += velocidadHacha * deltaTime;
-				hachaVolando = true;
-				anguloRotacionHacha += 360.0f * deltaTime; // 1 vuelta por segundo
-			}
-		}
-		else {
-			if (desplazamientoHacha > 0.0f) {
-				desplazamientoHacha -= velocidadHacha * deltaTime;
-				hachaVolando = false;
-				anguloRotacionHacha += 360.0f * deltaTime; // sigue rotando mientras regresa
-			}
-			if (desplazamientoHacha < 0.0f)
-				desplazamientoHacha = 0.0f;
-		}
 
-		//**********************************************************************************************************************************************************************************************************
-		// *****************************************************************************ANIMACIONES DE BOLICHE AJUSTADAS *******************************************************************************************
-		// *********************************************************************************************************************************************************************************************************
 
 		
-
-		//**********************************************************************************************************************************************************************************************************
-		// *********************************************************************************************************************************************************************************************************
-
-		// Animación bola béisbol
-		if (mainWindow.getBolaBaseGolpeada()) {
-			// Movimiento hacia atrás (Z) y subida (Y)
-			bolaZ -= velocidadBolaBase * deltaTime;
-
-			// Interpolación para subir Y desde 3 hasta 15
-			if (bolaY < 15.0f) {
-				bolaY += 20.0f * deltaTime;  // ajusta velocidad vertical si quieres
-				if (bolaY > 15.0f) bolaY = 15.0f;
-			}
-
-			// Rotación continua
-			rotacionBolaBase += 20.0f * deltaTime;  // 180 grados por segundo
-			if (rotacionBolaBase >= 360.0f) rotacionBolaBase -= 360.0f;
-
-			// Activar animación de bate
-			bateAnimando = true;
-			if (bateAnimando) {
-				if (anguloBate < 45.0f) {
-					anguloBate += 5.0f * deltaTime; // velocidad de swing
-					if (anguloBate > 45.0f) anguloBate = 45.0f;
-				}
-				// cambiar posición del bate al momento del swing
-				posicionBate = glm::vec3(-15.0f, 15.0f, -70.0f);
-			}
-
-			// Fin de animación
-			if (bolaZ <= -110.0f) {
-				bolaZ = -75.0f;
-				bolaY = 3.0f;
-				rotacionBolaBase = 0.0f;
-
-				// Reiniciar bate
-				anguloBate = 0.0f;
-				posicionBate = glm::vec3(-15.0f, 4.0f, -70.0f);
-				bateAnimando = false;
-
-				mainWindow.desactivarBolaBaseGolpeada();
-			}
-		}
-
 
 
 		//Animación alegría
@@ -3098,13 +3257,14 @@ int main()
 		Centro.RenderModel();
 
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(7.9f + desplazamientoHacha, 3.3f, 12.0f + desplazamientoHacha));
+		model = glm::translate(model, glm::vec3(-11.0f, 3.3f, 20.0f + desplazamientoHacha));
 		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::rotate(model, glm::radians(rotacionHacha), glm::vec3(0.0f, 0.0f, 1.0f)); // cartoon spin
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Acero.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		Hacha.RenderModel();
+
 
 		//************************ Mesa cobro moneda hachas ********************************************** 
 		model = modelaux2;
@@ -3125,7 +3285,7 @@ int main()
 
 		//Moneda - Utilizar en los casos necesarios 
 		model = modelaux2;
-		model = glm::translate(model, glm::vec3(0.0f, alturaMoneda, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, alturaMonedaHacha , 0.0f));
 		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Oro.UseMaterial(uniformSpecularIntensity, uniformShininess);
@@ -3191,7 +3351,7 @@ int main()
 
 		//Moneda - Utilizar en los casos necesarios 
 		model = modelaux2;
-		model = glm::translate(model, glm::vec3(0.0f, alturaMoneda, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, alturaMonedaBeisbol, 0.0f));
 		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Oro.UseMaterial(uniformSpecularIntensity, uniformShininess);
@@ -3221,6 +3381,11 @@ int main()
 		// Pierna derecha
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-0.6f, -1.3f, -0.15f));
+		if (mainWindow.getAnimacion_Simp1_P()) {
+			float anguloPierna = +25.0f * sin(glfwGetTime() * 4.0f);
+
+			model = glm::rotate(model, glm::radians(anguloPierna), glm::vec3(1.0f, 0.0f, 0.0f));
+		}
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PanicoPDer.RenderModel();
@@ -3228,10 +3393,14 @@ int main()
 		// Pierna izquierda
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.5f, -1.3f, -0.15f));
+		if (mainWindow.getAnimacion_Simp1_P()) {
+			float anguloPierna = -25.0f * sin(glfwGetTime() * 4.0f);
+
+			model = glm::rotate(model, glm::radians(anguloPierna), glm::vec3(1.0f, 0.0f, 0.0f));
+		}
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PanicoPIzq.RenderModel();
-
 		// Brazo derecho
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-0.835f, 2.15f, 0.1f));
@@ -3257,7 +3426,7 @@ int main()
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		PanicoBDer.RenderModel();
 
-		// Brazo izquierdo (puedes duplicar el comportamiento o dejar estático)
+
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.5f, 1.85f, -0.15f));
 
@@ -3360,55 +3529,64 @@ int main()
 			Furia_BrazoDer.RenderModel();
 		}
 		/********************************************Danny Phantom****************************************************/
-		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(81.0f, 16.0f, -67.0f));
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(81.0f + desplazamientoDP_X, 16.0f + desplazamientoDP_Y, -67.0f));
 		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-		if (mainWindow.getAnimacion_Simp1_DP()) {	//Activa animación
+		// Vuelo animado clásico
+		if (mainWindow.getAnimacion_Simp1_DP()) {
 			vueloDP += 0.3f * deltaTime;
 			model = glm::rotate(model, glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-			model = glm::translate(model, glm::vec3(0.0f + 2 * sin(glm::radians(3 * vueloDP + 90.0f)),
-				5.0f + 3 * sin(glm::radians(3 * vueloDP)),
-				0.0f));
+			model = glm::translate(model, glm::vec3(
+				2.0f * sin(glm::radians(3 * vueloDP + 90.0f)),
+				5.0f + 3.0f * sin(glm::radians(3 * vueloDP)),
+				0.0f
+			));
 		}
-		else if (mainWindow.getAnimacion_Simp1_DP() == false) {
-			vueloDP = 0.0f;		//Reinicia el recorrido de la animación
+		else if (!animacionDisparoDP) {
+			vueloDP = 0.0f;
 		}
+
 		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Fantasma.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		DannyP_cuerpo.RenderModel();
 
+		// Pierna izquierda
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.19f, -1.57f, 0.09f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Fantasma.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		DannyP_PiernaIzq.RenderModel();
 
+		// Pierna derecha
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-0.19f, -1.56f, 0.07f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Fantasma.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		DannyP_PiernaDer.RenderModel();
 
+		// Brazo izquierdo
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(0.78f, 0.57f, -0.255f));
-		if (mainWindow.getAnimacion_Simp1_DP()) {	//Rota arriba brazo izquierdo
+		if (mainWindow.getAnimacion_Simp1_DP()) {
 			model = glm::rotate(model, glm::radians(-140.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		}
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Fantasma.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		DannyP_BrazoIzq.RenderModel();
 
+		// Brazo derecho
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-0.84f, 0.52f, -0.23f));
-		if (mainWindow.getAnimacion_Simp1_DP()) {	//Rota arriba brazo derecho
+		if (mainWindow.getAnimacion_Simp1_DP()) {
 			model = glm::rotate(model, glm::radians(-140.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		}
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Fantasma.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		DannyP_BrazoDer.RenderModel();
+
 
 		//***************************************** PUESTOS *****************************************
 
@@ -3602,6 +3780,9 @@ int main()
 	if (sonidoDados)Mix_FreeChunk(sonidoDados);
 	if (sonidoPanico)Mix_FreeChunk(sonidoPanico);
 	if (sonidoHercules)Mix_FreeChunk(sonidoHercules);
+	if (sonidoHacha)Mix_FreeChunk(sonidoHacha);
+	if (sonidoDanny)Mix_FreeChunk(sonidoDanny);
+
 
 	//************************************************* SALE DE LAS LIBRERIAS DE SONIDO ***************************************************
 
