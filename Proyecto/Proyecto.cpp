@@ -1119,9 +1119,11 @@ int main()
 	Mix_Chunk* sonidoHacha = Mix_LoadWAV("Sounds/hacha.wav");
 	Mix_Chunk* sonidoDanny = Mix_LoadWAV("Sounds/DANNY.wav");
 	Mix_Chunk* sonidoBateo = Mix_LoadWAV("Sounds/BEISBOL.wav");
+	Mix_Chunk* sonidoTopos = Mix_LoadWAV("Sounds/toposSonido.wav");
 
 
 
+	bool ToposActivo = false;
 	bool DannyActivo = false;
 	bool bolicheActivo = false;
 	bool hachaActiva = false;
@@ -1151,6 +1153,7 @@ int main()
 	int canalAmbiente = -1;
 	int canalGlobo = -1;
 	int canalHERCULES = -1;
+	int canalTopos = -1;
 
 	if (!musicaFondo) printf("Error cargando musica fondo: %s\n", Mix_GetError());
 	if (!musicaBoliche) printf("Error cargando musica boliche: %s\n", Mix_GetError());
@@ -1172,6 +1175,7 @@ int main()
 	if (!sonidoHacha) printf("Error cargando sonido hacha: %s\n", Mix_GetError());
 	if (!sonidoDanny) printf("Error cargando sonido danny: %s\n", Mix_GetError());
 	if (!sonidoBateo) printf("Error cargando sonido beisbol: %s\n", Mix_GetError());
+	if (!sonidoTopos) printf("Error cargando sonido topos: %s\n", Mix_GetError());
 
 
 	////Loop mientras no se cierra la ventana
@@ -1797,110 +1801,118 @@ int main()
 			}
 		}
 
+//*********************************************************************************************************************************************************************************************************7
 
 
+// Nuevas configuraciones con nombres actualizados
+		static float velocidadSubidaMonedaTopo = 0.25f;
+		static float velocidadBajadaMonedaTopo = 0.25f;
 
+		static enum EstadoTopo { TOPO_ESPERANDO, TOPO_MONEDA, TOPO_GOLPEANDO } estadoTopo = TOPO_ESPERANDO;
 
+		static float alturaMonedaTopo = 0.8f;
+		static bool monedaSubiendoTopo = false;
+		static bool monedaMostradaTopo = false;
 
+		static float anguloMazo = 0.0f;
+		static float velocidadGolpe = 2.0f;
+		static bool bajandoMazo = true;
+		static bool golpeando = false;
 
+		static int contadorGolpes = 0;
+		static const int TOTAL_GOLES = 3;
 
+		static bool topoVisible[3] = { true, true, true };
+		static bool topoGolpeado[3] = { false, false, false };
+		static int mazoObjetivo = 0;
 
+		static float desplazamientoTopoY[3] = { 0.0f, 0.0f, 0.0f };
+		static float rotacionTopo[3] = { 0.0f, 0.0f, 0.0f };
 
+		if (estadoTopo == TOPO_ESPERANDO && mainWindow.getMazoGolpeando()) {
+			estadoTopo = TOPO_MONEDA;
+			monedaSubiendoTopo = true;
+			monedaMostradaTopo = true;
+			alturaMonedaTopo = 0.8f;
+			anguloMazo = 0.0f;
+			bajandoMazo = true;
+			golpeando = false;
+			contadorGolpes = 0;
 
+			for (int i = 0; i < 3; ++i) {
+				topoVisible[i] = true;
+				topoGolpeado[i] = false;
+				desplazamientoTopoY[i] = 0.0f;
+				rotacionTopo[i] = 0.0f;
+			}
 
+			mazoObjetivo = rand() % 3;
+		}
 
+		if (estadoTopo == TOPO_MONEDA) {
+			if (monedaSubiendoTopo) {
+				alturaMonedaTopo += velocidadSubidaMonedaTopo * deltaTime;
+				if (alturaMonedaTopo >= 2.0f) {
+					monedaSubiendoTopo = false;
+				}
+			}
+			else {
+				alturaMonedaTopo -= velocidadBajadaMonedaTopo * deltaTime;
+				if (alturaMonedaTopo <= 0.8f) {
+					alturaMonedaTopo = 0.8f;
+					monedaMostradaTopo = false;
 
+					estadoTopo = TOPO_GOLPEANDO;
+					golpeando = true;
 
-		// Movimiento alternante del martillo
-		if (direccionDerecha) {
-			anguloMartillo += velocidadOscilacion * deltaTime;
-			if (anguloMartillo >= 135.0f) {
-				anguloMartillo = 135.0f;
-				direccionDerecha = false;
+					if (sonidoMoneda) Mix_PlayChannel(-1, sonidoMoneda, 0);
+				}
 			}
 		}
-		else {
-			anguloMartillo -= velocidadOscilacion * deltaTime;
-			if (anguloMartillo <= -45.0f) {
-				anguloMartillo = -45.0;
-				direccionDerecha = true;
+
+		if (estadoTopo == TOPO_GOLPEANDO && golpeando) {
+			if (bajandoMazo) {
+				anguloMazo += velocidadGolpe * deltaTime;
+				if (anguloMazo >= 45.0f) {
+					anguloMazo = 45.0f;
+					bajandoMazo = false;
+
+					if (topoVisible[mazoObjetivo]) {
+						topoVisible[mazoObjetivo] = false;
+						topoGolpeado[mazoObjetivo] = true;
+						desplazamientoTopoY[mazoObjetivo] = 0.5f;
+						rotacionTopo[mazoObjetivo] = 30.0f;
+
+						if (sonidoTopos) Mix_PlayChannel(-1, sonidoTopos, 0);
+					}
+				}
+			}
+			else {
+				anguloMazo -= velocidadGolpe * deltaTime;
+				if (anguloMazo <= 0.0f) {
+					anguloMazo = 0.0f;
+					contadorGolpes++;
+					if (contadorGolpes >= TOTAL_GOLES) {
+						golpeando = false;
+						estadoTopo = TOPO_ESPERANDO;
+						mainWindow.desactivarMazoGolpeando();
+					}
+					else {
+						mazoObjetivo = rand() % 3;
+						bajandoMazo = true;
+						for (int i = 0; i < 3; ++i) {
+							topoVisible[i] = true;
+							topoGolpeado[i] = false;
+							desplazamientoTopoY[i] = 0.0f;
+							rotacionTopo[i] = 0.0f;
+						}
+					}
+				}
 			}
 		}
 
-		
 
 
-		//Animación moneda
-		if (mainWindow.getMonedaEnElAire()) {
-			animarMoneda = true;
-			monedaMostrada = true;
-
-			if (alturaMoneda < 2.0f)
-				alturaMoneda += velocidadMoneda * deltaTime;
-		}
-		else {
-			if (animarMoneda) {
-				if (alturaMoneda > 2.0f)
-					alturaMoneda -= velocidadMoneda * deltaTime;
-				else {
-					alturaMoneda = 0.8f;
-					animarMoneda = false;
-					monedaMostrada = false;
-				}
-			}
-		}
-		
-		
-
-		// Animación mazo y topo
-		if (mainWindow.getMazoGolpeando()) {
-			anguloMazo += velocidadGolpe * deltaTime;
-
-			if (anguloMazo >= 45.0f) {
-				anguloMazo = 45.0f;
-
-				if (topo1Visible) {
-					topo1Visible = false;
-					topo1Golpeado = true;
-					mazoAparece = 1;		//	Solo aparece el primer mazo
-				}
-				else if (topo2Visible) {
-					topo2Visible = false;
-					topo2Golpeado = true;
-					mazoAparece = 2;		//	Solo aparece el segundo mazo
-				}
-				else if (topo3Visible) {
-					topo3Visible = false;
-					topo3Golpeado = true;
-					mazoAparece = 0;		//	Solo aparece el tercer mazo
-				}
-
-				// Todos cuentan su tiempo si fueron golpeados
-				if (topo1Golpeado) tiempoTopo1Oculto += deltaTime;
-				if (topo2Golpeado) tiempoTopo2Oculto += deltaTime;
-				if (topo3Golpeado) tiempoTopo3Oculto += deltaTime;
-
-				// Verifica si ya pueden reaparecer
-				if (tiempoTopo1Oculto >= tiempoParaMostrarTopo) {
-					topo1Visible = true;
-					topo1Golpeado = false;
-					tiempoTopo1Oculto = 0.0f;
-				}
-				if (tiempoTopo2Oculto >= tiempoParaMostrarTopo) {
-					topo2Visible = true;
-					topo2Golpeado = false;
-					tiempoTopo2Oculto = 0.0f;
-				}
-				if (tiempoTopo3Oculto >= tiempoParaMostrarTopo) {
-					topo3Visible = true;
-					topo3Golpeado = false;
-					tiempoTopo3Oculto = 0.0f;
-				}
-
-				mainWindow.desactivarMazoGolpeando();
-				anguloMazo = 0.0f;
-			}
-		}
 
 		anguloRotacionTopo += 10.0f * deltaTime;  // Velocidad de rotación
 		if (anguloRotacionTopo >= 360.0f) {
@@ -3083,6 +3095,8 @@ int main()
 		Coin.RenderModel();
 
 		//***************************************** TOPOS *****************************************
+// Rend// Render de la máquina base
+// Render máquina base
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-70.0f, 3.0f, -90.0f));
 		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -3092,67 +3106,49 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Topo.RenderModel();
 
-		// Topo 1
-		if (topo1Visible) {
-			model = modelaux;
-			model = glm::translate(model, glm::vec3(0.5f, 11.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(anguloRotacionTopo), glm::vec3(0.0f, 1.0f, 0.0f));
-			model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-			Monito_TOPO.RenderModel();
+		// Posiciones
+		glm::vec3 posicionesTopos[3] = {
+			glm::vec3(5.0f, 11.0f, 0.0f),
+			glm::vec3(4.5f, 11.0f, 2.5f),
+			glm::vec3(4.5f, 11.0f, -2.5f)
+		};
 
-			model = modelaux;
-			model = glm::translate(model, glm::vec3(14.0f, 15.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(-anguloMazo), glm::vec3(0.0f, 1.0f, 0.0f));
-			model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
-			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-			Mazo.RenderModel();
+		glm::vec3 posicionesMazos[3] = {
+			glm::vec3(14.0f, 15.0f, 0.0f),
+			glm::vec3(14.0f, 15.0f, 4.5f),
+			glm::vec3(14.0f, 15.0f, -2.5f)
+		};
 
-		}
-
-		// Topo 2
-		if (topo2Visible) {
-			model = modelaux;
-			model = glm::translate(model, glm::vec3(4.5f, 11.0f, 2.5f));
-			model = glm::rotate(model, glm::radians(anguloRotacionTopo), glm::vec3(0.0f, 1.0f, 0.0f));
-			model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-			Monito_TOPO.RenderModel();
-			if (mazoAparece == 1) {
+		// Render topos
+		for (int i = 0; i < 3; ++i) {
+			if (topoVisible[i]) {
 				model = modelaux;
-				model = glm::translate(model, glm::vec3(14.0f, 15.0f, 4.5f));
-				model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-				model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-				model = glm::rotate(model, glm::radians(-anguloMazo), glm::vec3(0.0f, 1.0f, 0.0f));
-				model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+				model = glm::translate(model, posicionesTopos[i] + glm::vec3(0.0f, desplazamientoTopoY[i], 0.0f));
+				model = glm::rotate(model, glm::radians(rotacionTopo[i]), glm::vec3(1.0f, 0.0f, 0.0f));
+				model = glm::rotate(model, glm::radians(anguloRotacionTopo), glm::vec3(0.0f, 1.0f, 0.0f));
+				model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
 				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-				Mazo.RenderModel();
+				Monito_TOPO.RenderModel();
 			}
-
 		}
 
-		// Topo 3
-		if (topo3Visible) {
-			model = modelaux;
-			model = glm::translate(model, glm::vec3(4.5f, 11.0f, -2.5f));
-			model = glm::rotate(model, glm::radians(anguloRotacionTopo), glm::vec3(0.0f, 1.0f, 0.0f));
-			model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-			Monito_TOPO.RenderModel();
-			if (mazoAparece == 2) {
-				model = modelaux;
-				model = glm::translate(model, glm::vec3(14.0f, 15.0f, -2.5f));
-				model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-				model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-				model = glm::rotate(model, glm::radians(-anguloMazo), glm::vec3(0.0f, 1.0f, 0.0f));
-				model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
-				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-				Mazo.RenderModel();
-			}
+		glm::vec3 mazoPos = posicionesMazos[mazoObjetivo];
 
+		// Agrega desplazamiento si el objetivo es el topo del centro (índice 1)
+		if (mazoObjetivo == 1) {
+			mazoPos.y += 2.0f;     // subir un poco
+			mazoPos.x -= 1.5f;     // mover a la izquierda
 		}
+
+		model = modelaux;
+		model = glm::translate(model, mazoPos);
+		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(-anguloMazo), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(8.0f, 8.0f, 8.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Mazo.RenderModel();
+
 
 
 		//******************************* NPC EMBER *****************************************************
@@ -3212,7 +3208,7 @@ int main()
 
 		//Moneda - Utilizar en los casos necesarios 
 		model = modelaux2;
-		model = glm::translate(model, glm::vec3(0.0f, alturaMoneda, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, alturaMonedaTopo, 0.0f));
 		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Oro.UseMaterial(uniformSpecularIntensity, uniformShininess);
@@ -3782,6 +3778,9 @@ int main()
 	if (sonidoHercules)Mix_FreeChunk(sonidoHercules);
 	if (sonidoHacha)Mix_FreeChunk(sonidoHacha);
 	if (sonidoDanny)Mix_FreeChunk(sonidoDanny);
+	if (sonidoTopos)Mix_FreeChunk(sonidoTopos);
+	if (sonidoBateo)Mix_FreeChunk(sonidoBateo);
+
 
 
 	//************************************************* SALE DE LAS LIBRERIAS DE SONIDO ***************************************************
