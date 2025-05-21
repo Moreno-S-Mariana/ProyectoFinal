@@ -1,4 +1,4 @@
-﻿/*PROYECTO COMPUTACIÓN GRÁFICA*/
+﻿
 //*****************************************FERIA PULQUE**********************************************
 /*GARCÍA SOTO JEAN CARLO
   MINO GUZMÁN YARA AMAIRANI
@@ -384,9 +384,13 @@ DirectionalLight mainLight;
 PointLight pointLights1[MAX_POINT_LIGHTS];	//PointLight Lámparas
 PointLight pointLights2[MAX_POINT_LIGHTS];	//PointLigth Quiosko
 SpotLight spotLights[MAX_SPOT_LIGHTS];		// Luces Varias parque
-SpotLight spotLights2[MAX_SPOT_LIGHTS];		// Luces Atracciones
+SpotLight spotLights2[MAX_SPOT_LIGHTS];		// Luces globos
 SpotLight spotLights3[MAX_SPOT_LIGHTS];		// Luces Boliche
 SpotLight spotLights4[MAX_SPOT_LIGHTS];		//Luces por teclado edificios
+SpotLight spotLights5[MAX_SPOT_LIGHTS];		// Luces dados
+SpotLight spotLights6[MAX_SPOT_LIGHTS];		// Luces hachas
+SpotLight spotLights7[MAX_SPOT_LIGHTS];		//Luces topos
+
 // Arreglo temporal para luces activas
 SpotLight lucesActivas[MAX_SPOT_LIGHTS];
 int totalLucesActivas = 0;
@@ -949,7 +953,7 @@ int main()
 	unsigned int spotLightCount2 = 0;
 
 	//Dardo y globos
-	spotLights2[0] = SpotLight(0.529f, 0.808f, 0.922f, //azul
+	spotLights2[0] = SpotLight(0.5f, 0.0f, 0.5f,
 		10.0f, 80.0f,
 		-80.0f, 40.0f, 108.0f,
 		0.0f, -1.0f, 0.0f,
@@ -958,33 +962,12 @@ int main()
 	);
 	spotLightCount2++;
 
-	//Hachas
-	spotLights2[1] = SpotLight(0.133f, 0.545f, 0.133f,  //verde
+	spotLights2[1] = SpotLight(0.5f, 1.0f, 1.0f,
 		10.0f, 80.0f,
-		70.0f, 45.0f, -90.0f,
+		-80.0f, 40.0f, 113.0f,
 		0.0f, -1.0f, 0.0f,
 		1.0f, 0.09f, 0.032f,
-		80.0f
-	);
-	spotLightCount2++;
-
-	//Topo
-	spotLights2[2] = SpotLight(0.502f, 0.0f, 0.502f,  //morado
-		10.0f, 80.0f,
-		-55.0f, 50.0f, -90.0f,
-		0.0f, -1.0f, 0.0f,
-		1.0f, 0.09f, 0.032f,
-		80.0f
-	);
-	spotLightCount2++;
-
-	//Dados
-	spotLights2[3] = SpotLight(1.0f, 1.0f, 0.0f,
-		10.0f, 80.0f,
-		85.0f, 30.0f, 100.0f,
-		0.0f, -1.0f, 0.0f,
-		0.5f, 0.6f, 0.15f,
-		55.0f
+		90.0f
 	);
 	spotLightCount2++;
 
@@ -1000,7 +983,6 @@ int main()
 	);
 	spotLightCount3++;
 
-	//Luz boliche 2
 	spotLights3[1] = SpotLight(0.0f, 0.4f, 1.0f,
 		10.0f, 80.0f,
 		-80.0f, 9.0f, 260.0f,
@@ -1010,7 +992,6 @@ int main()
 	);
 	spotLightCount3++;
 
-	//Luz boliche 3
 	spotLights3[2] = SpotLight(0.5f, 1.0f, 0.0f,
 		10.0f, 80.0f,
 		-80.0f, 9.0f, 240.0f,
@@ -1020,7 +1001,6 @@ int main()
 	);
 	spotLightCount3++;
 
-	//Luz boliche 4
 	spotLights3[3] = SpotLight(1.0f, 0.0f, 0.5f,
 		10.0f, 80.0f,
 		-80.0f, 9.0f, 270.0f,
@@ -1031,6 +1011,7 @@ int main()
 	spotLightCount3++;
 
 	unsigned int spotLightCount4 = 0;				//Edificio izquierda
+
 	spotLights4[0] = SpotLight(1.0f, 0.0f, 0.0f,
 		10.0f, 80.0f,
 		-200.0f, 65.0f, 20.0f,
@@ -1058,7 +1039,70 @@ int main()
 	);
 	spotLightCount4++;
 
+	unsigned int spotLightCount5 = 0;
 
+	//Dados
+	spotLights5[0] = SpotLight(1.0f, 1.0f, 0.0f,
+		10.0f, 80.0f,
+		85.0f, 30.0f, 100.0f,
+		0.0f, -1.0f, 0.0f,
+		0.5f, 0.6f, 0.15f,
+		55.0f
+	);
+	spotLightCount5++;
+
+	spotLights5[1] = SpotLight(0.0f, 1.0f, 0.0f,
+		10.0f, 80.0f,
+		85.0f, 30.0f, 105.0f,
+		0.0f, -1.0f, 0.0f,
+		0.5f, 0.6f, 0.15f,
+		55.0f
+	);
+	spotLightCount5++;
+
+	unsigned int spotLightCount6 = 0;
+
+	//Hachas
+	spotLights6[0] = SpotLight(0.133f, 0.545f, 0.133f,
+		10.0f, 80.0f,
+		70.0f, 45.0f, -90.0f,
+		0.0f, -1.0f, 0.0f,
+		1.0f, 0.09f, 0.032f,
+		80.0f
+	);
+	spotLightCount6++;
+
+	spotLights6[1] = SpotLight(1.0, 0.65f, 0.0f,
+		10.0f, 80.0f,
+		70.0f, 45.0f, -95.0f,
+		0.0f, -1.0f, 0.0f,
+		1.0f, 0.09f, 0.032f,
+		80.0f
+	);
+	spotLightCount6++;
+
+	unsigned int spotLightCount7 = 0;
+
+	//Topos
+	spotLights7[0] = SpotLight(0.502f, 0.0f, 0.502f,
+		10.0f, 80.0f,
+		-70.0f, 12.0f, -90.0f,
+		0.0f, -1.0f, 0.0f,
+		1.0f, 0.09f, 0.032f,
+		80.0f
+	);
+	spotLightCount7++;
+
+	spotLights7[1] = SpotLight(0.5f, 0.5f, 0.5f,
+		10.0f, 80.0f,
+		-70.0f, 12.0f, -95.0f,
+		0.0f, -1.0f, 0.0f,
+		1.0f, 0.09f, 0.032f,
+		80.0f
+	);
+	spotLightCount7++;
+
+	unsigned int spotLightCount8 = 0;
 
 	// Variables para la luz
 	float intensidad = 0.0f;
@@ -1077,12 +1121,10 @@ int main()
 	static double lastSwitchTime = 0.0;
 	double currentTime = 0.0f;
 	bool camaraCercaDeLuces3 = false;
+
+
 	static float tiempoAcumulado = 0.0f;
 	int indiceActivo = 0;
-
-
-
-	//se crean mas luces puntuales y spotlight 
 
 	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformEyePosition = 0,
 		uniformSpecularIntensity = 0, uniformShininess = 0;
@@ -1169,7 +1211,7 @@ int main()
 	if (!sonidoPena) printf("Error cargando sonido pena: %s\n", Mix_GetError());
 	if (!sonidoGlobo) printf("Error cargando sonido globo: %s\n", Mix_GetError());
 	if (!sonidoMoneda) printf("Error cargando sonido moneda: %s\n", Mix_GetError());
-	if (!sonidoDados) printf("Error cargando sonido dados: %s\n", Mix_GetError()); 
+	if (!sonidoDados) printf("Error cargando sonido dados: %s\n", Mix_GetError());
 	if (!sonidoPanico) printf("Error cargando sonido panico: %s\n", Mix_GetError());
 	if (!sonidoHercules) printf("Error cargando sonido hercules: %s\n", Mix_GetError());
 	if (!sonidoHacha) printf("Error cargando sonido hacha: %s\n", Mix_GetError());
@@ -1189,15 +1231,15 @@ int main()
 
 		angulovaria += 0.3f * deltaTime;
 
-/*
- *
- *						AQUI INICIAN LAS ANIMACIONES CORREGIDAS 
- * 
-*/
+		/*
+		 *
+		 *						AQUI INICIAN LAS ANIMACIONES CORREGIDAS
+		 *
+		*/
 
-// ---------------------------- DADOS + NPC PANICO ----------------------------
+		// ---------------------------- DADOS + NPC PANICO ----------------------------
 
-		// ---------------------------- ESTADOS PARA DADOS ----------------------------
+				// ---------------------------- ESTADOS PARA DADOS ----------------------------
 		static enum EstadoDados { DADOS_ESPERANDO, DADOS_ANIMANDO_MONEDA, DADOS_GIRANDO_SUBIENDO, DADOS_GIRANDO_BAJANDO } estadoDados = DADOS_ESPERANDO;
 		static bool monedaSubiendoDados = false;
 		static bool sonidoDadosReproducido = false;
@@ -1309,10 +1351,10 @@ int main()
 			}
 		}
 
-//*********************************************************************************************************************************************************************************************************7
+		//*********************************************************************************************************************************************************************************************************7
 
-	// ---------------------------- BOLICHE + NPC PENA ----------------------------
-				
+			// ---------------------------- BOLICHE + NPC PENA ----------------------------
+
 		static float alturaMonedaBoliche = 0.8f;
 		static float velocidadMonedaBoliche = 0.1f;
 		static float bolaBoliche = 0.0f;
@@ -1338,7 +1380,8 @@ int main()
 				if (alturaMonedaBoliche >= 2.0f) {
 					monedaSubiendoBoliche = false;
 				}
-			} else {
+			}
+			else {
 				alturaMonedaBoliche -= velocidadMonedaBoliche * deltaTime;
 				if (alturaMonedaBoliche <= 0.8f) {
 					alturaMonedaBoliche = 0.8f;
@@ -1375,7 +1418,7 @@ int main()
 			animarCaidaPinos = true;
 			tiempoCaidaPinos = 0.0f;
 			pinoCaido0 = pinoCaido1 = pinoCaido2 = pinoCaido3 = pinoCaido4 =
-			pinoCaido5 = pinoCaido6 = pinoCaido7 = pinoCaido8 = pinoCaido9 = true;
+				pinoCaido5 = pinoCaido6 = pinoCaido7 = pinoCaido8 = pinoCaido9 = true;
 		}
 
 		if (animarCaidaPinos) {
@@ -1386,7 +1429,7 @@ int main()
 					rotacion += 60.0f * deltaTime;
 					if (rotacion > 90.0f) rotacion = 90.0f;
 				}
-			};
+				};
 
 			caer(pinoCaido0, rotacionPino0); caer(pinoCaido1, rotacionPino1);
 			caer(pinoCaido2, rotacionPino2); caer(pinoCaido3, rotacionPino3);
@@ -1396,10 +1439,10 @@ int main()
 
 			if (tiempoCaidaPinos >= 10.0f) {
 				pinoCaido0 = pinoCaido1 = pinoCaido2 = pinoCaido3 = pinoCaido4 =
-				pinoCaido5 = pinoCaido6 = pinoCaido7 = pinoCaido8 = pinoCaido9 = false;
+					pinoCaido5 = pinoCaido6 = pinoCaido7 = pinoCaido8 = pinoCaido9 = false;
 
 				rotacionPino0 = rotacionPino1 = rotacionPino2 = rotacionPino3 = rotacionPino4 =
-				rotacionPino5 = rotacionPino6 = rotacionPino7 = rotacionPino8 = rotacionPino9 = 0.0f;
+					rotacionPino5 = rotacionPino6 = rotacionPino7 = rotacionPino8 = rotacionPino9 = 0.0f;
 
 				animarCaidaPinos = false;
 			}
@@ -1438,9 +1481,9 @@ int main()
 			penaTemblor = 0.0f;
 		}
 
-//*********************************************************************************************************************************************************************************************************7
+		//*********************************************************************************************************************************************************************************************************7
 
-// ---------------------------- DARDOS + HÉRCULES ----------------------------
+		// ---------------------------- DARDOS + HÉRCULES ----------------------------
 
 		enum EstadoDardo { D_ESPERANDO, D_ANIMANDO_MONEDA, D_LANZANDO_DARDO };
 		static EstadoDardo estadoDardo = D_ESPERANDO;
@@ -1594,9 +1637,9 @@ int main()
 			}
 		}
 
-//*********************************************************************************************************************************************************************************************************7
+		//*********************************************************************************************************************************************************************************************************7
 
-// ---------------------------- ANIMACION DE HACHA + DANNY ----------------------------
+		// ---------------------------- ANIMACION DE HACHA + DANNY ----------------------------
 
 		static enum EstadoHacha { HACHA_ESPERANDO, HACHA_MONEDA, HACHA_VOLANDO, HACHA_CLAVADA, HACHA_VOLVIENDO } estadoHacha = HACHA_ESPERANDO;
 		static float alturaMonedaHacha = 0.8f;
@@ -1717,9 +1760,9 @@ int main()
 			desplazamientoDP_Y = 0.0f;
 		}
 
-//*********************************************************************************************************************************************************************************************************7
+		//*********************************************************************************************************************************************************************************************************7
 
-		// ---------------------------- ANIMACION DE BATE ----------------------------
+				// ---------------------------- ANIMACION DE BATE ----------------------------
 
 
 		static enum EstadoBeisbol { BEISBOL_ESPERANDO, BEISBOL_MONEDA, BEISBOL_BATEADO } estadoBeisbol = BEISBOL_ESPERANDO;
@@ -1801,10 +1844,10 @@ int main()
 			}
 		}
 
-//*********************************************************************************************************************************************************************************************************7
+		//*********************************************************************************************************************************************************************************************************7
 
 
-// Nuevas configuraciones con nombres actualizados
+		// Nuevas configuraciones con nombres actualizados
 		static float velocidadSubidaMonedaTopo = 0.25f;
 		static float velocidadBajadaMonedaTopo = 0.25f;
 
@@ -1921,7 +1964,7 @@ int main()
 
 
 
-		
+
 
 
 		//Animación alegría
@@ -1963,9 +2006,13 @@ int main()
 		//Recibir eventos del usuario
 		glfwPollEvents();
 
-
-
-
+		glm::vec3 cameraOffsets[] = {
+			glm::vec3(0.0f, 5.0f, -28.0f),  // Globos
+			glm::vec3(0.0f, 5.0f, 15.0f), // Boliche
+			glm::vec3(0.0f, 5.0f, -25.0f), // Dados
+			glm::vec3(-25.0f, -5.0f, 0.0f), // Hachas
+			glm::vec3(0.0f, 5.0f, 22.0f)  // Topos
+		};
 		if (currentCameraMode != ATTRACTIONS) {
 			camera.keyControl(mainWindow.getsKeys(), deltaTime, currentCameraMode);
 		}
@@ -2010,7 +2057,7 @@ int main()
 		glm::vec3 posDardos(-80.0f, 3.0f, 105.0f);
 		glm::vec3 posBoliche(0.0f, 3.0f, 235.0f); // Coordenadas nuevas del boliche (ajusta si es necesario)
 
-		float distanciaCambioCamara = 20.0f;
+		float distanciaCambioCamara = 35.0f;
 
 		bool cercaDeAlguna =
 			glm::distance(furiaPos, posDados) < distanciaCambioCamara ||
@@ -2030,27 +2077,35 @@ int main()
 		lastSwitchTime = 0.0f;
 		currentTime = glfwGetTime();
 		if (currentCameraMode == ATTRACTIONS) {
+			SpotLight* spotLightArrays[] = { spotLights2, spotLights3, spotLights5, spotLights6, spotLights7 };
+			int spotLightCounts[] = { spotLightCount2, spotLightCount3, spotLightCount5, spotLightCount6, spotLightCount7 };
+
 			if (keys[GLFW_KEY_E] && currentTime - lastSwitchTime > 0.3) {
-				attractionIndex = (attractionIndex + 1) % 4;
-				glm::vec3 attractionPos = spotLights2[attractionIndex].GetPosition();
-				glm::vec3 offset = glm::vec3(0.0f, 10.0f, 30.0f); // puedes ajustar esto
+				attractionIndex = (attractionIndex + 1) % 5;
+				SpotLight* currentArray = spotLightArrays[attractionIndex];
+				int currentCount = spotLightCounts[attractionIndex];
+				int index = static_cast<int>(glfwGetTime() / 10.0f) % currentCount;
+				glm::vec3 attractionPos = currentArray[index].GetPosition();
+				glm::vec3 offset = cameraOffsets[attractionIndex];
 				camera.setPosition(attractionPos + offset);
-				camera.setDirection(glm::normalize(attractionPos - (attractionPos + offset)));
+				glm::vec3 target = attractionPos + glm::vec3(0.0f, -5.0f, 0.0f); // apúntale más bajo
+				camera.setDirection(glm::normalize(target - camera.getCameraPosition()));
 				lastSwitchTime = currentTime;
 			}
 
 			if (keys[GLFW_KEY_Q] && currentTime - lastSwitchTime > 0.3) {
-				attractionIndex = (attractionIndex + 3) % 4;
-				glm::vec3 attractionPos = spotLights2[attractionIndex].GetPosition();
-				glm::vec3 offset = glm::vec3(0.0f, 10.0f, 30.0f);
+				attractionIndex = (attractionIndex - 1 + 5) % 5;
+				SpotLight* currentArray = spotLightArrays[attractionIndex];
+				int currentCount = spotLightCounts[attractionIndex];
+				int index = static_cast<int>(glfwGetTime() / 10.0f) % currentCount;
+				glm::vec3 attractionPos = currentArray[index].GetPosition();
+				glm::vec3 offset = cameraOffsets[attractionIndex];
 				camera.setPosition(attractionPos + offset);
-				camera.setDirection(glm::normalize(attractionPos - (attractionPos + offset)));
+				glm::vec3 target = attractionPos + glm::vec3(0.0f, -5.0f, 0.0f); // apúntale más bajo
+				camera.setDirection(glm::normalize(target - camera.getCameraPosition()));
 				lastSwitchTime = currentTime;
 			}
-
 		}
-
-
 		// Clear the window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -2091,9 +2146,16 @@ int main()
 			break;
 		}
 		case ATTRACTIONS:
+			SpotLight* spotLightArrays[] = { spotLights2, spotLights3, spotLights5, spotLights6, spotLights7 };
+			int spotLightCounts[] = { spotLightCount2, spotLightCount3, spotLightCount5, spotLightCount6, spotLightCount7 };
+
 			if (!attractionInitialized) {
-				glm::vec3 attractionPos = spotLights2[attractionIndex].GetPosition();
-				camera.setPosition(attractionPos + glm::vec3(0.0f, 5.0f, 30.0f));  // Vista desde enfrente
+				SpotLight* currentArray = spotLightArrays[attractionIndex];
+				int currentCount = spotLightCounts[attractionIndex];
+				int index = static_cast<int>(glfwGetTime() / 10.0f) % currentCount;
+				glm::vec3 attractionPos = currentArray[index].GetPosition();
+				glm::vec3 offset = cameraOffsets[attractionIndex];
+				camera.setPosition(attractionPos + offset);
 				camera.setDirection(glm::normalize(attractionPos - camera.getCameraPosition()));
 				camera.setYaw(glm::radians(180.0f));  // Opcional: ajusta orientación
 				attractionInitialized = true;
@@ -2214,7 +2276,7 @@ int main()
 			Mix_HaltChannel(canalMartillo);
 			martilloActivo = false;
 		}
-	
+
 
 		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
 
@@ -2292,13 +2354,6 @@ int main()
 			}
 		}
 
-		// ---------- Arreglo 2: spotLights2[] (una por atracción, solo si cerca)
-		for (int i = 0; i < spotLightCount2; ++i) {
-			if (estaCerca(camPos, spotLights2[i].GetPosition(), 60.0f)) {
-				lucesActivas[totalLucesActivas++] = spotLights2[i];
-			}
-		}
-
 		// ---------- Arreglo 3: spotLights3[] (una luz encendida a la vez cíclicamente)
 		camaraCercaDeLuces3 = false;
 		for (int i = 0; i < spotLightCount3; ++i) {
@@ -2318,12 +2373,35 @@ int main()
 				totalLucesActivas++;
 			}
 		}
-		else if (camaraCercaDeLuces3) {
-			totalLucesActivas = 0;
+
+		if (camaraCercaDeLuces3) {
 			int indiceActivo = static_cast<int>(tiempoAcumulado / 10.0f) % spotLightCount3;
 			lucesActivas[totalLucesActivas++] = spotLights3[indiceActivo];
 		}
 
+		// GLOBOS
+		if (glm::distance(furiaPos, posDardos) < 35.0f) {
+			int indiceActivo = static_cast<int>(tiempoAcumulado / 10.0f) % spotLightCount2;
+			lucesActivas[totalLucesActivas++] = spotLights2[indiceActivo];
+		}
+
+		// DADOS
+		if (glm::distance(furiaPos, posDados) < 50.0f) {
+			int indiceActivo = static_cast<int>(tiempoAcumulado / 10.0f) % spotLightCount5;
+			lucesActivas[totalLucesActivas++] = spotLights5[indiceActivo];
+		}
+
+		// HACHAS
+		if (glm::distance(furiaPos, posHachas) < 35.0f) {
+			int indiceActivo = static_cast<int>(tiempoAcumulado / 10.0f) % spotLightCount6;
+			lucesActivas[totalLucesActivas++] = spotLights6[indiceActivo];
+		}
+
+		// TOPOS
+		if (glm::distance(furiaPos, posTopos) < 35.0f) {
+			int indiceActivo = static_cast<int>(tiempoAcumulado / 10.0f) % spotLightCount7;
+			lucesActivas[totalLucesActivas++] = spotLights7[indiceActivo];
+		}
 
 		// ---------- Activar luces finales
 		shaderList[0].SetSpotLights(lucesActivas, totalLucesActivas);
@@ -2542,7 +2620,7 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Piel.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		BrazoIzq_Pena.RenderModel();
-			
+
 
 		//************************Mesa cobro moneda boliche************************************************ 
 		model = modelaux;
@@ -2563,7 +2641,7 @@ int main()
 
 		//Moneda - Utilizar en los casos necesarios 
 		model = modelaux;
-		model = glm::translate(model, glm::vec3(0.0f, alturaMonedaBoliche-0.72, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, alturaMonedaBoliche - 0.72, 0.0f));
 		model = glm::scale(model, glm::vec3(0.03f, 0.03f, 0.03f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Oro.UseMaterial(uniformSpecularIntensity, uniformShininess);
@@ -3281,7 +3359,7 @@ int main()
 
 		//Moneda - Utilizar en los casos necesarios 
 		model = modelaux2;
-		model = glm::translate(model, glm::vec3(0.0f, alturaMonedaHacha , 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, alturaMonedaHacha, 0.0f));
 		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Oro.UseMaterial(uniformSpecularIntensity, uniformShininess);
@@ -3321,7 +3399,7 @@ int main()
 		Bola.RenderModel();
 
 		model = glm::mat4(1.0);
-		model = glm::translate(model,posicionBate);
+		model = glm::translate(model, posicionBate);
 		model = glm::rotate(model, glm::radians(anguloBate), glm::vec3(0.0f, 1.0f, 0.0f)); // gira en eje X como si lo bajaras
 		model = glm::scale(model, glm::vec3(5.0f, 6.0f, 5.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -3506,23 +3584,15 @@ int main()
 				Furia_BrazoIzq.RenderModel();
 			}
 
-			// Brazo derecho visible siempre
-			if (currentCameraMode == FIRST_PERSON) {
-				model = glm::mat4(1.0f);
-				model = glm::translate(model, camera.getCameraPosition() + glm::vec3(0.3f, -0.2f, -0.5f));
-				model = glm::rotate(model, glm::radians(armAngle), glm::vec3(1, 0, 0));
-				model = glm::rotate(model, glm::radians(glm::degrees(furiaYaw)), glm::vec3(0, 1, 0));
-				model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
-			}
-			else {
+			if (currentCameraMode != FIRST_PERSON) {
 				model = modelaux;
 				model = glm::translate(model, glm::vec3(-0.26f, 0.088f, 0.0f));
 				model = glm::rotate(model, glm::radians(armAngle), glm::vec3(1, 0, 0));
-			}
 
-			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-			Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
-			Furia_BrazoDer.RenderModel();
+				glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+				Peluche.UseMaterial(uniformSpecularIntensity, uniformShininess);
+				Furia_BrazoDer.RenderModel();
+			}
 		}
 		/********************************************Danny Phantom****************************************************/
 		model = glm::mat4(1.0f);
@@ -3757,7 +3827,7 @@ int main()
 
 		mainWindow.swapBuffers();
 
-		
+
 
 	}
 
